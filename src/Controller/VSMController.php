@@ -17,17 +17,20 @@ class VSMController
     public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $data = $request->getParsedBody();
-        $fixVersionId = $data['fixVersionId'] ?? null;
+        $versionId = $data['fixVersionId'] ?? null;
 
         try {
             $jira = new JiraService();
             $jira->checkCredentials();
-            $tickets = $jira->getIssuesByFixVersion($fixVersionId);
+            $version = $jira->getVersionById($versionId);
+            $issues = $jira->getIssuesByVersion($versionId);
 
             $response->getBody()->write(json_encode([
-                'success' => true,
-                'tickets' => $tickets
-            ], JSON_PRETTY_PRINT));
+                    'success' => true,
+                    'version' => $version,
+                    'issues' => $issues
+                ], JSON_PRETTY_PRINT)
+            );
         } catch (\Throwable $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
