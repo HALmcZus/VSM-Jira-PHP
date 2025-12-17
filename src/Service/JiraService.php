@@ -9,6 +9,8 @@ class JiraService
     const API_URL_SEARCH = "/rest/api/3/search/jql";
     const API_URL_VERSION = "/rest/api/2/version";
     const API_URL_PROJECT_VERSIONS = "/rest/api/2/project/{project_id}/versions";
+    const API_URL_FETCH_ISSUES = "/rest/api/3/issue/bulkfetch";
+    
 
     private string $baseUrl;
     private string $email;
@@ -24,6 +26,7 @@ class JiraService
         $this->email = $_ENV['JIRA_EMAIL'] ?? throw new Exception("JIRA_EMAIL manquant dans le fichier .env");
         $this->token = $_ENV['JIRA_API_TOKEN'] ?? throw new Exception("JIRA_API_TOKEN manquant dans le fichier .env");
 
+        //TODO : déplacer appel à checkCredentials() ?
         $this->checkCredentials();
     }
 
@@ -92,7 +95,7 @@ class JiraService
     /**
      * Get Jira issues by Version ID
      */
-    public function getIssuesByVersion(int $versionId): array
+    public function getIssuesIdsByVersion(int $versionId): array
     {
         // Payload JSON simple
         $result = $this->callSearchApi([
@@ -106,16 +109,30 @@ class JiraService
     /**
      * WIP
      */
-    public function getIssuesDetails(array $issues)
+    public function getIssuesDetails(array $issuesIds)
     {
-            // $issues[] = [
-            //     'id' => $issue['fields']['id'] ?? '',
-            //     'key' => $issue['fields']['key'] ?? '',
-            //     'summary' => $issue['fields']['summary'] ?? '',
-            //     'status' => $issue['fields']['status']['name'] ?? '',
-            //     'created' => $issue['fields']['created'] ?? '',
-            //     'updated' => $issue['fields']['updated'] ?? ''
-            // ];
+        //Si on passe des int ça ne fonctionnera pas, on force en string
+        if (!is_string($issuesIds[0])) {
+            $issuesIds = array_map('strval', array_values($issuesIds));
+        }
+
+        $payload = [
+            "expand" => [
+                "names"
+              ],
+              "fields"=> [
+                "summary",
+                "project",
+                "assignee"
+              ],
+              "fieldsByKeys"=> false,
+              "issueIdsOrKeys"=> $issuesIds,
+              "properties"=> []
+        ];
+
+        $result = $this->callBulkFetchApi($payload);
+
+        return $result;
     }
 
     /**
@@ -140,8 +157,8 @@ class JiraService
         try {
             $result = $this->request($url, $payload);
 
-            if ($result['success'] === false || !$result['issues']) {
-                throw new Exception("Erreur lors de la récupération des tickets Jira : " . $result['message']);
+            if (!isset($result['issues'])) {
+                throw new Exception('Réponse Jira invalide (search)');
             }
             return $result;
         } catch (Exception $e) {
@@ -154,19 +171,47 @@ class JiraService
 
 
     /**
+     * Calls Jira Bulk Fetch API (/issue/bulkfetch)
+     */
+    public function callBulkFetchApi(array $payload): array
+    {
+        $url = $this->baseUrl . self::API_URL_FETCH_ISSUES;
+
+        try {
+            $result = $this->request($url, json_encode($payload, JSON_THROW_ON_ERROR), true);
+
+            if (!isset($result['issues'])) {
+                throw new Exception('Réponse Jira invalide (bulkfetch)');
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de l’appel à Jira : ' . $e->getMessage()
+            ];
+        }
+    }
+
+
+    /**
      * Performs a low-level HTTP request to the Jira REST API using cURL.
      */
-    private function request(string $url, $payload=null): array
+    private function request(string $url, $payload=null, $isPost=false): array
     {
         try {
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_USERPWD, $this->email . ':' . $this->token);
 
+
             $headers = ['Accept: application/json'];
+            //Si on passe un payload, on le charge et on indique dans les headers qu'il s'agit de json
             if ($payload !== null) {
-                //Si on passe un payload, on le charge et on indique dans les headers qu'il s'agit de json
                 $headers[] = 'Content-Type: application/json';
+                if ($isPost) {
+                    curl_setopt($ch, CURLOPT_POST, true);
+                }
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             }
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);

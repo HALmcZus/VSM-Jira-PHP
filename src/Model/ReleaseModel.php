@@ -7,14 +7,14 @@ use App\Service\JiraService;
 class ReleaseModel
 {
     protected JiraService $jiraService;
+    protected array $versionData = [];
+    protected array $versionIssuesIds = [];
+    protected array $versionIssuesDetails = [];
 
     public function __construct()
     {
         $this->jiraService = new JiraService();
     }
-    
-    // $version = $jira->getVersionById($versionId);
-    // $issues = $jira->getIssuesByVersion($versionId);
 
     public function getVersionById(int $versionId) : array 
     {
@@ -37,8 +37,8 @@ class ReleaseModel
         if (!$result['id']) {
             throw new Exception("Erreur lors de la récupération de la Version Jira : " . $result['message']);
         }
-
-        return $result;
+        $this->versionData = $result;
+        return $this->versionData;
     }
 
 
@@ -50,9 +50,13 @@ class ReleaseModel
     }
 
 
-    public function getIssuesByVersion(int $versionId) : array 
+    public function getIssuesIdsByVersion(int $versionId) : array 
     {
-        $issues = $this->jiraService->getIssuesByVersion($versionId);
+        $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
+        $result = [];
+        foreach ($issues['issues'] as $issue) {
+            $result[] = $issue['id'] ?? '';
+        }
         /**"issues": [
             "530796",
             "496526",
@@ -66,27 +70,20 @@ class ReleaseModel
             "462330"
           ]
         */
-        $result = [];
-        foreach ($issues['issues'] as $issue) {
-            $result[] = $issue['id'] ?? '';
-        }
-
-        return $result;
+        $this->versionIssuesIds = $result;
+        return $this->versionIssuesIds;
     }
 
 
-    /**
-     * TODO
-     */
-    public function getIssuesDetails(array $issues)
+    public function getIssuesDetailsByVersion(int $versionId) : array 
     {
-            // $issues[] = [
-            //     'id' => $issue['fields']['id'] ?? '',
-            //     'key' => $issue['fields']['key'] ?? '',
-            //     'summary' => $issue['fields']['summary'] ?? '',
-            //     'status' => $issue['fields']['status']['name'] ?? '',
-            //     'created' => $issue['fields']['created'] ?? '',
-            //     'updated' => $issue['fields']['updated'] ?? ''
-            // ];
+        //Evite un second appel pour récupérer les IDs si on les a déjà
+        if (!$this->versionIssuesIds) {
+            $this->getIssuesIdsByVersion($versionId);
+        }
+        
+        $this->versionIssuesDetails = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
+        
+        return $this->versionIssuesDetails;
     }
 }

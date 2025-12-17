@@ -28,9 +28,9 @@ class VsmController
             $release = new ReleaseModel();
 
             $versionData = $release->getVersionById($versionId);
-            $issues = $release->getIssuesByVersion($versionId);
+            $versionIssues = $release->getIssuesDetailsByVersion($versionId);
             
-            $view = new VersionView($versionData);
+            $view = new VersionView($versionData, $versionIssues);
             
             ob_start();
             require __DIR__ . '/../../views/index.php';
