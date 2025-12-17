@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use App\Service\JiraService;
+use App\Model\ReleaseModel;
 
 class VSMController
 {
@@ -20,10 +20,9 @@ class VSMController
         $versionId = $data['fixVersionId'] ?? null;
 
         try {
-            $jira = new JiraService();
-            $jira->checkCredentials();
-            $version = $jira->getVersionById($versionId);
-            $issues = $jira->getIssuesByVersion($versionId);
+            $release = new ReleaseModel();
+            $version = $release->getVersionById($versionId);
+            $issues = $release->getIssuesByVersion($versionId);
 
             $response->getBody()->write(json_encode([
                     'success' => true,

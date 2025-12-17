@@ -14,6 +14,7 @@ class JiraService
     private string $email;
     private string $token;
 
+
     public function __construct()
     {
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
@@ -23,6 +24,7 @@ class JiraService
         $this->email = $_ENV['JIRA_EMAIL'] ?? throw new Exception("JIRA_EMAIL manquant dans le fichier .env");
         $this->token = $_ENV['JIRA_API_TOKEN'] ?? throw new Exception("JIRA_API_TOKEN manquant dans le fichier .env");
     }
+
 
     /**
      * Ping Jira "myself" API to check if credentials are valid.
@@ -38,29 +40,6 @@ class JiraService
         }
     }
 
-
-    /**
-     * Call Jira API Search
-     */
-    public function callSearchApi(array $payload): array
-    {
-        $url = $this->baseUrl . self::API_URL_SEARCH;
-        $payload = json_encode($payload);
-
-        try {
-            $result = $this->request($url, $payload);
-
-            if ($result['success'] === false || !$result['issues']) {
-                throw new Exception("Erreur lors de la récupération des tickets Jira : " . $result['message']);
-            }
-            return $result;
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
-            ];
-        }
-    }
 
     /**
      * WIP, not tested
@@ -86,8 +65,10 @@ class JiraService
         }
     }
 
+
     /**
      * Get Versions from a Jira Project ID
+     * 
      * @return array
      */
     public function getVersionsByProjectId(int $projectId): array
@@ -109,6 +90,7 @@ class JiraService
             ];
         }
     }
+    
 
     /**
      * Get Jira issues by Version ID
@@ -120,21 +102,16 @@ class JiraService
             "jql" => "fixVersion = $versionId"
         ]);
 
-        // Payload JSON si plusieurs requêtes
-        // $payload = json_encode([
-        //     "queries" => [
-        //         [
-        //             "query" => [
-        //                 "jql" => $jql
-        //             ]
-        //         ]
-        //     ]
-        // ]);
+        return $result;
+    }
 
-        $issues = [];
-        foreach ($result['issues'] as $issue) {
-            $issues[] = $issue['id'] ?? '';
-            // $tickets[] = [
+
+    /**
+     * WIP
+     */
+    public function getIssuesDetails(array $issues)
+    {
+            // $issues[] = [
             //     'id' => $issue['fields']['id'] ?? '',
             //     'key' => $issue['fields']['key'] ?? '',
             //     'summary' => $issue['fields']['summary'] ?? '',
@@ -142,10 +119,46 @@ class JiraService
             //     'created' => $issue['fields']['created'] ?? '',
             //     'updated' => $issue['fields']['updated'] ?? ''
             // ];
-        }
-        return $issues;
     }
 
+    /**
+     *   Executes a Jira Search API call using a pre-built payload.
+     * 
+     *   //Payload JSON si plusieurs requêtes
+     *   // $payload = json_encode([
+     *   //     "queries" => [
+     *   //         [
+     *   //             "query" => [
+     *   //                 "jql" => $jql
+     *   //             ]
+     *   //         ]
+     *   //     ]
+     *   // ]);
+     */
+    public function callSearchApi(array $payload): array
+    {
+        $url = $this->baseUrl . self::API_URL_SEARCH;
+        $payload = json_encode($payload);
+
+        try {
+            $result = $this->request($url, $payload);
+
+            if ($result['success'] === false || !$result['issues']) {
+                throw new Exception("Erreur lors de la récupération des tickets Jira : " . $result['message']);
+            }
+            return $result;
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
+            ];
+        }
+    }
+
+
+    /**
+     * Performs a low-level HTTP request to the Jira REST API using cURL.
+     */
     private function request(string $url, $payload=null): array
     {
         try {
