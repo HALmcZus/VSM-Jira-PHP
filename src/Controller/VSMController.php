@@ -4,12 +4,17 @@ namespace App\Controller;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use App\Model\ReleaseModel;
+use App\View\VersionView;
 
-class VSMController
+class VsmController
 {
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $html = file_get_contents(__DIR__ . '/../../views/index.html');
+        ob_start();
+        $view = null;
+        require __DIR__ . '/../../views/index.php';
+        $html = ob_get_clean();
+
         $response->getBody()->write($html);
         return $response;
     }
@@ -21,22 +26,26 @@ class VSMController
 
         try {
             $release = new ReleaseModel();
-            $version = $release->getVersionById($versionId);
-            $issues = $release->getIssuesByVersion($versionId);
 
-            $response->getBody()->write(json_encode([
-                    'success' => true,
-                    'version' => $version,
-                    'issues' => $issues
-                ], JSON_PRETTY_PRINT)
-            );
+            $versionData = $release->getVersionById($versionId);
+            $issues = $release->getIssuesByVersion($versionId);
+            
+            $view = new VersionView($versionData);
+            
+            ob_start();
+            require __DIR__ . '/../../views/index.php';
+            $html = ob_get_clean();
+            
+            $response->getBody()->write($html);
+            return $response;
         } catch (\Throwable $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
                 'error' => $e->getMessage()
             ]));
+            return $response
+                ->withHeader('Content-Type', 'application/json')
+                ->withStatus(500);
         }
-
-        return $response->withHeader('Content-Type', 'application/json');
     }
 }

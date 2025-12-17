@@ -1,8 +1,8 @@
 <?php
 use Slim\App;
-use App\Controller\VSMController;
+use App\Controller\VsmController;
 
 return function(App $app) {
-    $app->get('/', [VSMController::class, 'index']);
-    $app->post('/vsm', [VSMController::class, 'process']);
+    $app->get('/', [VsmController::class, 'index']);
+    $app->post('/vsm', [VsmController::class, 'process']);
 };

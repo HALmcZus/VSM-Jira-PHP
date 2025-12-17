@@ -23,6 +23,8 @@ class JiraService
         $this->baseUrl = $_ENV['JIRA_BASE_URL'] ?? throw new Exception("JIRA_BASE_URL manquant dans le fichier .env");
         $this->email = $_ENV['JIRA_EMAIL'] ?? throw new Exception("JIRA_EMAIL manquant dans le fichier .env");
         $this->token = $_ENV['JIRA_API_TOKEN'] ?? throw new Exception("JIRA_API_TOKEN manquant dans le fichier .env");
+
+        $this->checkCredentials();
     }
 
 
@@ -51,12 +53,7 @@ class JiraService
         $url = $this->baseUrl . self::API_URL_VERSION . '/' . $versionId;
 
         try {
-            $result = $this->request($url);
-
-            if (!$result['id']) {
-                throw new Exception("Erreur lors de la récupération de la Version Jira : " . $result['message']);
-            }
-            return $result;
+            return $this->request($url);
         } catch (Exception $e) {
             return [
                 'success' => false,
