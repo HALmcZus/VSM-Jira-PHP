@@ -6,9 +6,10 @@
 <head>
     <meta charset="UTF-8">
     <title>VSM - Jira</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-    <h1>Value Stream Mapping - Jira</h1>
+    <h1>Value Stream Mapping - Version Jira</h1>
     <form method="POST" action="/vsm">
         <label>FixVersion ID :</label>
         <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">
@@ -17,50 +18,61 @@
     
     <?php if ($view): ?>
         <div class="card">
-            <h2><?= $view->getVersionName(); ?> (<?= $view->getVersionId(); ?>)</h2>
+            <h2><?= $view->getVersionName(); ?> (<?= 'ID ' . $view->getVersionId(); ?>)</h2>
+            
+            <p style="margin-top: 12px; color: var(--muted);">
+                <?= $view->getVersionDescription(); ?>
+            </p>
 
             <div class="meta">
-                <span>📅 Start date: <?= $view->getVersionStartDate() ?? '—'; ?></span>
-                <span>🚀 Release date: <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
-
-                <?php if ($view->isReleased()): ?>
-                    <span class="badge green">Status : Released</span>
-                <?php else: ?>
-                    <span class="badge orange">Status : In progress</span>
+                <span>📅 Date de démarrage : <?= $view->getVersionStartDate() ?? '—'; ?></span>
+                <span>🚀 Date de release : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
+                
+                <?php if ($view->isVersionOverdue()): ?>
+                    <span class="badge red">🕗Deadline dépassée</span>
                 <?php endif; ?>
-            </div>
 
-            <?php if ($view->getVersionDescription()): ?>
-                <p style="margin-top: 12px; color: var(--muted);">
-                    <?= $view->getVersionDescription(); ?>
-                </p>
-            <?php endif; ?>
+                <?php if ($view->isVersionReleased()): ?>
+                    <span class="badge green">Status : Terminé</span>
+                <?php else: ?>
+                    <span class="badge orange">Status : En cours</span>
+                <?php endif; ?>
+
+                <span>Cycle Time Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
+                <span>Cycle Time Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
+            </div>
         </div>
 
-        <!-- <div class="card">
-            <h2>Tickets in this release</h2>
+        <div class="card">
+            <h2><?= $view->getIssuesCount(); ?> tickets rattachés à cette version :</h2>
             <table>
                 <thead>
                     <tr>
+                        <th>Priorité</th>
                         <th>Key</th>
-                        <th>Summary</th>
-                        <th>Assignee</th>
-                        <th>Cycle time (days)</th>
+                        <th>Titre</th>
+                        <th>Status</th>
+                        <th>Date de création</th>
+                        <th>Date de résolution</th>
+                        <th>Cycle time (jours)</th>
                     </tr>
                 </thead>
                 <tbody>
-                    < ?php foreach ($view->getIssues() as $issue): ?>
+                    <?php foreach ($view->getIssues() as $issue): ?>
                         <tr>
-                            <td><strong>< ?= $issue['key']; ?></strong></td>
-                            <td>< ?= htmlspecialchars($issue['summary']); ?></td>
-                            <td>< ?= $issue['assignee'] ?? '—'; ?></td>
-                            <td>< ?= $issue['cycleTime'] ?? '—'; ?></td>
+                            <td><?= $issue['priority'] ?? '—'; ?></td>
+                            <td><strong><?= $issue['key']; ?></strong></td>
+                            <td><?= htmlspecialchars($issue['summary']); ?></td>
+                            <!-- <td>< ?= $issue['assignee'] ?? '—'; ?></td> -->
+                            <td class="<?= $issue['statusCategoryColor'] ?>"><?= $issue['statusName'] ?? '—'; ?></td>
+                            <td><?= $issue['created'] ?? '—'; ?></td>
+                            <td><?= $issue['resolutiondate'] ?? '—'; ?></td>
+                            <td><?= $issue['cycleTime'] ?? '—'; ?></td>
                         </tr>
-                    < ?php endforeach; ?>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-        -->
 
         <!-- 
         <div class="card">

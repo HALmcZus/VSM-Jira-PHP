@@ -53,37 +53,77 @@ class ReleaseModel
     public function getIssuesIdsByVersion(int $versionId) : array 
     {
         $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
+        
         $result = [];
         foreach ($issues['issues'] as $issue) {
             $result[] = $issue['id'] ?? '';
         }
-        /**"issues": [
-            "530796",
-            "496526",
-            "467535",
-            "467532",
-            "467404",
-            "467401",
-            "466894",
-            "466892",
-            "462331",
-            "462330"
-          ]
-        */
+
         $this->versionIssuesIds = $result;
         return $this->versionIssuesIds;
     }
 
-
-    public function getIssuesDetailsByVersion(int $versionId) : array 
+    public function getIssuesDetailsByVersion(int $versionId, $raw = false) : array 
     {
         //Evite un second appel pour récupérer les IDs si on les a déjà
         if (!$this->versionIssuesIds) {
             $this->getIssuesIdsByVersion($versionId);
         }
         
-        $this->versionIssuesDetails = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
+        $rawIssues = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
         
+        //Si demandé, retourne les données brutes        
+        //Sinon par défaut, nettoie la réponse brute pour ne garder que les données utiles à afficher
+        $this->versionIssuesDetails = $raw 
+        ? $rawIssues 
+        : $this->cleanRawIssuesData($rawIssues);
+
         return $this->versionIssuesDetails;
+    }
+
+    /**
+     * Nettoie la réponse brute pour ne garder que les données utiles à afficher
+     */
+    protected function cleanRawIssuesData(array $rawIssues) : array
+    {
+        foreach ($rawIssues['issues'] as $index => $issue) {
+            // $assignee = $issue['fields']['assignee']['displayName'] ?? 'Non assigné';
+
+            //Calcul du Cycle Time
+            $createdDate = new \DateTime($issue['fields']['created']);
+            $resolvedDate = isset($issue['fields']['resolutiondate']) ? new \DateTime($issue['fields']['resolutiondate']) : null;
+            $cycleTime = null;
+            if ($resolvedDate) {
+                $interval = $createdDate->diff($resolvedDate);
+                //Nombre de jours entre les deux dates
+                $cycleTime = (int) $interval->format('%a'); 
+            }
+
+            $usefulIssuesDetails[$index] = [
+                'key' => $issue['key'],
+                'summary' => $issue['fields']['summary'],
+                'statusName' => $issue['fields']['status']['name'],
+                'statusCategoryColor' => $issue['fields']['status']['statusCategory']['colorName'],
+                'statusCategoryKey' => $issue['fields']['status']['statusCategory']['key'],
+                // 'assignee' => $assignee,
+                'created' => $this->formatDate($issue['fields']['created']),
+                'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null,
+                'priority' => $issue['fields']['priority']['name'] ?? '—',
+                // 'history' => $issue['changelog']['histories'] ?? [],
+                // 'changeLog' => $issue['changelog'] ?? [],
+                'cycleTime' => $cycleTime
+            ];
+        }
+        return $usefulIssuesDetails;
+    }
+
+    protected function formatDate(?string $dateStr): ?string
+    {
+        if ($dateStr === null) {
+            return null;
+        }
+
+        $date = new \DateTime($dateStr);
+        return $date->format('d/m/Y');
     }
 }

@@ -67,7 +67,12 @@ h2 {
 
 .badge.orange {
     background: #ffedd5;
-    color: #9a3412;
+    color: #9a4f12;
+}
+
+.badge.red {
+    background: #f8d1d1;
+    color: #991b1b;
 }
 
 table {
@@ -89,4 +94,23 @@ th {
 
 tr:hover {
     background: #f9fafb;
+}
+
+tr:hover {
+    background: #f9fafb;
+}
+
+.blue-gray {
+    background-color: #bfdbfe;
+    color: #5067b6;
+}
+
+.green {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.yellow {
+    background-color: #f8e9ac;
+    color: #a7900f;
 }

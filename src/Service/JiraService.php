@@ -111,7 +111,7 @@ class JiraService
 
 
     /**
-     * WIP
+     * Get issues detail from Jira API bulk fetch
      */
     public function getIssuesDetails(array $issuesIds)
     {
@@ -122,14 +122,21 @@ class JiraService
 
         $payload = [
             "expand" => [
-                "names"
+                // "transitions", "operations", "editmeta", "changelog", "versionedRepresentations", "renderedFields"
               ],
               "fields"=> [
                 "summary",
                 "project",
-                "assignee"
+                "assignee",
+                "priority",
+                "status",
+                "created",
+                "resolutiondate"
+                // "history",
+                // "changelog",
+                // "*all"
               ],
-              "fieldsByKeys"=> false,
+              "fieldsByKeys"=> true,
               "issueIdsOrKeys"=> $issuesIds,
               "properties"=> []
         ];
@@ -227,15 +234,14 @@ class JiraService
 
             $response = curl_exec($ch);
 
+            if (curl_errno($ch)) {
+                throw new Exception("Erreur cURL : " . curl_error($ch));
+            }
+
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($httpCode >= 400) {
                 throw new Exception("Erreur HTTP Jira ($httpCode) : $response");
             }
-
-            if (curl_errno($ch)) {
-                throw new Exception("Erreur cURL : " . curl_error($ch));
-            }
-            curl_close($ch);
 
             $data = json_decode($response, true);
             if (!$data) {

@@ -18,205 +18,99 @@ class VersionView extends AbstractView
         $this->versionIssues = $versionIssues;
     }
 
-
-    public function getIssues()
-    {
-        return $this->versionIssues;
-    }
-    
-
+    /**
+    * *********************
+    * * All about Version *
+    * *********************
+     */
     public function getVersionId(): string
     {
         return $this->versionData['id'] ?? '';
     }
-    
 
     public function getVersionName(): string
     {
         return $this->versionData['name'] ?? '';
     }
 
-
     public function getVersionDescription(): string
     {
-        return $this->versionData['description'] ?? '';
+        return $this->versionData['description'] !== null
+            ? htmlspecialchars($this->versionData['description'], ENT_QUOTES, 'UTF-8')
+            : '';
     }
-
 
     public function getVersionStartDate(): string
     {
         return $this->versionData['startDate'] ?? '';
     }
 
-
     public function getVersionReleaseDate(): string
     {
         return $this->versionData['releaseDate'] ?? '';
     }
-    
 
-    /**
-     * Indicates whether the version has been released.
-     *
-     * @return bool
-     */
-    public function isReleased(): bool
+    public function isVersionReleased(): bool
     {
         return (bool) ($this->versionData['released'] ?? false);
     }
 
-    // /**
-    //  * Returns the version name formatted for display.
-    //  *
-    //  * @return string
-    //  */
-    // public function getVersionName(): string
-    // {
-    //     return htmlspecialchars($this->versionData['name']);
-    // }
+    public function isVersionOverdue(): bool
+    {
+        return (bool) ($this->versionData['overdue'] ?? false);
+    }
 
+    public function getProjectId(): int
+    {
+        return (int) ($this->versionData['projectId'] ?? 0);
+    }
 
-    // /**
-    //  * Returns the release date (if available).
-    //  *
-    //  * @return string|null
-    //  */
-    // public function getReleaseDate(): ?string
-    // {
-    //     return $this->versionData['releaseDate'] ?? null;
-    // }
-    
+    /**
+     * ******************************
+     * * All about Version's Issues *
+     * ******************************
+     */
+    public function getIssues()
+    {
+        return $this->versionIssues;
+    }
 
-    // /**
-    //  * Indicates whether the version has been released.
-    //  *
-    //  * @return bool
-    //  */
-    // public function isReleased(): bool
-    // {
-    //     return (bool) ($this->versionData['released'] ?? false);
-    // }
+    public function getIssuesCount(): int
+    {
+        return count($this->versionIssues);
+    }
 
-    // /* ===========================
-    //  * Identité
-    //  * =========================== */
+    public function getStatusCSSClass($statusCategoryKey): string
+    {
+        if ($statusCategoryKey === 'new') {
+            $cssClass = 'blue-gray';
+        } elseif ($statusCategoryKey === 'done') {
+            $cssClass = 'green';
+        } else {
+            $cssClass = 'yellow';
+        }
+        return $cssClass;
+    }
 
-    // public function getId(): ?string
-    // {
-    //     return $this->get('id');
-    // }
+    public function getAverageCycleTime(): float
+    {
+        $total = 0;
+        $count = 0;
+        foreach ($this->versionIssues as $issue) {
+            if (isset($issue['cycleTime'])) {
+                $total += $issue['cycleTime'];
+                $count++;
+            }
+        }
+        return $count > 0 ? round($total / $count, 2) : 0;
+    }
 
-    // public function getName(): string
-    // {
-    //     return (string) $this->get('name', '');
-    // }
-
-    // public function getDescription(): ?string
-    // {
-    //     return $this->get('description');
-    // }
-
-    // public function getProjectId(): ?int
-    // {
-    //     return $this->get('projectId');
-    // }
-
-    // /* ===========================
-    //  * États
-    //  * =========================== */
-
-    // public function isArchived(): bool
-    // {
-    //     return (bool) $this->get('archived', false);
-    // }
-
-    // public function isReleased(): bool
-    // {
-    //     return (bool) $this->get('released', false);
-    // }
-
-    // public function isOverdue(): bool
-    // {
-    //     return (bool) $this->get('overdue', false);
-    // }
-
-    // /* ===========================
-    //  * Dates (format API)
-    //  * =========================== */
-
-    // /**
-    //  * Date de début brute (YYYY-MM-DD)
-    //  */
-    // public function getStartDate(): ?string
-    // {
-    //     return $this->get('startDate');
-    // }
-
-    // /**
-    //  * Date de release brute (YYYY-MM-DD)
-    //  */
-    // public function getReleaseDate(): ?string
-    // {
-    //     return $this->get('releaseDate');
-    // }
-
-    // /* ===========================
-    //  * Dates (format utilisateur Jira)
-    //  * =========================== */
-
-    // /**
-    //  * Date de début formatée par Jira (ex: 29/juin/25)
-    //  */
-    // public function getUserStartDate(): ?string
-    // {
-    //     return $this->get('userStartDate');
-    // }
-
-    // /**
-    //  * Date de release formatée par Jira (ex: 31/juil./25)
-    //  */
-    // public function getUserReleaseDate(): ?string
-    // {
-    //     return $this->get('userReleaseDate');
-    // }
-
-    // /* ===========================
-    //  * Helpers d'affichage (optionnels mais pratiques)
-    //  * =========================== */
-
-    // /**
-    //  * Nom sécurisé pour affichage HTML
-    //  */
-    // public function getEscapedName(): string
-    // {
-    //     return htmlspecialchars($this->getName(), ENT_QUOTES, 'UTF-8');
-    // }
-
-    // /**
-    //  * Description sécurisée pour affichage HTML
-    //  */
-    // public function getEscapedDescription(): ?string
-    // {
-    //     $description = $this->getDescription();
-
-    //     return $description !== null
-    //         ? htmlspecialchars($description, ENT_QUOTES, 'UTF-8')
-    //         : null;
-    // }
-
-    // /**
-    //  * Libellé d'état humain
-    //  */
-    // public function getStatusLabel(): string
-    // {
-    //     if ($this->isReleased()) {
-    //         return 'Released';
-    //     }
-
-    //     if ($this->isArchived()) {
-    //         return 'Archived';
-    //     }
-
-    //     return 'In progress';
-    // }
+    public function getTotalCycleTime(): int
+    {
+        $total = 0;
+        foreach ($this->versionIssues as $issue) {
+            $total += $issue['cycleTime'] ?? 0;
+        }
+        return $total;
+    }
 }
