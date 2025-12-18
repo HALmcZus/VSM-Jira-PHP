@@ -15,6 +15,7 @@ class JiraService
     private string $baseUrl;
     private string $email;
     private string $token;
+    private bool $areCredentialsVerified = false;
 
 
     public function __construct()
@@ -25,9 +26,6 @@ class JiraService
         $this->baseUrl = $_ENV['JIRA_BASE_URL'] ?? throw new Exception("JIRA_BASE_URL manquant dans le fichier .env");
         $this->email = $_ENV['JIRA_EMAIL'] ?? throw new Exception("JIRA_EMAIL manquant dans le fichier .env");
         $this->token = $_ENV['JIRA_API_TOKEN'] ?? throw new Exception("JIRA_API_TOKEN manquant dans le fichier .env");
-
-        //TODO : déplacer appel à checkCredentials() ?
-        $this->checkCredentials();
     }
 
 
@@ -41,8 +39,11 @@ class JiraService
         $response = $this->request($url);
 
         if (!isset($response['accountId'])) {
+            $this->areCredentialsVerified = false;
             throw new Exception('Invalid Jira credentials.');
         }
+
+        $this->areCredentialsVerified = true;
     }
 
 
@@ -200,6 +201,11 @@ class JiraService
     private function request(string $url, $payload=null, $isPost=false): array
     {
         try {
+            //Vérifie si les credentials API sont valides, si pas déjà fait
+            if (!$this->areCredentialsVerified) {
+                $this->checkCredentials();
+            }
+
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_USERPWD, $this->email . ':' . $this->token);
