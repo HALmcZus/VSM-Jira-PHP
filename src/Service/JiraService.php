@@ -6,17 +6,16 @@ use Exception;
 
 class JiraService
 {
+    //API /rest/api/3/search déprécié ! Utiliser /rest/api/3/search/jql à la place
     const API_URL_SEARCH = "/rest/api/3/search/jql";
     const API_URL_VERSION = "/rest/api/2/version";
     const API_URL_PROJECT_VERSIONS = "/rest/api/2/project/{project_id}/versions";
     const API_URL_FETCH_ISSUES = "/rest/api/3/issue/bulkfetch";
     
-
     private string $baseUrl;
     private string $email;
     private string $token;
     private bool $areCredentialsVerified = false;
-
 
     public function __construct()
     {
@@ -101,10 +100,21 @@ class JiraService
      */
     public function getIssuesIdsByVersion(int $versionId): array
     {
-        // Payload JSON simple
-        $result = $this->callSearchApi([
-            "jql" => "fixVersion = $versionId"
-        ]);
+        $jql = "fixVersion = $versionId";
+
+        $fields = [
+            'summary',
+            'issuetype',
+            'assignee',
+            'priority',
+            'status',
+            'created',
+            'resolutiondate'
+            // pour plus tard VSM
+            // 'expand' => ['changelog']
+        ];
+
+        $result = $this->callSearchApi($jql, $fields);
 
         return $result;
     }
@@ -120,9 +130,11 @@ class JiraService
             $issuesIds = array_map('strval', array_values($issuesIds));
         }
 
-        $payload = [
+        $jql = "id IN (" . implode(",", $issuesIds) . ")";
+
+        $fields = [
             "expand" => [
-                // "transitions", "operations", "editmeta", "changelog", "versionedRepresentations", "renderedFields"
+                //"changelog" //pour plus tard calcul VSM par status
               ],
               "fields"=> [
                 "summary",
@@ -131,17 +143,16 @@ class JiraService
                 "priority",
                 "status",
                 "created",
-                "resolutiondate"
+                "resolutiondate",
+                'issuetype',
                 // "history",
-                // "changelog",
-                // "*all"
+                // "changelog"
               ],
-              "fieldsByKeys"=> true,
-              "issueIdsOrKeys"=> $issuesIds,
-              "properties"=> []
+              "issueIdsOrKeys"=> $issuesIds
         ];
 
-        $result = $this->callBulkFetchApi($payload);
+        // $result = $this->callBulkFetchApi($payload);
+        $result = $this->callSearchApi($jql, $fields);
 
         return $result;
     }
@@ -159,19 +170,50 @@ class JiraService
      *   //         ]
      *   //     ]
      *   // ]);
+     * 
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-post
      */
-    public function callSearchApi(array $payload): array
+    public function callSearchApi(string $jql, array $fields = []): array
     {
-        $url = $this->baseUrl . self::API_URL_SEARCH;
-        $payload = json_encode($payload);
+        // $url = $this->baseUrl . self::API_URL_SEARCH;
+
+        // $payload = [
+        //     'jql' => $jql,
+        //     'fields' => '{summary}'
+        // ];
+
+        // $jsonPayload = json_encode($payload, JSON_THROW_ON_ERROR);
+    
+
+        // $payload = [
+        //     'queries' => [
+        //         [
+        //             'query' => 'fixVersion = 25342',
+        //             'fields' => ['summary']
+        //         ]
+        //     ]
+        // ];
+        // $jsonPayload = json_encode($payload, JSON_THROW_ON_ERROR);
+        
+
+        $query = http_build_query([
+            'jql' => $jql,
+            'fields' => $fields
+        ]);
+    
+        $fullUrl = $this->baseUrl . self::API_URL_SEARCH . '?' . $query;
+
+
 
         try {
-            $result = $this->request($url, $payload);
-
+            $result = $this->request($fullUrl);
+    
             if (!isset($result['issues'])) {
-                throw new Exception('Réponse Jira invalide (search)');
-            }
-            return $result;
+                throw new Exception('Réponse Jira invalide (' . self::API_URL_SEARCH . ')');
+            }            
+    
+            return $result['issues'];
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -219,7 +261,6 @@ class JiraService
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_USERPWD, $this->email . ':' . $this->token);
-
 
             $headers = ['Accept: application/json'];
             //Si on passe un payload, on le charge et on indique dans les headers qu'il s'agit de json

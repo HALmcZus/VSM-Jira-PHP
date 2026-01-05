@@ -12,7 +12,7 @@
     <h1>Value Stream Mapping - Version Jira</h1>
     <form method="POST" action="/vsm">
         <label>FixVersion ID :</label>
-        <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">
+        <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)" value="25342">
         <button type="submit">OK</button>
     </form>
     
@@ -49,6 +49,7 @@
                 <thead>
                     <tr>
                         <th>Priorité</th>
+                        <th>Type</th>
                         <th>Key</th>
                         <th>Titre</th>
                         <th>Status</th>
@@ -61,6 +62,7 @@
                     <?php foreach ($view->getIssues() as $issue): ?>
                         <tr>
                             <td><?= $issue['priority'] ?? '—'; ?></td>
+                            <td><img src="<?= $issue['issuetype']['iconUrl'] ?? '' ?>"/><?= $issue['issuetype']['name'] ?? '—';?></td>
                             <td><strong><?= $issue['key']; ?></strong></td>
                             <td><?= htmlspecialchars($issue['summary']); ?></td>
                             <!-- <td>< ?= $issue['assignee'] ?? '—'; ?></td> -->

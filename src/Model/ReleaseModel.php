@@ -16,7 +16,7 @@ class ReleaseModel
         $this->jiraService = new JiraService();
     }
 
-    public function getVersionById(int $versionId) : array 
+    public function  getVersionById(int $versionId) : array 
     {
         $result = $this->jiraService->getVersionById($versionId);
         /**"version": {
@@ -41,7 +41,6 @@ class ReleaseModel
         return $this->versionData;
     }
 
-
     public function getVersionsByProjectId(int $projectId) : array 
     {
         $result = $this->jiraService->getVersionsByProjectId($projectId);
@@ -49,13 +48,12 @@ class ReleaseModel
         return $result;
     }
 
-
     public function getIssuesIdsByVersion(int $versionId) : array 
     {
         $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
         
         $result = [];
-        foreach ($issues['issues'] as $issue) {
+        foreach ($issues as $issue) {
             $result[] = $issue['id'] ?? '';
         }
 
@@ -65,20 +63,24 @@ class ReleaseModel
 
     public function getIssuesDetailsByVersion(int $versionId, $raw = false) : array 
     {
-        //Evite un second appel pour récupérer les IDs si on les a déjà
-        if (!$this->versionIssuesIds) {
-            $this->getIssuesIdsByVersion($versionId);
-        }
-        
-        $rawIssues = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
-        
-        //Si demandé, retourne les données brutes        
-        //Sinon par défaut, nettoie la réponse brute pour ne garder que les données utiles à afficher
-        $this->versionIssuesDetails = $raw 
-        ? $rawIssues 
-        : $this->cleanRawIssuesData($rawIssues);
+        try {
+            //Evite un second appel pour récupérer les IDs si on les a déjà
+            if (!$this->versionIssuesIds) {
+                $this->getIssuesIdsByVersion($versionId);
+            }
+            
+            $rawIssues = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
+            
+            //Si demandé, retourne les données brutes        
+            //Sinon par défaut, nettoie la réponse brute pour ne garder que les données utiles à afficher
+            $this->versionIssuesDetails = $raw 
+            ? $rawIssues 
+            : $this->cleanRawIssuesData($rawIssues);
 
-        return $this->versionIssuesDetails;
+            return $this->versionIssuesDetails;
+        } catch (Exception $e) {
+            throw new Exception("Erreur lors de la récupération des tickets Jira rattachés à la Version : " . $e->getMessage());
+        }
     }
 
     /**
