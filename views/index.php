@@ -12,7 +12,7 @@
     <h1>Value Stream Mapping - Version Jira</h1>
     <form method="POST" action="/vsm">
         <label>FixVersion ID :</label>
-        <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)" value="25342">
+        <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">
         <button type="submit">OK</button>
     </form>
     

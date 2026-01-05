@@ -88,7 +88,7 @@ class ReleaseModel
      */
     protected function cleanRawIssuesData(array $rawIssues) : array
     {
-        foreach ($rawIssues['issues'] as $index => $issue) {
+        foreach ($rawIssues as $index => $issue) {
             // $assignee = $issue['fields']['assignee']['displayName'] ?? 'Non assigné';
 
             //Calcul du Cycle Time

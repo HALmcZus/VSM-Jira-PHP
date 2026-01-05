@@ -97,6 +97,7 @@ class JiraService
 
     /**
      * Get Jira issues by Version ID
+    * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
      */
     public function getIssuesIdsByVersion(int $versionId): array
     {
@@ -114,7 +115,7 @@ class JiraService
             // 'expand' => ['changelog']
         ];
 
-        $result = $this->callSearchApi($jql, $fields);
+        $result = $this->callSearchApiGet($jql, $fields);
 
         return $result;
     }
@@ -130,13 +131,9 @@ class JiraService
             $issuesIds = array_map('strval', array_values($issuesIds));
         }
 
-        $jql = "id IN (" . implode(",", $issuesIds) . ")";
-
-        $fields = [
-            "expand" => [
-                //"changelog" //pour plus tard calcul VSM par status
-              ],
-              "fields"=> [
+        $payload = [
+            'jql' => "id IN (" . implode(",", $issuesIds) . ")",
+            'fields' => [
                 "summary",
                 "project",
                 "assignee",
@@ -147,18 +144,47 @@ class JiraService
                 'issuetype',
                 // "history",
                 // "changelog"
-              ],
-              "issueIdsOrKeys"=> $issuesIds
-        ];
+            ],
+            'maxResults' => count($issuesIds)
+        ];  
 
         // $result = $this->callBulkFetchApi($payload);
-        $result = $this->callSearchApi($jql, $fields);
+        $result = $this->callSearchApiPost($payload);
 
         return $result;
     }
 
     /**
-     *   Executes a Jira Search API call using a pre-built payload.
+     * Executes a Jira Search API GET call.
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
+     */
+    public function callSearchApiGet(string $jql, array $fields = []): array
+    {
+        $query = http_build_query([
+            'jql' => $jql,
+            'fields' => $fields
+        ]);
+    
+        $fullUrl = $this->baseUrl . self::API_URL_SEARCH . '?' . $query;
+
+        try {
+            $result = $this->request($fullUrl);
+    
+            if (!isset($result['issues'])) {
+                throw new Exception('Réponse Jira invalide (' . self::API_URL_SEARCH . ')');
+            }            
+    
+            return $result['issues'];
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     *   Executes a Jira Search API POST call.
      * 
      *   //Payload JSON si plusieurs requêtes
      *   // $payload = json_encode([
@@ -171,43 +197,16 @@ class JiraService
      *   //     ]
      *   // ]);
      * 
-     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-post
      */
-    public function callSearchApi(string $jql, array $fields = []): array
+    public function callSearchApiPost(array $payload): array
     {
-        // $url = $this->baseUrl . self::API_URL_SEARCH;
+        $url = $this->baseUrl . self::API_URL_SEARCH;
 
-        // $payload = [
-        //     'jql' => $jql,
-        //     'fields' => '{summary}'
-        // ];
-
-        // $jsonPayload = json_encode($payload, JSON_THROW_ON_ERROR);
-    
-
-        // $payload = [
-        //     'queries' => [
-        //         [
-        //             'query' => 'fixVersion = 25342',
-        //             'fields' => ['summary']
-        //         ]
-        //     ]
-        // ];
-        // $jsonPayload = json_encode($payload, JSON_THROW_ON_ERROR);
-        
-
-        $query = http_build_query([
-            'jql' => $jql,
-            'fields' => $fields
-        ]);
-    
-        $fullUrl = $this->baseUrl . self::API_URL_SEARCH . '?' . $query;
-
-
+        $jsonPayload = json_encode($payload, JSON_THROW_ON_ERROR);        
 
         try {
-            $result = $this->request($fullUrl);
+            $result = $this->request($url, $jsonPayload, true);
     
             if (!isset($result['issues'])) {
                 throw new Exception('Réponse Jira invalide (' . self::API_URL_SEARCH . ')');
