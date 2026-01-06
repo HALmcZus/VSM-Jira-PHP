@@ -9,12 +9,14 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+    <div class="card">
     <h1>Value Stream Mapping - Version Jira</h1>
-    <form method="POST" action="/vsm">
-        <label>FixVersion ID :</label>
-        <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">
-        <button type="submit">OK</button>
-    </form>
+        <form method="POST" action="/vsm">
+            <label>FixVersion ID :</label>
+            <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">
+            <button type="submit">OK</button>
+        </form>
+    </div>
     
     <?php if ($view): ?>
         <div class="card">
@@ -54,21 +56,23 @@
                         <th>Titre</th>
                         <th>Status</th>
                         <th>Date de création</th>
-                        <th>Date de résolution</th>
-                        <th>Cycle time (jours)</th>
+                        <th>1er passage à En cours</th>
+                        <th>Date de résolution (Terminé)</th>
+                        <th>Cycle time (jours effectifs En cours -> Terminé)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($view->getIssues() as $issue): ?>
                         <tr>
-                            <td><?= $issue['priority'] ?? '—'; ?></td>
+                            <td><img src="<?= $issue['priorityIcon'] ?? '' ?>"/><?= $issue['priority'] ?? '—'; ?></td>
                             <td><img src="<?= $issue['issuetype']['iconUrl'] ?? '' ?>"/><?= $issue['issuetype']['name'] ?? '—';?></td>
                             <td><strong><?= $issue['key']; ?></strong></td>
                             <td><?= htmlspecialchars($issue['summary']); ?></td>
                             <!-- <td>< ?= $issue['assignee'] ?? '—'; ?></td> -->
                             <td class="<?= $issue['statusCategoryColor'] ?>"><?= $issue['statusName'] ?? '—'; ?></td>
                             <td><?= $issue['created'] ?? '—'; ?></td>
-                            <td><?= $issue['resolutiondate'] ?? '—'; ?></td>
+                            <td><?= $issue['firstInProgressDate'] ?? '—'; ?></td>
+                            <td><?= $issue['doneDate'] ?? '—'; ?></td>
                             <td><?= $issue['cycleTime'] ?? '—'; ?></td>
                         </tr>
                     <?php endforeach; ?>

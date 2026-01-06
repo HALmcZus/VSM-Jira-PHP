@@ -9,6 +9,33 @@ use App\Service\JiraService;
  */
 class ReleaseModel
 {
+    //Liste des jours fériés au format Y-m-d
+    const HOLIDAYS = [
+        // Année précédente
+        '2025-01-01', // Jour de l'An
+        '2025-04-21', // Lundi de Pâques, variable
+        '2025-05-01', // Fête du Travail
+        '2025-05-08', // Victoire 1945
+        '2025-05-29', // Ascension, variable
+        '2025-06-09', // Lundi de Pentecôte, variable
+        '2025-07-14', // Fête Nationale
+        '2025-08-15', // Assomption
+        '2025-11-01', // Toussaint
+        '2025-11-11', // Armistice 1918
+        '2025-12-25', // Noël
+        // Année suivante
+        '2026-01-01', // Jour de l'An
+        '2026-04-06', // Lundi de Pâques, variable
+        '2026-05-01', // Fête du Travail
+        '2026-05-08', // Victoire 1945
+        '2026-05-14', // Ascension, variable
+        '2026-05-25', // Lundi de Pentecôte, variable
+        '2026-07-14', // Fête Nationale
+        '2026-08-15', // Assomption
+        '2026-11-01', // Toussaint
+        '2026-11-11', // Armistice 1918
+        '2026-12-25', // Noël
+    ];
     protected JiraService $jiraService;
     protected array $versionData = [];
     protected array $versionIssuesIds = [];
@@ -33,21 +60,6 @@ class ReleaseModel
     public function getVersionById(int $versionId) : array 
     {
         $result = $this->jiraService->getVersionById($versionId);
-        /**"version": {
-            "self": "https://imsa.atlassian.net/rest/api/2/version/19075",
-            "id": "19075",
-            "description": "REP-210 Mise à disposition de DPAE pour la DGT 6 création des messages MOM DPAE pour alimentation base nationale",
-            "name": "REP-210 DPAE DGT",
-            "archived": false,
-            "released": false,
-            "startDate": "2025-06-29",
-            "releaseDate": "2025-07-31",
-            "overdue": true,
-            "userStartDate": "29/juin/25",
-            "userReleaseDate": "31/juil./25",
-            "projectId": 11547
-          },
-        */
         if (!$result['id']) {
             throw new Exception("Erreur lors de la récupération de la Version Jira : " . $result['message']);
         }
@@ -108,7 +120,7 @@ class ReleaseModel
             //Sinon par défaut, nettoie la réponse brute pour ne garder que les données utiles à afficher
             $this->versionIssuesDetails = $raw 
             ? $rawIssues 
-            : $this->cleanRawIssuesData($rawIssues);
+            : $this->formatRawIssuesData($rawIssues);
 
             return $this->versionIssuesDetails;
         } catch (Exception $e) {
@@ -119,44 +131,99 @@ class ReleaseModel
     /**
      * Nettoie la réponse brute pour ne garder que les données utiles à afficher
      *
-     * @param  mixed $rawIssues
+     * @param  array $rawIssues
      * @return array
      */
-    protected function cleanRawIssuesData(array $rawIssues) : array
+    protected function formatRawIssuesData(array $rawIssues) : array
     {
         $usefulIssuesDetails = [];
-        
-        foreach ($rawIssues as $index => $issue) {
-            // $assignee = $issue['fields']['assignee']['displayName'] ?? 'Non assigné';
 
-            //Calcul du Cycle Time
-            $createdDate = new \DateTime($issue['fields']['created']);
-            $resolvedDate = isset($issue['fields']['resolutiondate']) ? new \DateTime($issue['fields']['resolutiondate']) : null;
+        foreach ($rawIssues as $index => $issue) {
+
+            $inProgressDate = null;
+            $doneDate = null;
+            
+            //Calcul du Cycle Time en parcourant le changelog du ticket
+            if (!empty($issue['changelog']['histories'])) {
+                foreach ($issue['changelog']['histories'] as $history) {
+                    foreach ($history['items'] as $item) {
+                        if ($item['field'] !== 'status') {
+                            continue;
+                        }
+
+                        if ($item['toString'] === 'In Progress' && $inProgressDate === null) {
+                            $inProgressDate = new \DateTime($history['created']);
+                        }
+
+                        if ($item['toString'] === 'Done' && $doneDate === null) {
+                            $doneDate = new \DateTime($history['created']);
+                        }
+                    }
+                }
+            }
+
             $cycleTime = null;
-            if ($resolvedDate) {
-                $interval = $createdDate->diff($resolvedDate);
-                //Nombre de jours entre les deux dates
-                $cycleTime = (int) $interval->format('%a'); 
+            if ($inProgressDate && $doneDate) {
+                //Nombre de jours entre les deux dates, excluant week-ends et jours fériés
+                $cycleTime = $this->calculateBusinessDays($inProgressDate, $doneDate);
             }
 
             $usefulIssuesDetails[$index] = [
                 'key' => $issue['key'],
                 'summary' => $issue['fields']['summary'],
+                'issuetype' => $issue['fields']['issuetype'] ?? [],
                 'statusName' => $issue['fields']['status']['name'],
                 'statusCategoryColor' => $issue['fields']['status']['statusCategory']['colorName'],
                 'statusCategoryKey' => $issue['fields']['status']['statusCategory']['key'],
-                // 'assignee' => $assignee,
                 'created' => $this->formatDate($issue['fields']['created']),
                 'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null,
                 'priority' => $issue['fields']['priority']['name'] ?? '—',
-                // 'history' => $issue['changelog']['histories'] ?? [],
-                // 'changeLog' => $issue['changelog'] ?? [],
-                'cycleTime' => $cycleTime
+                'priorityIcon' => $issue['fields']['priority']['iconUrl'] ?? null,
+                'cycleTime' => $cycleTime,
+                'firstInProgressDate' => $inProgressDate ? $inProgressDate->format('d/m/Y') : null,
+                'doneDate' => $doneDate ? $doneDate->format('d/m/Y') : null
             ];
         }
+
         return $usefulIssuesDetails;
     }
     
+
+    /**
+     * Calcule le nombre de jours ouvrés entre deux dates (week-ends et jours fériés exclus).
+     *
+     * @param \DateTime $start Date de début (incluse)
+     * @param \DateTime $end Date de fin (incluse)
+     *
+     * @return int Nombre de jours ouvrés
+     */
+    protected function calculateBusinessDays(\DateTime $start, \DateTime $end): int 
+    {
+        if ($start > $end) {
+            return 0;
+        }
+    
+        $businessDays = 0;
+        $current = clone $start;
+    
+        while ($current <= $end) {
+            $dayOfWeek = (int) $current->format('N'); // 1 (lundi) → 7 (dimanche)
+            $currentDate = $current->format('Y-m-d');
+    
+            $isWeekend = ($dayOfWeek >= 6);
+            $isHoliday = in_array($currentDate, self::HOLIDAYS, true);
+    
+            if (!$isWeekend && !$isHoliday) {
+                $businessDays++;
+            }
+    
+            $current->modify('+1 day');
+        }
+    
+        return $businessDays;
+    }    
+
+
     /**
      * formatDate
      *

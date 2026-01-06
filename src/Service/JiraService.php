@@ -132,8 +132,6 @@ class JiraService
             'status',
             'created',
             'resolutiondate'
-            // pour plus tard VSM
-            // 'expand' => ['changelog']
         ];
 
         $result = $this->callSearchApiGet($jql, $fields);
@@ -145,7 +143,7 @@ class JiraService
     /**
      * getIssuesDetails
      *
-     * @param  mixed $issuesIds
+     * @param  array $issuesIds
      * @return array
      */
     public function getIssuesDetails(array $issuesIds): array
@@ -158,26 +156,21 @@ class JiraService
         $payload = [
             'jql' => "id IN (" . implode(",", $issuesIds) . ")",
             'fields' => [
-                "summary",
-                "project",
-                "assignee",
-                "priority",
-                "status",
-                "created",
-                "resolutiondate",
-                'issuetype',
-                // "history",
-                // "changelog"
+                'summary',
+                'project',
+                'priority',
+                'status',
+                'created',
+                'resolutiondate',
+                'issuetype'
             ],
+            'expand' => 'changelog',
             'maxResults' => count($issuesIds)
-        ];  
-
-        // $result = $this->callBulkFetchApi($payload);
-        $result = $this->callSearchApiPost($payload);
-
-        return $result;
+        ];
+    
+        return $this->callSearchApiPost($payload);
     }
-
+    
 
     /**
      * Executes a Jira Search API GET call.
@@ -217,17 +210,6 @@ class JiraService
     /**
      *   Executes a Jira Search API POST call.
      * 
-     *   //Payload JSON si plusieurs requêtes
-     *   // $payload = json_encode([
-     *   //     "queries" => [
-     *   //         [
-     *   //             "query" => [
-     *   //                 "jql" => $jql
-     *   //             ]
-     *   //         ]
-     *   //     ]
-     *   // ]);
-     * 
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-post
      *
      * @param  mixed $payload
@@ -254,35 +236,6 @@ class JiraService
             ];
         }
     }
-
-
-    /**
-     * Calls Jira Bulk Fetch API (/issue/bulkfetch)
-     * 
-     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-bulk-fetch/#api-rest-api-3-issue-bulkfetch-post
-     *
-     * @param  mixed $payload
-     * @return array
-     */
-    // public function callBulkFetchApi(array $payload): array
-    // {
-    //     $url = $this->baseUrl . self::API_URL_FETCH_ISSUES;
-
-    //     try {
-    //         $result = $this->request($url, json_encode($payload, JSON_THROW_ON_ERROR), true);
-
-    //         if (!isset($result['issues'])) {
-    //             throw new Exception('Réponse Jira invalide (bulkfetch)');
-    //         }
-
-    //         return $result;
-    //     } catch (Exception $e) {
-    //         return [
-    //             'success' => false,
-    //             'message' => 'Erreur lors de l’appel à Jira : ' . $e->getMessage()
-    //         ];
-    //     }
-    // }
 
 
     /**
