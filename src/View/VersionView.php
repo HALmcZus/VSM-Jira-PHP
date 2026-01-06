@@ -161,16 +161,17 @@ class VersionView extends AbstractView
     }
     
     /**
-     * calculateLeadAndCycleTime
+     * calculateLeadAndCycleTime (total and average)
      *
      * @return void
      */
     public function calculateLeadAndCycleTime()
     {
         if ($this->getIssuesCount() > 0) {
+            /* @var \App\Model\Issue $issue */
             foreach ($this->versionIssues as $issue) {
-                $this->totalLeadTime += $issue['leadTime'] ?? 0;
-                $this->totalCycleTime += $issue['cycleTime'] ?? 0;
+                $this->totalLeadTime += $issue->getLeadTime() ?? 0;
+                $this->totalCycleTime += $issue->getCycleTime() ?? 0;
             }
             $this->averageLeadTime = round($this->totalLeadTime / $this->getIssuesCount(), 2);
             $this->averageCycleTime = round($this->totalCycleTime / $this->getIssuesCount(), 2);

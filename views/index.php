@@ -74,18 +74,19 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <?php /** @var \App\Model\Issue $issue */ ?>
                     <?php foreach ($view->getIssues() as $issue): ?>
                         <tr>
-                            <td><img src="<?= $issue['priorityIcon'] ?? '' ?>"/><?= $issue['priority'] ?? '—'; ?></td>
-                            <td><img src="<?= $issue['issuetype']['iconUrl'] ?? '' ?>"/><?= $issue['issuetype']['name'] ?? '—';?></td>
-                            <td><strong><?= $issue['key']; ?></strong></td>
-                            <td><?= htmlspecialchars($issue['summary']); ?></td>
-                            <td class="<?= $issue['statusCategoryColor'] ?>"><?= $issue['statusName'] ?? '—'; ?></td>
-                            <td><?= $issue['created'] ?? '—'; ?></td>
-                            <td><?= $issue['firstInProgressDate'] ?? '—'; ?></td>
-                            <td><?= $issue['doneDate'] ?? '—'; ?></td>
-                            <td><?= $issue['leadTime'] ?? '—'; ?></td>
-                            <td><?= $issue['cycleTime'] ?? '—'; ?></td>
+                            <td><img src="<?= $issue->getPriorityIcon() ?? '' ?>"/><?= $issue->getPriorityName() ?? '—'; ?></td>
+                            <td><img src="<?= $issue->getIssueTypeIcon() ?? '' ?>"/><?= $issue->getIssueTypeName() ?? '—';?></td>
+                            <td><strong><?= $issue->getKey(); ?></strong></td>
+                            <td><?= htmlspecialchars($issue->getSummary()); ?></td>
+                            <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
+                            <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
+                            <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
+                            <td><?= $issue->getDoneDate() ?? '—'; ?></td>
+                            <td><?= $issue->getLeadTime() > 0 ? $issue->getLeadTime() . ' jours' : '—'; ?></td>
+                            <td><?= $issue->getCycleTime() > 0 ? $issue->getCycleTime() . ' jours' : '—'; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

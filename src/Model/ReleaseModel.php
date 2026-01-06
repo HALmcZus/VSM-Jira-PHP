@@ -39,7 +39,7 @@ class ReleaseModel
     protected JiraService $jiraService;
     protected array $versionData = [];
     protected array $versionIssuesIds = [];
-    protected array $versionIssuesDetails = [];
+    protected array $versionIssues = [];
     
     /**
      * __construct
@@ -103,10 +103,9 @@ class ReleaseModel
      * getIssuesDetailsByVersion
      *
      * @param  mixed $versionId
-     * @param  mixed $raw
      * @return array
      */
-    public function getIssuesDetailsByVersion(int $versionId, $raw = false) : array 
+    public function getIssuesDetailsByVersion(int $versionId) : array
     {
         try {
             //Evite un second appel pour récupérer les IDs si on les a déjà
@@ -115,14 +114,12 @@ class ReleaseModel
             }
             
             $rawIssues = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
-            
-            //Si demandé, retourne les données brutes        
-            //Sinon par défaut, nettoie la réponse brute pour ne garder que les données utiles à afficher
-            $this->versionIssuesDetails = $raw 
-            ? $rawIssues 
-            : $this->formatRawIssuesData($rawIssues);
-
-            return $this->versionIssuesDetails;
+     
+            foreach ($rawIssues as $rawIssueData) {
+                $this->versionIssues[] = new Issue($rawIssueData);
+            }
+    
+            return $this->versionIssues;
         } catch (Exception $e) {
             throw new Exception("Erreur lors de la récupération des tickets Jira rattachés à la Version : " . $e->getMessage());
         }
@@ -134,67 +131,68 @@ class ReleaseModel
      * @param  array $rawIssues
      * @return array
      */
-    protected function formatRawIssuesData(array $rawIssues) : array
-    {
-        $usefulIssuesDetails = [];
+    // protected function formatRawIssuesData(array $rawIssues) : array
+    // {
+    //     $usefulIssuesDetails = [];
 
-        foreach ($rawIssues as $index => $issue) {
+    //     foreach ($rawIssues as $index => $issue) {
 
-            $inProgressDate = null;
-            $doneDate = null;
+    //         $inProgressDate = null;
+    //         $doneDate = null;
             
-            //Calcul du Cycle Time en parcourant le changelog du ticket
-            if (!empty($issue['changelog']['histories'])) {
-                foreach ($issue['changelog']['histories'] as $history) {
-                    foreach ($history['items'] as $item) {
-                        if ($item['field'] !== 'status') {
-                            continue;
-                        }
+    //         //Calcul du Cycle Time en parcourant le changelog du ticket
+    //         if (!empty($issue['changelog']['histories'])) {
+    //             foreach ($issue['changelog']['histories'] as $history) {
+    //                 foreach ($history['items'] as $item) {
+    //                     if ($item['field'] !== 'status') {
+    //                         continue;
+    //                     }
 
-                        //Premier passage à En cours
-                        if ($item['toString'] === 'In Progress' && $inProgressDate === null) {
-                            $inProgressDate = new \DateTime($history['created']);
-                        }
+    //                     //Premier passage à En cours
+    //                     if ($item['toString'] === 'In Progress' && $inProgressDate === null) {
+    //                         $inProgressDate = new \DateTime($history['created']);
+    //                     }
 
-                        //Dernier passage à Done
-                        if ($item['toString'] === 'Done') {
-                            $doneDate = new \DateTime($history['created']);
-                        }
-                    }
-                }
-            }
+    //                     //Dernier passage à Done
+    //                     if ($item['toString'] === 'Done') {
+    //                         $doneDate = new \DateTime($history['created']);
+    //                     }
+    //                 }
+    //             }
+    //         }
 
-            $leadTime = null;
-            $cycleTime = null;
-            //Si ticket est Terminé, on calcule les temps de résolution
-            if ($inProgressDate && $doneDate) {
-                $createdDate = new \DateTime($issue['fields']['created']);
-                $leadTime = $doneDate->diff($createdDate)->days;
+    //         $leadTime = null;
+    //         $cycleTime = null;
+    //         //Si ticket est Terminé, on calcule les temps de résolution
+    //         if ($inProgressDate && $doneDate) {
+    //             $createdDate = new \DateTime($issue['fields']['created']);
+    //             $leadTime = $doneDate->diff($createdDate)->days;
 
-                //Nombre de jours entre les deux dates, excluant week-ends et jours fériés
-                $cycleTime = $this->calculateBusinessDays($inProgressDate, $doneDate);
-            }
+    //             //Nombre de jours entre les deux dates, excluant week-ends et jours fériés
+    //             $cycleTime = $this->calculateBusinessDays($inProgressDate, $doneDate);
+    //         }
 
-            $usefulIssuesDetails[$index] = [
-                'key' => $issue['key'],
-                'summary' => $issue['fields']['summary'],
-                'issuetype' => $issue['fields']['issuetype'] ?? [],
-                'statusName' => $issue['fields']['status']['name'],
-                'statusCategoryColor' => $issue['fields']['status']['statusCategory']['colorName'],
-                'statusCategoryKey' => $issue['fields']['status']['statusCategory']['key'],
-                'priority' => $issue['fields']['priority']['name'] ?? '—',
-                'priorityIcon' => $issue['fields']['priority']['iconUrl'] ?? null,
-                'created' => $this->formatDate($issue['fields']['created']),
-                'firstInProgressDate' => $inProgressDate ? $inProgressDate->format('d/m/Y') : null,
-                'doneDate' => $doneDate ? $doneDate->format('d/m/Y') : null,
-                'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null, //doublon ? A voir quand diff par Status
-                'leadTime' => $leadTime,
-                'cycleTime' => $cycleTime
-            ];
-        }
+    //         $usefulIssuesDetails[$index] = [
+    //             'key' => $issue['key'],
+    //             'summary' => $issue['fields']['summary'],
+    //             'issuetype' => $issue['fields']['issuetype'] ?? [],
+    //             'statusName' => $issue['fields']['status']['name'],
+    //             'statusCategoryColor' => $issue['fields']['status']['statusCategory']['colorName'],
+    //             'statusCategoryKey' => $issue['fields']['status']['statusCategory']['key'],
+    //             'priority' => $issue['fields']['priority']['name'] ?? '—',
+    //             'priorityIcon' => $issue['fields']['priority']['iconUrl'] ?? null,
+    //             'created' => $this->formatDate($issue['fields']['created']),
+    //             'firstInProgressDate' => $inProgressDate ? $inProgressDate->format('d/m/Y') : null,
+    //             'doneDate' => $doneDate ? $doneDate->format('d/m/Y') : null,
+    //             'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null, //doublon ? A voir quand diff par Status
+    //             'leadTime' => $leadTime,
+    //             'cycleTime' => $cycleTime,
+    //             // 'storypoints' => $issue['fields']['customfield_10016'] ?? null
+    //         ];
+    //     }
 
-        return $usefulIssuesDetails;
-    }
+    //     return $usefulIssuesDetails;
+    // }
 
 
     /**
@@ -205,13 +203,13 @@ class ReleaseModel
      *
      * @return int Nombre de jours ouvrés
      */
-    protected function calculateBusinessDays(\DateTime $start, \DateTime $end): int 
+    public function calculateBusinessDays(\DateTime $start, \DateTime $end): int 
     {
         if ($start > $end) {
             return 0;
         }
     
-        $businessDays = 0;
+        $businessDays = 1;
         $current = clone $start;
     
         while ($current <= $end) {
