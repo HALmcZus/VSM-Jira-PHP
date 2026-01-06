@@ -6,8 +6,18 @@ use Psr\Http\Message\ServerRequestInterface;
 use App\Model\ReleaseModel;
 use App\View\VersionView;
 
+/**
+ * VsmController
+ */
 class VsmController
-{
+{    
+    /**
+     * index
+     *
+     * @param  mixed $request
+     * @param  mixed $response
+     * @return ResponseInterface
+     */
     public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         ob_start();
@@ -18,7 +28,15 @@ class VsmController
         $response->getBody()->write($html);
         return $response;
     }
-
+    
+    
+    /**
+     * process
+     *
+     * @param  mixed $request
+     * @param  mixed $response
+     * @return ResponseInterface
+     */
     public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $data = $request->getParsedBody();

@@ -37,9 +37,9 @@
                 <?php else: ?>
                     <span class="badge orange">Status : En cours</span>
                 <?php endif; ?>
-
-                <span>Cycle Time Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
+                
                 <span>Cycle Time Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
+                <span>Cycle Time Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
             </div>
         </div>
 

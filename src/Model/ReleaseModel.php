@@ -4,19 +4,33 @@ namespace App\Model;
 use Exception;
 use App\Service\JiraService;
 
+/**
+ * ReleaseModel
+ */
 class ReleaseModel
 {
     protected JiraService $jiraService;
     protected array $versionData = [];
     protected array $versionIssuesIds = [];
     protected array $versionIssuesDetails = [];
-
+    
+    /**
+     * __construct
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->jiraService = new JiraService();
     }
-
-    public function  getVersionById(int $versionId) : array 
+    
+    /**
+     * getVersionById
+     *
+     * @param  mixed $versionId
+     * @return array
+     */
+    public function getVersionById(int $versionId) : array 
     {
         $result = $this->jiraService->getVersionById($versionId);
         /**"version": {
@@ -40,14 +54,26 @@ class ReleaseModel
         $this->versionData = $result;
         return $this->versionData;
     }
-
+    
+    /**
+     * getVersionsByProjectId
+     *
+     * @param  mixed $projectId
+     * @return array
+     */
     public function getVersionsByProjectId(int $projectId) : array 
     {
         $result = $this->jiraService->getVersionsByProjectId($projectId);
 
         return $result;
     }
-
+    
+    /**
+     * getIssuesIdsByVersion
+     *
+     * @param  mixed $versionId
+     * @return array
+     */
     public function getIssuesIdsByVersion(int $versionId) : array 
     {
         $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
@@ -60,7 +86,14 @@ class ReleaseModel
         $this->versionIssuesIds = $result;
         return $this->versionIssuesIds;
     }
-
+    
+    /**
+     * getIssuesDetailsByVersion
+     *
+     * @param  mixed $versionId
+     * @param  mixed $raw
+     * @return array
+     */
     public function getIssuesDetailsByVersion(int $versionId, $raw = false) : array 
     {
         try {
@@ -85,9 +118,14 @@ class ReleaseModel
 
     /**
      * Nettoie la réponse brute pour ne garder que les données utiles à afficher
+     *
+     * @param  mixed $rawIssues
+     * @return array
      */
     protected function cleanRawIssuesData(array $rawIssues) : array
     {
+        $usefulIssuesDetails = [];
+        
         foreach ($rawIssues as $index => $issue) {
             // $assignee = $issue['fields']['assignee']['displayName'] ?? 'Non assigné';
 
@@ -118,7 +156,13 @@ class ReleaseModel
         }
         return $usefulIssuesDetails;
     }
-
+    
+    /**
+     * formatDate
+     *
+     * @param  mixed $dateStr
+     * @return string
+     */
     protected function formatDate(?string $dateStr): ?string
     {
         if ($dateStr === null) {

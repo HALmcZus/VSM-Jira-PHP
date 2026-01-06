@@ -4,6 +4,9 @@ namespace App\Service;
 use Dotenv\Dotenv;
 use Exception;
 
+/**
+ * JiraService
+ */
 class JiraService
 {
     //API /rest/api/3/search déprécié ! Utiliser /rest/api/3/search/jql à la place
@@ -16,7 +19,13 @@ class JiraService
     private string $email;
     private string $token;
     private bool $areCredentialsVerified = false;
+    
 
+    /**
+     * __construct
+     *
+     * @return void
+     */
     public function __construct()
     {
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
@@ -31,6 +40,10 @@ class JiraService
     /**
      * Ping Jira "myself" API to check if credentials are valid.
      * Throw exception if not.
+     * 
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-myself/#api-rest-api-3-myself-get
+     * 
+     * @return void
      */
     public function checkCredentials(): void
     {
@@ -48,10 +61,13 @@ class JiraService
         $this->areCredentialsVerified = true;
     }
 
-
+ 
     /**
-     * WIP, not tested
-     * Get Version infos by ID
+     * getVersionById
+     * 
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-version/#api-rest-api-2-version-id-get
+     *
+     * @param  mixed $versionId
      * @return array
      */
     public function getVersionById(int $versionId): array
@@ -72,6 +88,9 @@ class JiraService
     /**
      * Get Versions from a Jira Project ID
      * 
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-project-versions/#api-rest-api-2-project-project-id-versions-get
+     *
+     * @param  mixed $projectId
      * @return array
      */
     public function getVersionsByProjectId(int $projectId): array
@@ -82,8 +101,8 @@ class JiraService
         try {
             $result = $this->request($url);
 
-            if ($result['success'] === false || !$result['issues']) {
-                throw new Exception("Erreur lors de la récupération de la Version Jira : " . $result['message']);
+            if (!is_array($result)) {
+                throw new Exception("Erreur lors de la récupération de la Version Jira : " . print_r($result, true));
             }
             return $result;
         } catch (Exception $e) {
@@ -94,10 +113,12 @@ class JiraService
         }
     }
     
-
+    
     /**
-     * Get Jira issues by Version ID
-    * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
+     * getIssuesIdsByVersion
+     *
+     * @param  mixed $versionId
+     * @return array
      */
     public function getIssuesIdsByVersion(int $versionId): array
     {
@@ -120,11 +141,14 @@ class JiraService
         return $result;
     }
 
-
+    
     /**
-     * Get issues detail from Jira API bulk fetch
+     * getIssuesDetails
+     *
+     * @param  mixed $issuesIds
+     * @return array
      */
-    public function getIssuesDetails(array $issuesIds)
+    public function getIssuesDetails(array $issuesIds): array
     {
         //Si on passe des int ça ne fonctionnera pas, on force en string
         if (!is_string($issuesIds[0])) {
@@ -154,15 +178,21 @@ class JiraService
         return $result;
     }
 
+
     /**
      * Executes a Jira Search API GET call.
+     * 
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-get
+     *
+     * @param  mixed $jql
+     * @param  mixed $fields
+     * @return array
      */
     public function callSearchApiGet(string $jql, array $fields = []): array
     {
         $query = http_build_query([
             'jql' => $jql,
-            'fields' => $fields
+            'fields' => $fields ? implode(',', $fields) : ''
         ]);
     
         $fullUrl = $this->baseUrl . self::API_URL_SEARCH . '?' . $query;
@@ -182,6 +212,7 @@ class JiraService
             ];
         }
     }
+    
 
     /**
      *   Executes a Jira Search API POST call.
@@ -198,6 +229,9 @@ class JiraService
      *   // ]);
      * 
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-search/#api-rest-api-3-search-jql-post
+     *
+     * @param  mixed $payload
+     * @return array
      */
     public function callSearchApiPost(array $payload): array
     {
@@ -224,75 +258,80 @@ class JiraService
 
     /**
      * Calls Jira Bulk Fetch API (/issue/bulkfetch)
+     * 
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-bulk-fetch/#api-rest-api-3-issue-bulkfetch-post
+     *
+     * @param  mixed $payload
+     * @return array
      */
-    public function callBulkFetchApi(array $payload): array
-    {
-        $url = $this->baseUrl . self::API_URL_FETCH_ISSUES;
+    // public function callBulkFetchApi(array $payload): array
+    // {
+    //     $url = $this->baseUrl . self::API_URL_FETCH_ISSUES;
 
-        try {
-            $result = $this->request($url, json_encode($payload, JSON_THROW_ON_ERROR), true);
+    //     try {
+    //         $result = $this->request($url, json_encode($payload, JSON_THROW_ON_ERROR), true);
 
-            if (!isset($result['issues'])) {
-                throw new Exception('Réponse Jira invalide (bulkfetch)');
-            }
+    //         if (!isset($result['issues'])) {
+    //             throw new Exception('Réponse Jira invalide (bulkfetch)');
+    //         }
 
-            return $result;
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l’appel à Jira : ' . $e->getMessage()
-            ];
-        }
-    }
+    //         return $result;
+    //     } catch (Exception $e) {
+    //         return [
+    //             'success' => false,
+    //             'message' => 'Erreur lors de l’appel à Jira : ' . $e->getMessage()
+    //         ];
+    //     }
+    // }
 
 
     /**
      * Performs a low-level HTTP request to the Jira REST API using cURL.
+     *
+     * @param  mixed $url
+     * @param  mixed $payload
+     * @param  mixed $isPost
+     * @return array
      */
-    private function request(string $url, $payload=null, $isPost=false): array
+    private function request(string $url, $payload = null, bool $isPost = false): array
     {
-        try {
-            //Vérifie si les credentials API sont valides, si pas déjà fait
-            if (!$this->areCredentialsVerified) {
-                $this->checkCredentials();
-            }
-
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_USERPWD, $this->email . ':' . $this->token);
-
-            $headers = ['Accept: application/json'];
-            //Si on passe un payload, on le charge et on indique dans les headers qu'il s'agit de json
-            if ($payload !== null) {
-                $headers[] = 'Content-Type: application/json';
-                if ($isPost) {
-                    curl_setopt($ch, CURLOPT_POST, true);
-                }
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            }
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-            $response = curl_exec($ch);
-
-            if (curl_errno($ch)) {
-                throw new Exception("Erreur cURL : " . curl_error($ch));
-            }
-
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            if ($httpCode >= 400) {
-                throw new Exception("Erreur HTTP Jira ($httpCode) : $response");
-            }
-
-            $data = json_decode($response, true);
-            if (!$data) {
-                throw new Exception("Invalid response from Jira");
-            }
-            return $data;
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
-            ];
+        if (!$this->areCredentialsVerified) {
+            $this->checkCredentials();
         }
-    }
+    
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_USERPWD => $this->email . ':' . $this->token,
+            CURLOPT_HTTPHEADER => ['Accept: application/json'],
+        ]);
+        
+        //Si on passe un payload, on le charge et on indique dans les headers qu'il s'agit de json
+        if ($payload !== null) {
+            curl_setopt($ch, CURLOPT_POST, $isPost);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Accept: application/json',
+                'Content-Type: application/json'
+            ]);
+        }
+    
+        $response = curl_exec($ch);
+    
+        if (curl_errno($ch)) {
+            throw new Exception('Erreur cURL : ' . curl_error($ch));
+        }
+    
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($httpCode >= 400) {
+            throw new Exception("Erreur HTTP Jira ($httpCode) : $response");
+        }
+    
+        $data = json_decode($response, true);
+        if (!is_array($data)) {
+            throw new Exception('Réponse Jira invalide (JSON)');
+        }
+    
+        return $data;
+    }    
 }
