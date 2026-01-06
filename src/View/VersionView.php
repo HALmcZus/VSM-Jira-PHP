@@ -11,7 +11,11 @@ class VersionView extends AbstractView
      */
     private array $versionData;
     private array $versionIssues;
-    
+    private float $averageCycleTime = 0;
+    private float $totalCycleTime = 0;
+    private float $averageLeadTime = 0;
+    private float $totalLeadTime = 0;
+
     /**
      * __construct
      *
@@ -23,12 +27,13 @@ class VersionView extends AbstractView
     {
         $this->versionData = $versionData;
         $this->versionIssues = $versionIssues;
+        $this->calculateLeadAndCycleTime();
     }
 
     /**
-    * *********************
-    * * All about Version *
-    * *********************
+     * *********************
+     * * All about Version *
+     * *********************
      */    
     /**
      * getVersionId
@@ -156,34 +161,59 @@ class VersionView extends AbstractView
     }
     
     /**
+     * calculateLeadAndCycleTime
+     *
+     * @return void
+     */
+    public function calculateLeadAndCycleTime()
+    {
+        if ($this->getIssuesCount() > 0) {
+            foreach ($this->versionIssues as $issue) {
+                $this->totalLeadTime += $issue['leadTime'] ?? 0;
+                $this->totalCycleTime += $issue['cycleTime'] ?? 0;
+            }
+            $this->averageLeadTime = round($this->totalLeadTime / $this->getIssuesCount(), 2);
+            $this->averageCycleTime = round($this->totalCycleTime / $this->getIssuesCount(), 2);
+        }
+    }
+    
+    /**
      * getAverageCycleTime
      *
      * @return float
      */
     public function getAverageCycleTime(): float
     {
-        $total = 0;
-        $count = 0;
-        foreach ($this->versionIssues as $issue) {
-            if (isset($issue['cycleTime'])) {
-                $total += $issue['cycleTime'];
-                $count++;
-            }
-        }
-        return $count > 0 ? round($total / $count, 2) : 0;
+        return $this->averageCycleTime;
     }
-    
+
     /**
      * getTotalCycleTime
      *
-     * @return int
+     * @return float
      */
-    public function getTotalCycleTime(): int
+    public function getTotalCycleTime(): float
     {
-        $total = 0;
-        foreach ($this->versionIssues as $issue) {
-            $total += $issue['cycleTime'] ?? 0;
-        }
-        return $total;
+        return $this->totalCycleTime;
+    }
+
+    /**
+     * getAverageLeadTime
+     *
+     * @return float
+     */
+    public function getAverageLeadTime(): float
+    {
+        return $this->averageLeadTime;
+    }
+
+    /**
+     * getTotalLeadTime
+     *
+     * @return float
+     */
+    public function getTotalLeadTime(): float
+    {
+        return $this->totalLeadTime;
     }
 }

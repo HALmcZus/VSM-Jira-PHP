@@ -151,19 +151,26 @@ class ReleaseModel
                             continue;
                         }
 
+                        //Premier passage à En cours
                         if ($item['toString'] === 'In Progress' && $inProgressDate === null) {
                             $inProgressDate = new \DateTime($history['created']);
                         }
 
-                        if ($item['toString'] === 'Done' && $doneDate === null) {
+                        //Dernier passage à Done
+                        if ($item['toString'] === 'Done') {
                             $doneDate = new \DateTime($history['created']);
                         }
                     }
                 }
             }
 
+            $leadTime = null;
             $cycleTime = null;
+            //Si ticket est Terminé, on calcule les temps de résolution
             if ($inProgressDate && $doneDate) {
+                $createdDate = new \DateTime($issue['fields']['created']);
+                $leadTime = $doneDate->diff($createdDate)->days;
+
                 //Nombre de jours entre les deux dates, excluant week-ends et jours fériés
                 $cycleTime = $this->calculateBusinessDays($inProgressDate, $doneDate);
             }
@@ -175,19 +182,20 @@ class ReleaseModel
                 'statusName' => $issue['fields']['status']['name'],
                 'statusCategoryColor' => $issue['fields']['status']['statusCategory']['colorName'],
                 'statusCategoryKey' => $issue['fields']['status']['statusCategory']['key'],
-                'created' => $this->formatDate($issue['fields']['created']),
-                'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null,
                 'priority' => $issue['fields']['priority']['name'] ?? '—',
                 'priorityIcon' => $issue['fields']['priority']['iconUrl'] ?? null,
-                'cycleTime' => $cycleTime,
+                'created' => $this->formatDate($issue['fields']['created']),
                 'firstInProgressDate' => $inProgressDate ? $inProgressDate->format('d/m/Y') : null,
-                'doneDate' => $doneDate ? $doneDate->format('d/m/Y') : null
+                'doneDate' => $doneDate ? $doneDate->format('d/m/Y') : null,
+                'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null, //doublon ? A voir quand diff par Status
+                'leadTime' => $leadTime,
+                'cycleTime' => $cycleTime
             ];
         }
 
         return $usefulIssuesDetails;
     }
-    
+
 
     /**
      * Calcule le nombre de jours ouvrés entre deux dates (week-ends et jours fériés exclus).

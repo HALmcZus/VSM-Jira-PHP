@@ -39,9 +39,20 @@
                 <?php else: ?>
                     <span class="badge orange">Status : En cours</span>
                 <?php endif; ?>
+
+                <!-- Lead Time -->
+                <div class="metric">
+                    <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
+                    <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
+                    <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours</strong></span>
+                </div>
                 
-                <span>Cycle Time Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
-                <span>Cycle Time Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
+                <!-- Cycle Time -->
+                <div class="metric">
+                    <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
+                    <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
+                    <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
+                </div>
             </div>
         </div>
 
@@ -58,7 +69,8 @@
                         <th>Date de création</th>
                         <th>1er passage à En cours</th>
                         <th>Date de résolution (Terminé)</th>
-                        <th>Cycle time (jours effectifs En cours -> Terminé)</th>
+                        <th>Lead time</th>
+                        <th>Cycle time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,35 +80,19 @@
                             <td><img src="<?= $issue['issuetype']['iconUrl'] ?? '' ?>"/><?= $issue['issuetype']['name'] ?? '—';?></td>
                             <td><strong><?= $issue['key']; ?></strong></td>
                             <td><?= htmlspecialchars($issue['summary']); ?></td>
-                            <!-- <td>< ?= $issue['assignee'] ?? '—'; ?></td> -->
                             <td class="<?= $issue['statusCategoryColor'] ?>"><?= $issue['statusName'] ?? '—'; ?></td>
                             <td><?= $issue['created'] ?? '—'; ?></td>
                             <td><?= $issue['firstInProgressDate'] ?? '—'; ?></td>
                             <td><?= $issue['doneDate'] ?? '—'; ?></td>
+                            <td><?= $issue['leadTime'] ?? '—'; ?></td>
                             <td><?= $issue['cycleTime'] ?? '—'; ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        </div>
-
-        <!-- 
-        <div class="card">
-            <h2>Value Stream Metrics</h2>
-
-            <div class="meta">
-                <span>⏱ Average cycle time: <strong>— days</strong></span>
-                <span>📦 Tickets: <strong>< ?= count($view->getIssues()); ?></strong></span>
-            </div>
-
-            <p style="margin-top: 12px; color: var(--muted);">
-                Cycle time is measured from first In Progress to Done.
-            </p>
-        </div>
-         -->
+        </div>       
 
     <?php endif; ?>
-
 
 </body>
 </html>

@@ -47,7 +47,10 @@ h2 {
 
 .meta {
     display: flex;
-    gap: 24px;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    align-items: flex-start;
+    margin-top: 16px;
     color: var(--muted);
     font-size: 14px;
 }
@@ -113,4 +116,33 @@ tr:hover {
 .yellow {
     background-color: #f8e9ac;
     color: #a7900f;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 12px;
+    border-left: 4px solid var(--accent, #4f46e5);
+    background: #fafafa;
+    border-radius: 6px;
+}
+
+.metric-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.metric-title em {
+    font-weight: normal;
+    font-size: 0.8rem;
+    color: var(--muted, #666);
+}
+
+.metric:nth-of-type(1) {
+    border-left-color: #e9af0e; /* orange */
+}
+
+.metric:nth-of-type(2) {
+    border-left-color: #0ea5e9; /* bleu */
 }
