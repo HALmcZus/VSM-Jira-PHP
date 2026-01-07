@@ -77,27 +77,6 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Timeline par Status Category -->
-            <div class="card">
-                <h2>🧱 Timeline par catégorie de status (VSM)</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Catégorie</th>
-                            <th>Temps cumulé</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($view->getTimelineByCategory() as $category => $days): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($category); ?></td>
-                                <td><strong><?= round($days, 2); ?> jours</strong></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
 

@@ -65,7 +65,6 @@ class Issue
         $this->buildTimeline();
         $this->setLeadTime();
         $this->setCycleTime();
-        // $this->calculateTimeline($data);
     }
 
     /**
