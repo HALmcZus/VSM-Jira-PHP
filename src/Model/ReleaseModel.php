@@ -3,40 +3,16 @@ namespace App\Model;
 
 use Exception;
 use App\Service\JiraService;
+use App\Model\Config;
 
 /**
  * ReleaseModel
  */
 class ReleaseModel
 {
-    //Liste des jours fériés au format Y-m-d
-    const HOLIDAYS = [
-        // Année précédente
-        '2025-01-01', // Jour de l'An
-        '2025-04-21', // Lundi de Pâques, variable
-        '2025-05-01', // Fête du Travail
-        '2025-05-08', // Victoire 1945
-        '2025-05-29', // Ascension, variable
-        '2025-06-09', // Lundi de Pentecôte, variable
-        '2025-07-14', // Fête Nationale
-        '2025-08-15', // Assomption
-        '2025-11-01', // Toussaint
-        '2025-11-11', // Armistice 1918
-        '2025-12-25', // Noël
-        // Année suivante
-        '2026-01-01', // Jour de l'An
-        '2026-04-06', // Lundi de Pâques, variable
-        '2026-05-01', // Fête du Travail
-        '2026-05-08', // Victoire 1945
-        '2026-05-14', // Ascension, variable
-        '2026-05-25', // Lundi de Pentecôte, variable
-        '2026-07-14', // Fête Nationale
-        '2026-08-15', // Assomption
-        '2026-11-01', // Toussaint
-        '2026-11-11', // Armistice 1918
-        '2026-12-25', // Noël
-    ];
     protected JiraService $jiraService;
+    protected Config $config;
+
     protected array $versionData = [];
     protected array $versionIssuesIds = [];
     protected array $versionIssues = [];
@@ -49,6 +25,7 @@ class ReleaseModel
     public function __construct()
     {
         $this->jiraService = new JiraService();
+        $this->config = new Config();
     }
     
     /**
@@ -141,6 +118,7 @@ class ReleaseModel
             return 0;
         }
     
+        $nonWorkingDays = $this->config->getNonWorkingDays();
         $businessDays = 1;
         $current = clone $start;
     
@@ -149,7 +127,7 @@ class ReleaseModel
             $currentDate = $current->format('Y-m-d');
     
             $isWeekend = ($dayOfWeek >= 6);
-            $isHoliday = in_array($currentDate, self::HOLIDAYS, true);
+            $isHoliday = in_array($currentDate, $nonWorkingDays, true);
     
             if (!$isWeekend && !$isHoliday) {
                 $businessDays++;
