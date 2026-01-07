@@ -27,7 +27,7 @@ class VersionView extends AbstractView
     {
         $this->versionData = $versionData;
         $this->versionIssues = $versionIssues;
-        $this->calculateLeadAndCycleTime();
+        $this->calculateVersionLeadAndCycleTime();
     }
 
     /**
@@ -161,11 +161,11 @@ class VersionView extends AbstractView
     }
     
     /**
-     * calculateLeadAndCycleTime (total and average)
+     * calculate Version's Lead And Cycle Times (total and average)
      *
      * @return void
      */
-    public function calculateLeadAndCycleTime()
+    public function calculateVersionLeadAndCycleTime()
     {
         if ($this->getIssuesCount() > 0) {
             /* @var \App\Model\Issue $issue */

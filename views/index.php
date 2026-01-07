@@ -88,6 +88,29 @@
                             <td><?= $issue->getLeadTime() > 0 ? $issue->getLeadTime() . ' jours' : '—'; ?></td>
                             <td><?= $issue->getCycleTime() > 0 ? $issue->getCycleTime() . ' jours' : '—'; ?></td>
                         </tr>
+                        <tr>
+                            <td colspan="11">
+                                <!-- Détails temps par status -->
+                                <details>
+                                    <summary>Détails du temps passé par status</summary>
+                                    <ul>
+                                        <?php foreach ($issue->getTimeByStatus() as $statusName => $timeSpent): ?>
+                                            <li><?= htmlspecialchars($statusName); ?> : <?= $timeSpent; ?> jours</li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </details>
+
+                                <!-- Détails temps par catégorie de status -->
+                                <details>
+                                    <summary>Détails du temps passé par catégorie de status</summary>
+                                    <ul>
+                                        <?php foreach ($issue->getTimeByCategory() as $categoryName => $timeSpent): ?>
+                                            <li><?= htmlspecialchars($categoryName); ?> : <?= $timeSpent; ?> jours</li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                </details>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>

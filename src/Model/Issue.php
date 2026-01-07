@@ -14,6 +14,10 @@ use App\Model\ReleaseModel;
  */
 class Issue
 {
+    const STATUS_TODO = 'To Do';
+    const STATUS_IN_PROGRESS = 'In Progress';
+    const STATUS_DONE = 'Done';
+
     protected ReleaseModel $releaseModel;
 
     /**
@@ -24,13 +28,15 @@ class Issue
     protected array $data = [];
 
     /**
-     * Dates clés du cycle de vie
+     * Données clés du cycle de vie
      */
     protected ?\DateTime $createdDate = null;
     protected ?\DateTime $firstInProgressDate = null;
     protected ?\DateTime $doneDate = null;
     protected int $leadTime = 0;
     protected int $cycleTime = 0;
+    protected array $timeByStatus = [];
+    protected array $timeByCategory = [];
 
     /**
      * Issue constructor
@@ -88,6 +94,10 @@ class Issue
 
     /**
      * Reconstruit la timeline de l’issue à partir du changelog Jira
+     * et calcule le temps cumulé par status et par status category.
+     *
+     * Cette méthode est appelée une seule fois à l'initialisation
+     * de l'objet Issue.
      *
      * @return void
      */
@@ -96,29 +106,67 @@ class Issue
         if (empty($this->data['changelog']['histories'])) {
             return;
         }
-
+    
+        // Status initial
+        $currentStatus = $this->data['fields']['status']['name'];
+        $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
+        $currentDate = new \DateTime($this->data['fields']['created']);
+    
+        // Sécurisation : tri chronologique du changelog
+        usort(
+            $this->data['changelog']['histories'],
+            fn ($a, $b) => strtotime($a['created']) <=> strtotime($b['created'])
+        );
+    
+        //Parcours du changelog, en ciblant uniquement les changements de status
         foreach ($this->data['changelog']['histories'] as $history) {
             foreach ($history['items'] as $item) {
-
+    
                 if ($item['field'] !== 'status') {
                     continue;
                 }
 
-                //Date du changement de status
+                //Date du changement du status
                 $transitionDate = new \DateTime($history['created']);
-
-                // Premier passage à "In Progress"
-                if ($item['toString'] === 'In Progress' && $this->firstInProgressDate === null) {
+                $days = (int) $currentDate->diff($transitionDate)->days;
+    
+                // Agrégation
+                $this->timeByStatus[$currentStatus] =
+                    ($this->timeByStatus[$currentStatus] ?? 0) + $days;
+    
+                $this->timeByCategory[$currentCategory] =
+                    ($this->timeByCategory[$currentCategory] ?? 0) + $days;
+    
+                // Premier passage à En cours
+                if ($item['toString'] === self::STATUS_IN_PROGRESS && $this->firstInProgressDate === null) {
                     $this->firstInProgressDate = $transitionDate;
                 }
-
-                // Dernier passage à "Done"
-                if ($item['toString'] === 'Done') {
+                // Dernier passage à Done (pour prendre en compte les éventuels allers-retours de status)
+                if ($item['toString'] === self::STATUS_DONE) {
                     $this->doneDate = $transitionDate;
                 }
+    
+                // Mise à jour du status courant
+                $currentStatus = $item['toString'];
+                $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
+                $currentDate = $transitionDate;
             }
         }
+    
+        // Dernier segment (jusqu'à Done, ou date du jour si ticket pas encore résolu)
+        $endDate = !empty($this->data['fields']['resolutiondate'])
+            ? new \DateTime($this->data['fields']['resolutiondate'])
+            : new \DateTime();
+    
+        $days = (int) $currentDate->diff($endDate)->days;
+    
+        $this->timeByStatus[$currentStatus] =
+            ($this->timeByStatus[$currentStatus] ?? 0) + $days;
+    
+        $this->timeByCategory[$currentCategory] =
+            ($this->timeByCategory[$currentCategory] ?? 0) + $days;
     }
+    
 
     /* =======================
      * ====== GETTERS ========
@@ -240,7 +288,7 @@ class Issue
     }
     
     /**
-     * setLeadTime
+     * setLeadTime (jours calendaires)
      *
      * @return void
      */
@@ -272,10 +320,11 @@ class Issue
     private function setCycleTime(): void
     {
         if (!$this->firstInProgressDate || !$this->doneDate) {
-            $this->cycleTime = 0.0;
+            $this->cycleTime = 0;
             return;
         }
 
+        //Calcul en jours ouvrés (excluant week-ends et jours fériés)
         $this->cycleTime = $this->releaseModel->calculateBusinessDays(
             $this->firstInProgressDate,
             $this->doneDate
@@ -291,76 +340,24 @@ class Issue
     {
         return $this->cycleTime;
     }
-
     
     /**
-     * Calcule le temps cumulé passé dans chaque status Jira
-     * ainsi que par Status Category, à partir du changelog.
+     * Temps cumulé passé par status Jira
      *
-     * @param array $issue Issue Jira brute issue de /search/jql
-     *
-     * @return array{
-     *   byStatus: array<string, float>,
-     *   byCategory: array<string, float>
-     * }
-     *
-     * @throws Exception Si les données Jira sont incomplètes
+     * @return array<string,int>
      */
-    // public function calculateTimeline(array $issue = []): array
-    // {
-    //     if (empty($issue['fields']['status']) || empty($issue['changelog']['histories'])) {
-    //         throw new Exception('Issue Jira incomplète : status ou changelog manquant');
-    //     }
+    public function getTimeByStatus(): array
+    {
+        return $this->timeByStatus;
+    }
 
-    //     $statusTimes = [];
-    //     $categoryTimes = [];
-
-    //     // Status initial
-    //     $currentStatus = $issue['fields']['status']['name'];
-    //     $currentCategory = $issue['fields']['status']['statusCategory']['name'];
-    //     $currentDate = new \DateTime($issue['fields']['created']);
-
-    //     // Historique trié chronologiquement (sécurité)
-    //     usort($issue['changelog']['histories'], function ($a, $b) {
-    //         return strtotime($a['created']) <=> strtotime($b['created']);
-    //     });
-
-    //     //On parcourt le changelog
-    //     foreach ($issue['changelog']['histories'] as $history) {
-    //         foreach ($history['items'] as $item) {
-    //             if ($item['field'] !== 'status') {
-    //                 continue;
-    //             }
-
-    //             $transitionDate = new \DateTime($history['created']);
-    //             $interval = $currentDate->diff($transitionDate);
-    //             $days = (float) $interval->format('%a');
-
-    //             // Agrégation par status
-    //             $statusTimes[$currentStatus] = ($statusTimes[$currentStatus] ?? 0) + $days;
-    //             $categoryTimes[$currentCategory] = ($categoryTimes[$currentCategory] ?? 0) + $days;
-
-    //             // Mise à jour du status courant
-    //             $currentStatus = $item['toString'];
-    //             $currentCategory = $issue['fields']['status']['statusCategory']['name'];
-    //             $currentDate = $transitionDate;
-    //         }
-    //     }
-
-    //     // Dernier segment (jusqu'à date de résolution, ou date du jour si ticket pas résolu)
-    //     $endDate = !empty($issue['fields']['resolutiondate'])
-    //         ? new \DateTime($issue['fields']['resolutiondate'])
-    //         : new \DateTime();
-
-    //     $interval = $currentDate->diff($endDate);
-    //     $days = (float) $interval->format('%a');
-
-    //     $statusTimes[$currentStatus] = ($statusTimes[$currentStatus] ?? 0) + $days;
-    //     $categoryTimes[$currentCategory] = ($categoryTimes[$currentCategory] ?? 0) + $days;
-
-    //     return [
-    //         'byStatus' => $statusTimes,
-    //         'byCategory' => $categoryTimes,
-    //     ];
-    // }
+    /**
+     * Temps cumulé passé par Status Category Jira
+     *
+     * @return array<string,int>
+     */
+    public function getTimeByCategory(): array
+    {
+        return $this->timeByCategory;
+    }
 }

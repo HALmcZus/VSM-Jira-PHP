@@ -125,78 +125,10 @@ class ReleaseModel
         }
     }
 
-    /**
-     * Nettoie la réponse brute pour ne garder que les données utiles à afficher
-     *
-     * @param  array $rawIssues
-     * @return array
-     */
-    // protected function formatRawIssuesData(array $rawIssues) : array
-    // {
-    //     $usefulIssuesDetails = [];
-
-    //     foreach ($rawIssues as $index => $issue) {
-
-    //         $inProgressDate = null;
-    //         $doneDate = null;
-            
-    //         //Calcul du Cycle Time en parcourant le changelog du ticket
-    //         if (!empty($issue['changelog']['histories'])) {
-    //             foreach ($issue['changelog']['histories'] as $history) {
-    //                 foreach ($history['items'] as $item) {
-    //                     if ($item['field'] !== 'status') {
-    //                         continue;
-    //                     }
-
-    //                     //Premier passage à En cours
-    //                     if ($item['toString'] === 'In Progress' && $inProgressDate === null) {
-    //                         $inProgressDate = new \DateTime($history['created']);
-    //                     }
-
-    //                     //Dernier passage à Done
-    //                     if ($item['toString'] === 'Done') {
-    //                         $doneDate = new \DateTime($history['created']);
-    //                     }
-    //                 }
-    //             }
-    //         }
-
-    //         $leadTime = null;
-    //         $cycleTime = null;
-    //         //Si ticket est Terminé, on calcule les temps de résolution
-    //         if ($inProgressDate && $doneDate) {
-    //             $createdDate = new \DateTime($issue['fields']['created']);
-    //             $leadTime = $doneDate->diff($createdDate)->days;
-
-    //             //Nombre de jours entre les deux dates, excluant week-ends et jours fériés
-    //             $cycleTime = $this->calculateBusinessDays($inProgressDate, $doneDate);
-    //         }
-
-    //         $usefulIssuesDetails[$index] = [
-    //             'key' => $issue['key'],
-    //             'summary' => $issue['fields']['summary'],
-    //             'issuetype' => $issue['fields']['issuetype'] ?? [],
-    //             'statusName' => $issue['fields']['status']['name'],
-    //             'statusCategoryColor' => $issue['fields']['status']['statusCategory']['colorName'],
-    //             'statusCategoryKey' => $issue['fields']['status']['statusCategory']['key'],
-    //             'priority' => $issue['fields']['priority']['name'] ?? '—',
-    //             'priorityIcon' => $issue['fields']['priority']['iconUrl'] ?? null,
-    //             'created' => $this->formatDate($issue['fields']['created']),
-    //             'firstInProgressDate' => $inProgressDate ? $inProgressDate->format('d/m/Y') : null,
-    //             'doneDate' => $doneDate ? $doneDate->format('d/m/Y') : null,
-    //             'resolutiondate' => $this->formatDate($issue['fields']['resolutiondate']) ?? null, //doublon ? A voir quand diff par Status
-    //             'leadTime' => $leadTime,
-    //             'cycleTime' => $cycleTime,
-    //             // 'storypoints' => $issue['fields']['customfield_10016'] ?? null
-    //         ];
-    //     }
-
-    //     return $usefulIssuesDetails;
-    // }
-
 
     /**
      * Calcule le nombre de jours ouvrés entre deux dates (week-ends et jours fériés exclus).
+     * TODO: extraire dans un Helper ou Model dédié ?
      *
      * @param \DateTime $start Date de début (incluse)
      * @param \DateTime $end Date de fin (incluse)
@@ -227,22 +159,5 @@ class ReleaseModel
         }
     
         return $businessDays;
-    }    
-
-
-    /**
-     * formatDate
-     *
-     * @param  mixed $dateStr
-     * @return string
-     */
-    protected function formatDate(?string $dateStr): ?string
-    {
-        if ($dateStr === null) {
-            return null;
-        }
-
-        $date = new \DateTime($dateStr);
-        return $date->format('d/m/Y');
     }
 }
