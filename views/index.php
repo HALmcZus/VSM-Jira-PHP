@@ -123,16 +123,6 @@
                                         <?php endforeach; ?>
                                     </ul>
                                 </details>
-
-                                <!-- Détails temps par catégorie de status -->
-                                <details>
-                                    <summary>Détails du temps passé par catégorie de status</summary>
-                                    <ul>
-                                        <?php foreach ($issue->getTimeByCategory() as $categoryName => $timeSpent): ?>
-                                            <li><?= htmlspecialchars($categoryName); ?> : <?= $timeSpent; ?> jours</li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </details>
                             </td>
                         </tr>
                     <?php endforeach; ?>

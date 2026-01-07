@@ -185,11 +185,6 @@ class ReleaseModel
             foreach ($issue->getTimeByStatus() as $statusName => $timeSpent) {
                 $timeByStatus[$statusName] = ($timeByStatus[$statusName] ?? 0) + $timeSpent;
             }
-
-            // Agrégation par catégorie
-            foreach ($issue->getTimeByCategory() as $categoryName => $timeSpent) {
-                $timeByCategory[$categoryName] = ($timeByCategory[$categoryName] ?? 0) + $timeSpent;
-            }
         }
 
         return [

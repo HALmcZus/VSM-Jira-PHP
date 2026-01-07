@@ -349,14 +349,4 @@ class Issue
     {
         return $this->timeByStatus;
     }
-
-    /**
-     * Temps cumulé passé par Status Category Jira
-     *
-     * @return array<string,int>
-     */
-    public function getTimeByCategory(): array
-    {
-        return $this->timeByCategory;
-    }
 }
