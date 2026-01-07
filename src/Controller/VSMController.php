@@ -10,7 +10,7 @@ use App\View\VersionView;
  * VsmController
  */
 class VsmController
-{    
+{
     /**
      * index
      *
@@ -43,13 +43,24 @@ class VsmController
         $versionId = $data['fixVersionId'] ?? null;
 
         try {
+            if (!$versionId) {
+                throw new \Exception('Le paramètre fixVersionId est requis.');
+            }
+
             $release = new ReleaseModel();
 
             $versionData = $release->getVersionById($versionId);
             $versionIssues = $release->getIssuesDetailsByVersion($versionId);
+            $timeline = $release->calculateTimelineByStatusAndCategory();
+
+            $view = new VersionView(
+                $versionData,
+                $versionIssues,
+                $timeline
+            );
+
             
-            $view = new VersionView($versionData, $versionIssues);
-            
+            // Render view
             ob_start();
             require __DIR__ . '/../../views/index.php';
             $html = ob_get_clean();

@@ -146,3 +146,20 @@ tr:hover {
 .metric:nth-of-type(2) {
     border-left-color: #0ea5e9; /* bleu */
 }
+
+.timeline-grid {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.timeline-grid .card {
+    flex: 1;
+}
+
+/* Responsive : empilé sur petits écrans */
+@media (max-width: 900px) {
+    .timeline-grid {
+        flex-direction: column;
+    }
+}

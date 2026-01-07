@@ -160,4 +160,42 @@ class ReleaseModel
     
         return $businessDays;
     }
+
+    
+    /**
+     * Calcule le temps cumulé de la release par status
+     * et par catégorie de status Jira.
+     *
+     * Agrège les timelines calculées dans chaque Issue.
+     *
+     * @return array{
+     *   byStatus: array<string, float>,
+     *   byCategory: array<string, float>
+     * }
+     */
+    public function calculateTimelineByStatusAndCategory(): array
+    {
+        $timeByStatus = [];
+        $timeByCategory = [];
+
+        /** @var \App\Model\Issue $issue */
+        foreach ($this->versionIssues as $issue) {
+
+            // Agrégation par status
+            foreach ($issue->getTimeByStatus() as $statusName => $timeSpent) {
+                $timeByStatus[$statusName] = ($timeByStatus[$statusName] ?? 0) + $timeSpent;
+            }
+
+            // Agrégation par catégorie
+            foreach ($issue->getTimeByCategory() as $categoryName => $timeSpent) {
+                $timeByCategory[$categoryName] = ($timeByCategory[$categoryName] ?? 0) + $timeSpent;
+            }
+        }
+
+        return [
+            'byStatus' => $timeByStatus,
+            'byCategory' => $timeByCategory,
+        ];
+    }
+
 }

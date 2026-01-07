@@ -15,20 +15,29 @@ class VersionView extends AbstractView
     private float $totalCycleTime = 0;
     private float $averageLeadTime = 0;
     private float $totalLeadTime = 0;
+    private array $timelineByStatus = [];
+    private array $timelineByCategory = [];
+
 
     /**
      * __construct
      *
      * @param  mixed $versionData
      * @param  mixed $versionIssues
+     * @param  mixed $releaseTimeline
      * @return void
      */
-    public function __construct(array $versionData, array $versionIssues)
+    public function __construct(array $versionData, array $versionIssues, array $releaseTimeline = [])
     {
         $this->versionData = $versionData;
         $this->versionIssues = $versionIssues;
+    
+        $this->timelineByStatus = $releaseTimeline['byStatus'] ?? [];
+        $this->timelineByCategory = $releaseTimeline['byCategory'] ?? [];
+    
         $this->calculateVersionLeadAndCycleTime();
     }
+    
 
     /**
      * *********************
@@ -74,7 +83,7 @@ class VersionView extends AbstractView
      */
     public function getVersionStartDate(): string
     {
-        return $this->versionData['startDate'] ?? '<i>Date de début non renseignée.</i>';
+        return $this->versionData['startDate'] ?? '<i>Date non renseignée.</i>';
     }
     
     /**
@@ -84,7 +93,7 @@ class VersionView extends AbstractView
      */
     public function getVersionReleaseDate(): string
     {
-        return $this->versionData['releaseDate'] ?? '<i>Date de release non renseignée.</i>';
+        return $this->versionData['releaseDate'] ?? '<i>Non renseignée.</i>';
     }
     
     /**
@@ -217,4 +226,25 @@ class VersionView extends AbstractView
     {
         return $this->totalLeadTime;
     }
+        
+    /**
+     * getTimelineByStatus
+     *
+     * @return array
+     */
+    public function getTimelineByStatus(): array
+    {
+        return $this->timelineByStatus;
+    }
+    
+    /**
+     * getTimelineByCategory
+     *
+     * @return array
+     */
+    public function getTimelineByCategory(): array
+    {
+        return $this->timelineByCategory;
+    }
+
 }

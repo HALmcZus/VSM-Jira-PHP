@@ -28,14 +28,14 @@
 
             <div class="meta">
                 <span>📅 Date de démarrage : <?= $view->getVersionStartDate() ?? '—'; ?></span>
-                <span>🚀 Date de release : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
+                <span>🎯 Date cible de livraison : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
                 
                 <?php if ($view->isVersionOverdue()): ?>
                     <span class="badge red">🕗Deadline dépassée</span>
                 <?php endif; ?>
 
                 <?php if ($view->isVersionReleased()): ?>
-                    <span class="badge green">Status : Terminé</span>
+                    <span class="badge green">Status : Terminée 🚀</span>
                 <?php else: ?>
                     <span class="badge orange">Status : En cours</span>
                 <?php endif; ?>
@@ -55,6 +55,51 @@
                 </div>
             </div>
         </div>
+
+        <div class="timeline-grid">
+            <!-- Timeline par Status -->
+            <div class="card">
+                <h2>🧭 Timeline globale par status (Release)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status Jira</th>
+                            <th>Temps cumulé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($view->getTimelineByStatus() as $status => $days): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($status); ?></td>
+                                <td><strong><?= round($days, 2); ?> jours</strong></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Timeline par Status Category -->
+            <div class="card">
+                <h2>🧱 Timeline par catégorie de status (VSM)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Catégorie</th>
+                            <th>Temps cumulé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($view->getTimelineByCategory() as $category => $days): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($category); ?></td>
+                                <td><strong><?= round($days, 2); ?> jours</strong></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
 
         <div class="card">
             <h2><?= $view->getIssuesCount(); ?> tickets rattachés à cette version :</h2>
