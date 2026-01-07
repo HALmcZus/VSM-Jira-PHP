@@ -3,6 +3,7 @@ namespace App\Model;
 
 use Exception;
 use App\Model\ReleaseModel;
+use App\Model\Config;
 
 /**
  * Issue
@@ -19,6 +20,7 @@ class Issue
     const STATUS_DONE = 'Done';
 
     protected ReleaseModel $releaseModel;
+    protected Config $config;
 
     /**
      * Données brutes issues de l’API Jira
@@ -37,6 +39,11 @@ class Issue
     protected int $cycleTime = 0;
     protected array $timeByStatus = [];
     protected array $timeByCategory = [];
+    protected array $workflowTimeBreakdown = [
+        'refinement' => 0,
+        'sprint' => 0,
+        'other' => 0,
+    ];
 
     /**
      * Issue constructor
@@ -46,6 +53,8 @@ class Issue
     public function __construct(array $data)
     {
         $this->releaseModel = new ReleaseModel();
+        $this->config = new Config();
+
         $this->initialize($data);
     }
 
@@ -63,6 +72,7 @@ class Issue
 
         $this->initializeDates();
         $this->buildTimeline();
+        $this->calculateWorkflowTimeBreakdown();
         $this->setLeadTime();
         $this->setCycleTime();
     }
@@ -348,5 +358,75 @@ class Issue
     public function getTimeByStatus(): array
     {
         return $this->timeByStatus;
+    }
+
+    /**
+     * Calcule le temps cumulé par grandes étapes du workflow Jira (Affinage / Travail réel / Autre), basé sur la configuration.
+     * Les statuts de type "done" sont ignorés.
+     */
+    public function calculateWorkflowTimeBreakdown()
+    {
+        if (empty($this->data['changelog']['histories'])) {
+            return;
+        }
+
+        //Récupère les status Jira du fichier de configuration (config_files/jira_workflow.json)
+        $workflow = $this->config->getJiraWorkflow();
+        $refinementStatuses = array_map('mb_strtolower', $workflow['refinement_statuses'] ?? []);
+        $sprintStatuses = array_map('mb_strtolower', $workflow['sprint_statuses'] ?? []);
+        $doneStatuses = array_map('mb_strtolower', $workflow['done_statuses'] ?? []);
+
+        // Status initial
+        $currentStatus = mb_strtolower($this->data['fields']['status']['name']);
+        $currentDate = new \DateTime($this->data['fields']['created']);
+
+        // Sécurisation : tri chronologique
+        usort(
+            $this->data['changelog']['histories'],
+            fn ($a, $b) => strtotime($a['created']) <=> strtotime($b['created'])
+        );
+
+        foreach ($this->data['changelog']['histories'] as $history) {
+            foreach ($history['items'] as $item) {
+
+                if ($item['field'] !== 'status') {
+                    continue;
+                }
+
+                $transitionDate = new \DateTime($history['created']);
+                $days = (int) $currentDate->diff($transitionDate)->days;
+
+                // On ignore les statuts "Done"
+                if (!in_array($currentStatus, $doneStatuses, true)) {
+                    //On compte le nombre de jours par catégorie
+                    if (in_array($currentStatus, $refinementStatuses, true)) {
+                        $this->workflowTimeBreakdown['refinement'] += $days;
+                    } elseif (in_array($currentStatus, $sprintStatuses, true)) {
+                        $this->workflowTimeBreakdown['sprint'] += $days;
+                    } else {
+                        $this->workflowTimeBreakdown['other'] += $days;
+                    }
+                }
+
+                // Passage au status suivant
+                $currentStatus = mb_strtolower($item['toString']);
+                $currentDate = $transitionDate;
+            }
+        }
+    }
+
+    public function getTimeSpentInRefinement(): int
+    {
+        return $this->workflowTimeBreakdown['refinement'];
+    }
+
+    public function getTimeSpentInSprint(): int
+    {
+        return $this->workflowTimeBreakdown['sprint'];
+    }
+
+    public function getTimeSpentInOther(): int
+    {
+        return $this->workflowTimeBreakdown['other'];
     }
 }

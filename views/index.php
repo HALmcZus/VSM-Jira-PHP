@@ -53,32 +53,30 @@
                     <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
                     <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
                 </div>
+                
+                <!-- Time Breakdown -->
+                <div class="metric">
+                    <span class="metric-title">🧮 <b>Temps par phase</b></span>
+                    <span>Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours</strong></span>
+                    <span>Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours</strong></span>
+                    <span>Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours</strong></span>
+                </div>
             </div>
         </div>
 
         <div class="timeline-grid">
             <!-- Timeline par Status -->
             <div class="card">
-                <h2>🧭 Timeline globale par status (Release)</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Status Jira</th>
-                            <th>Temps cumulé</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <details>
+                    <summary>🧭 Timeline globale par status (Release)</summary>
+                    <ul>
                         <?php foreach ($view->getTimelineByStatus() as $status => $days): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($status); ?></td>
-                                <td><strong><?= round($days, 2); ?> jours</strong></td>
-                            </tr>
+                            <li><?= htmlspecialchars($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                         <?php endforeach; ?>
-                    </tbody>
-                </table>
+                    </ul>
+                </details>
             </div>
         </div>
-
 
         <div class="card">
             <h2><?= $view->getIssuesCount(); ?> tickets rattachés à cette version :</h2>
@@ -121,6 +119,15 @@
                                         <?php foreach ($issue->getTimeByStatus() as $statusName => $timeSpent): ?>
                                             <li><?= htmlspecialchars($statusName); ?> : <?= $timeSpent; ?> jours</li>
                                         <?php endforeach; ?>
+                                    </ul>
+                                </details>
+                                <!-- Détails temps par catégorie de status -->
+                                <details>
+                                    <summary>Détails du temps passé par étapes du cycle de vie du ticket</summary>
+                                    <ul>
+                                        <li>🧠 Affinage : <strong><?= $issue->getTimeSpentInRefinement(); ?> jours</strong></li>
+                                        <li>⚙️ Réal + Qualif : <strong><?= $issue->getTimeSpentInSprint(); ?> jours</strong></li>
+                                        <li>❓ Autre : <strong><?= $issue->getTimeSpentInOther(); ?> jours</strong></li>
                                     </ul>
                                 </details>
                             </td>

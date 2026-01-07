@@ -12,12 +12,17 @@ class VersionView extends AbstractView
     private array $versionData;
     private array $versionIssues;
     private float $averageCycleTime = 0;
-    private float $totalCycleTime = 0;
+    private int $totalCycleTime = 0;
     private float $averageLeadTime = 0;
-    private float $totalLeadTime = 0;
+    private int $totalLeadTime = 0;
+    private float $averageTimeSpentInRefinement = 0;
+    private int $totalTimeSpentInRefinement = 0;
+    private float $averageTimeSpentInSprint = 0;
+    private int $totalTimeSpentInSprint = 0;
+    private float $averageTimeSpentInOther = 0;
+    private int $totalTimeSpentInOther = 0;
     private array $timelineByStatus = [];
     private array $timelineByCategory = [];
-
 
     /**
      * __construct
@@ -181,9 +186,15 @@ class VersionView extends AbstractView
             foreach ($this->versionIssues as $issue) {
                 $this->totalLeadTime += $issue->getLeadTime() ?? 0;
                 $this->totalCycleTime += $issue->getCycleTime() ?? 0;
+                $this->totalTimeSpentInRefinement += $issue->getTimeSpentInRefinement() ?? 0;
+                $this->totalTimeSpentInSprint += $issue->getTimeSpentInSprint() ?? 0;
+                $this->totalTimeSpentInOther += $issue->getTimeSpentInOther() ?? 0;
             }
             $this->averageLeadTime = round($this->totalLeadTime / $this->getIssuesCount(), 2);
             $this->averageCycleTime = round($this->totalCycleTime / $this->getIssuesCount(), 2);
+            $this->averageTimeSpentInRefinement = round($this->totalTimeSpentInRefinement / $this->getIssuesCount(), 2);
+            $this->averageTimeSpentInSprint = round($this->totalTimeSpentInSprint / $this->getIssuesCount(), 2);
+            $this->averageTimeSpentInOther = round($this->totalTimeSpentInOther / $this->getIssuesCount(), 2);
         }
     }
     
@@ -246,5 +257,64 @@ class VersionView extends AbstractView
     {
         return $this->timelineByCategory;
     }
-
+    
+    /**
+     * getAverageTimeSpentInRefinement
+     *
+     * @return float
+     */
+    public function getAverageTimeSpentInRefinement(): float
+    {
+        return $this->averageTimeSpentInRefinement;
+    }
+    
+    /**
+     * getTotalTimeSpentInRefinement
+     *
+     * @return int
+     */
+    public function getTotalTimeSpentInRefinement(): int
+    {
+        return $this->totalTimeSpentInRefinement;
+    }
+        
+    /**
+     * getAverageTimeSpentInSprint
+     *
+     * @return float
+     */
+    public function getAverageTimeSpentInSprint(): float
+    {
+        return $this->averageTimeSpentInSprint;
+    }
+    
+    /**
+     * getTotalTimeSpentInSprint
+     *
+     * @return int
+     */
+    public function getTotalTimeSpentInSprint(): int
+    {
+        return $this->totalTimeSpentInSprint;
+    }
+    
+    /**
+     * getAverageTimeSpentInOther
+     *
+     * @return float
+     */
+    public function getAverageTimeSpentInOther(): float
+    {
+        return $this->averageTimeSpentInOther;
+    }
+    
+    /**
+     * getTotalTimeSpentInOther
+     *
+     * @return int
+     */
+    public function getTotalTimeSpentInOther(): int
+    {
+        return $this->totalTimeSpentInOther;
+    }
 }

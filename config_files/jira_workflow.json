@@ -1,0 +1,23 @@
+{
+    "refinement_statuses": [
+        "backlog",
+        "en rédaction",
+        "a affiner",
+        "affinée",
+        "a planifier"
+    ],
+    "sprint_statuses": [
+        "To Do",
+        "à faire",
+        "In Progress",
+        "revue dév",
+        "a qualifier",
+        "qualif en cours",
+        "validation PO"
+    ],
+    "done_statuses": [
+        "Done",
+        "terminé(e)",
+        "abandonné"
+    ]
+}
