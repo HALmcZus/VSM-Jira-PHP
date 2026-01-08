@@ -20,46 +20,56 @@
     
     <?php if ($view): ?>
         <div class="card">
-            <h2><?= $view->getVersionName(); ?> (<?= 'ID ' . $view->getVersionId(); ?>)</h2>
+            <h2>
+                <a href="#" target="_blank">
+                    <?= $view->getVersionName(); ?> (<?= 'ID ' . $view->getVersionId(); ?>)
+                </a>
+            </h2>
             
             <p style="margin-top: 12px; color: var(--muted);">
                 <?= $view->getVersionDescription(); ?>
             </p>
 
             <div class="meta">
-                <span>📅 Date de démarrage : <?= $view->getVersionStartDate() ?? '—'; ?></span>
-                <span>🎯 Date cible de livraison : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
-                
-                <?php if ($view->isVersionOverdue()): ?>
-                    <span class="badge red">🕗Deadline dépassée</span>
-                <?php endif; ?>
+                <!-- Infos version -->
+                <div class="meta-line meta-line-info">
+                    <span>📅 Date de démarrage : <?= $view->getVersionStartDate() ?? '—'; ?></span>
+                    <span>🎯 Date cible de livraison : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
 
-                <?php if ($view->isVersionReleased()): ?>
-                    <span class="badge green">Status : Terminée 🚀</span>
-                <?php else: ?>
-                    <span class="badge orange">Status : En cours</span>
-                <?php endif; ?>
+                    <?php if ($view->isVersionOverdue()): ?>
+                        <span class="badge red">🕗Deadline dépassée</span>
+                    <?php endif; ?>
 
-                <!-- Lead Time -->
-                <div class="metric">
-                    <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
-                    <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
-                    <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours</strong></span>
+                    <?php if ($view->isVersionReleased()): ?>
+                        <span class="badge green">Status : Terminée 🚀</span>
+                    <?php else: ?>
+                        <span class="badge orange">Status : En cours</span>
+                    <?php endif; ?>
                 </div>
                 
-                <!-- Cycle Time -->
-                <div class="metric">
-                    <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
-                    <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
-                    <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
-                </div>
-                
-                <!-- Time Breakdown -->
-                <div class="metric">
-                    <span class="metric-title">🧮 <b>Temps par phase</b></span>
-                    <span>Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours</strong></span>
-                    <span>Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours</strong></span>
-                    <span>Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours</strong></span>
+                <!-- Métriques -->
+                <div class="meta-line meta-line-metrics">
+                    <!-- Lead Time -->
+                    <div class="metric">
+                        <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
+                        <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
+                        <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours</strong></span>
+                    </div>
+
+                    <!-- Cycle Time -->
+                    <div class="metric">
+                        <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
+                        <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
+                        <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
+                    </div>
+
+                    <!-- Time Breakdown -->
+                    <div class="metric">
+                        <span class="metric-title">🧮 <b>Temps par phase</b></span>
+                        <span>Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInRefinement(); ?> jours /ticket.</strong></em></span>
+                        <span>Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInSprint(); ?> jours /ticket.</strong></em></span>
+                        <span>Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInOther(); ?> jours /ticket.</strong></em></span>
+                    </div>
                 </div>
             </div>
         </div>

@@ -47,12 +47,26 @@ h2 {
 
 .meta {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 12px 24px;
     align-items: flex-start;
     margin-top: 16px;
     color: var(--muted);
     font-size: 14px;
+}
+
+.meta-line-info {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.meta-line-metrics {
+    display: flex;
+    gap: 16px;
+    align-items: stretch;
 }
 
 .badge {
@@ -160,6 +174,13 @@ tr:hover {
 /* Responsive : empilé sur petits écrans */
 @media (max-width: 900px) {
     .timeline-grid {
+        flex-direction: column;
+    }
+    
+    .meta-line-info {
+        flex-wrap: wrap;
+    }
+    .meta-line-metrics {
         flex-direction: column;
     }
 }
