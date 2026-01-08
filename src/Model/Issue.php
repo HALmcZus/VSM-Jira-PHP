@@ -181,12 +181,11 @@ class Issue
      * ====== GETTERS ========
      * =======================
      */
-
-    /**
-     * Accès aux données brutes si nécessaire (debug / extension)
-     */
-    public function getRawData(): array
+    public function getData(string $data = null): array
     {
+        if ($data !== null && isset($this->data[$data])) {
+            return $this->data[$data];
+        }
         return $this->data;
     }
 

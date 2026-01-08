@@ -95,6 +95,7 @@ class JiraService
      */
     public function getVersionsByProjectId(int $projectId): array
     {
+        //WIP: pour plus tard : liste les versions d'un projet (future IHM)
         $url = $this->baseUrl . self::API_URL_PROJECT_VERSIONS;
         $url = str_replace('{project_id}', $projectId, $url);
 

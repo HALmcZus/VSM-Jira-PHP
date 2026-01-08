@@ -4,7 +4,7 @@ namespace App\View;
 /**
  * Formate les données du Back, et les expose au Front
  */
-class VersionView extends AbstractView
+class VersionView
 {
     /**
      * @var array Raw version data provided by the Controller
@@ -22,7 +22,7 @@ class VersionView extends AbstractView
     private float $averageTimeSpentInOther = 0;
     private int $totalTimeSpentInOther = 0;
     private array $timelineByStatus = [];
-    private array $timelineByCategory = [];
+    private array $timelineByCategory = []; //pas utilisé
 
     /**
      * __construct
@@ -138,7 +138,6 @@ class VersionView extends AbstractView
      */
     public function getProjectId(): int
     {
-        echo ''; //Utilisé ?
         return (int) ($this->versionData['projectId'] ?? 0);
     }
 
