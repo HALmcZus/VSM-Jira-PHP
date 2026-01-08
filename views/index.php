@@ -53,14 +53,14 @@
                     <div class="metric">
                         <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
                         <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours</strong></span>
+                        <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours /ticket</strong></span>
                     </div>
 
                     <!-- Cycle Time -->
                     <div class="metric">
                         <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
                         <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours</strong></span>
+                        <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours /ticket</strong></span>
                     </div>
 
                     <!-- Time Breakdown -->
