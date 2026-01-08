@@ -82,6 +82,16 @@ class VersionView extends AbstractView
     }
     
     /**
+     * getVersionUrl
+     *
+     * @return string
+     */
+    public function getVersionUrl(): string
+    {
+        return $this->versionData['version_url'] ?? '#';
+    }
+    
+    /**
      * getVersionStartDate
      *
      * @return string
@@ -128,6 +138,7 @@ class VersionView extends AbstractView
      */
     public function getProjectId(): int
     {
+        echo ''; //Utilisé ?
         return (int) ($this->versionData['projectId'] ?? 0);
     }
 
@@ -164,6 +175,7 @@ class VersionView extends AbstractView
      */
     public function getStatusCSSClass($statusCategoryKey): string
     {
+        echo ''; //Utilisé ?
         if ($statusCategoryKey === 'new') {
             $cssClass = 'blue-gray';
         } elseif ($statusCategoryKey === 'done') {
@@ -255,6 +267,7 @@ class VersionView extends AbstractView
      */
     public function getTimelineByCategory(): array
     {
+        echo ''; //Utilisé ?
         return $this->timelineByCategory;
     }
     

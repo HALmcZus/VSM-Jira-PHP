@@ -2,6 +2,7 @@
 namespace App\Model;
 
 use Exception;
+use Dotenv\Dotenv;
 use App\Service\JiraService;
 use App\Model\Config;
 
@@ -10,6 +11,8 @@ use App\Model\Config;
  */
 class ReleaseModel
 {
+    const VERSION_URL = '{base_url}/projects/{project_key}/versions/{version_id}';
+
     protected JiraService $jiraService;
     protected Config $config;
 
@@ -40,6 +43,13 @@ class ReleaseModel
         if (!$result['id']) {
             throw new Exception("Erreur lors de la récupération de la Version Jira : " . $result['message']);
         }
+
+        $result['version_url'] = str_replace(
+            ['{base_url}', '{project_key}', '{version_id}'],
+            [$_ENV['JIRA_BASE_URL'], $result['projectId'], $result['id']],
+            self::VERSION_URL
+        );
+
         $this->versionData = $result;
         return $this->versionData;
     }
@@ -52,6 +62,7 @@ class ReleaseModel
      */
     public function getVersionsByProjectId(int $projectId) : array 
     {
+        //WIP: non utilisé pour l'instant
         $result = $this->jiraService->getVersionsByProjectId($projectId);
 
         return $result;

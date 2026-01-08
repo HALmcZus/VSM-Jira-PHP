@@ -21,7 +21,7 @@
     <?php if ($view): ?>
         <div class="card">
             <h2>
-                <a href="#" target="_blank">
+                <a href="<?= $view->getVersionUrl(); ?>" target="_blank">
                     <?= $view->getVersionName(); ?> (<?= 'ID ' . $view->getVersionId(); ?>)
                 </a>
             </h2>
