@@ -170,9 +170,9 @@ class ReleaseModel
 
         /** @var \App\Model\Issue $issue */
         foreach ($this->versionIssues as $issue) {
-
             // Agrégation par status
             foreach ($issue->getTimeByStatus() as $statusName => $timeSpent) {
+                $statusName = mb_strtolower($statusName, 'UTF-8');
                 $timeByStatus[$statusName] = ($timeByStatus[$statusName] ?? 0) + $timeSpent;
             }
         }

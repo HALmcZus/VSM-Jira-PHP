@@ -376,7 +376,7 @@ class Issue
         $doneStatuses = array_map('mb_strtolower', $workflow['done_statuses'] ?? []);
 
         // Status initial
-        $currentStatus = mb_strtolower($this->data['fields']['status']['name']);
+        $currentStatus = mb_strtolower($this->data['fields']['status']['name'], 'UTF-8');
         $currentDate = new \DateTime($this->data['fields']['created']);
 
         // Sécurisation : tri chronologique
@@ -395,7 +395,7 @@ class Issue
                 $transitionDate = new \DateTime($history['created']);
                 $days = (int) $currentDate->diff($transitionDate)->days;
 
-                // On ignore les statuts "Done"
+                // On ignore les statuts dans la catégorie "Done"
                 if (!in_array($currentStatus, $doneStatuses, true)) {
                     //On compte le nombre de jours par catégorie
                     if (in_array($currentStatus, $refinementStatuses, true)) {
@@ -408,7 +408,7 @@ class Issue
                 }
 
                 // Passage au status suivant
-                $currentStatus = mb_strtolower($item['toString']);
+                $currentStatus = mb_strtolower($item['toString'], 'UTF-8');
                 $currentDate = $transitionDate;
             }
         }

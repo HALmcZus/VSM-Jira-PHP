@@ -4,6 +4,7 @@
         "en rédaction",
         "a affiner",
         "affinée",
+        "vainci 1",
         "a planifier"
     ],
     "sprint_statuses": [
@@ -11,9 +12,11 @@
         "à faire",
         "In Progress",
         "revue dév",
+        "revue dév / pair",
         "a qualifier",
         "qualif en cours",
-        "validation PO"
+        "validation PO",
+        "validation PO / Vainci"
     ],
     "done_statuses": [
         "Done",

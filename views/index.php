@@ -85,11 +85,19 @@
             <!-- Timeline par Status -->
             <div class="card">
                 <details>
-                    <summary>🧭 Timeline globale par status (Release)</summary>
+                    <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Done)</summary>
                     <ul>
-                        <?php foreach ($view->getTimelineByStatus() as $status => $days): ?>
-                            <li><?= htmlspecialchars($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                        <?php $timelineData = $view->getTimelineByStatus(); ?>
+                        <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
+                            <li><?= ucfirst(htmlspecialchars($status)); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                         <?php endforeach; ?>
+                        <br/>
+                        <?php if (!empty($timelineData['otherStatuses'])): ?>
+                            Autres statuts :
+                            <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
+                                <li><?= ucfirst(htmlspecialchars($status)); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </ul>
                 </details>
             </div>
