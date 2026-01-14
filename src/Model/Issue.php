@@ -19,6 +19,7 @@ class Issue
     const STATUS_TODO = 'To Do';
     const STATUS_IN_PROGRESS = 'In Progress';
     const STATUS_DONE = 'Done';
+    const ISSUE_URL = '{base_url}/browse/{issue_key}';
     
     protected Config $config;
     protected ReleaseModel $releaseModel;
@@ -430,5 +431,14 @@ class Issue
     public function getTimeSpentInOther(): int
     {
         return $this->workflowTimeBreakdown['other'];
+    }
+
+    public function getIssueUrl(): string
+    {
+        return str_replace(
+            ['{base_url}', '{issue_key}'],
+            [$_ENV['JIRA_BASE_URL'], $this->getKey()],
+            self::ISSUE_URL
+        );
     }
 }

@@ -129,7 +129,7 @@
                             <td><img src="<?= $issue->getPriorityIcon() ?? '' ?>"/><?= $issue->getPriorityName() ?? '—'; ?></td>
                             <td><img src="<?= $issue->getIssueTypeIcon() ?? '' ?>"/><?= $issue->getIssueTypeName() ?? '—';?></td>
                             <td><strong><?= $issue->getKey(); ?></strong></td>
-                            <td><?= htmlspecialchars($issue->getSummary()); ?></td>
+                            <td><a href="<?= $issue->getIssueUrl(); ?>" target="_blank"><?= htmlspecialchars($issue->getSummary()); ?></a></td>
                             <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
                             <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
                             <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
