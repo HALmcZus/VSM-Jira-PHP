@@ -76,7 +76,7 @@ class VersionView
      */
     public function getVersionDescription(): string
     {
-        return $this->versionData['description'] !== null
+        return (isset($this->versionData['description']) && $this->versionData['description'] !== null)
             ? htmlspecialchars($this->versionData['description'], ENT_QUOTES, 'UTF-8')
             : '<i>Description non renseignée.</i>';
     }

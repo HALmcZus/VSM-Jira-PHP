@@ -1,4 +1,5 @@
 <?php
+    /** @var \App\Controller\VsmController $this */
     /** @var \App\View\VersionView $view */
 ?>
 <!DOCTYPE html>
@@ -9,6 +10,12 @@
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+    <?php if ($this->getIsDemo()): ?>
+        <div style="color:red;font-weight:bold;">
+            ⚠️ Mode DÉMO activé dans .env => Vérification SSL <u>désactivée</u> ⚠️
+        </div>
+    <?php endif; ?>
+
     <div class="card">
     <h1>Value Stream Mapping - Version Jira</h1>
         <form method="POST" action="/vsm">

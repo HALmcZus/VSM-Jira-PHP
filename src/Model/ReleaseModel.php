@@ -2,7 +2,6 @@
 namespace App\Model;
 
 use Exception;
-use Dotenv\Dotenv;
 use App\Service\JiraService;
 use App\Model\Config;
 
@@ -40,8 +39,10 @@ class ReleaseModel
     public function getVersionById(int $versionId) : array 
     {
         $result = $this->jiraService->getVersionById($versionId);
-        if (!$result['id']) {
-            throw new Exception("Erreur lors de la récupération de la Version Jira : " . $result['message']);
+
+        //TODO: afficher message erreur si version non trouvée pour l'ID demandé
+        if (!isset($result['id']) || isset($result['error'])) {
+            throw new Exception("Erreur lors de la récupération de la Version Jira (ReleaseModel::getVersionById) : " . print_r($result, true));
         }
 
         $result['version_url'] = str_replace(

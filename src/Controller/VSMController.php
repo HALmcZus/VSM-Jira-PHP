@@ -24,9 +24,18 @@ class VsmController
         $view = null;
         require __DIR__ . '/../../views/index.php';
         $html = ob_get_clean();
-
         $response->getBody()->write($html);
         return $response;
+    }
+    
+    /**
+     * getIsDemo
+     *
+     * @return bool
+     */
+    public function getIsDemo(): bool
+    {
+        return $_ENV['IS_DEMO'] ?? false;
     }
     
     

@@ -18,8 +18,8 @@ class JiraService
     private string $baseUrl;
     private string $email;
     private string $token;
+    private bool $isDemo = false;
     private bool $areCredentialsVerified = false;
-    
 
     /**
      * __construct
@@ -28,12 +28,10 @@ class JiraService
      */
     public function __construct()
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
-
         $this->baseUrl = $_ENV['JIRA_BASE_URL'] ?? throw new Exception("JIRA_BASE_URL manquant dans le fichier .env");
         $this->email = $_ENV['JIRA_EMAIL'] ?? throw new Exception("JIRA_EMAIL manquant dans le fichier .env");
         $this->token = $_ENV['JIRA_API_TOKEN'] ?? throw new Exception("JIRA_API_TOKEN manquant dans le fichier .env");
+        $this->isDemo = $_ENV['IS_DEMO'] ?? false;
     }
 
 
@@ -196,7 +194,7 @@ class JiraService
     
             if (!isset($result['issues'])) {
                 throw new Exception('Réponse Jira invalide (' . self::API_URL_SEARCH . ')');
-            }            
+            }
     
             return $result['issues'];
         } catch (Exception $e) {
@@ -269,7 +267,13 @@ class JiraService
                 'Content-Type: application/json'
             ]);
         }
-    
+
+        if ($this->isDemo === true) {
+            // ⚠️ Démo uniquement ⚠️ (proxy SSL corporate) => on bypass la vérification SSL
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+
         $response = curl_exec($ch);
     
         if (curl_errno($ch)) {
