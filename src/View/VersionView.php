@@ -2,13 +2,20 @@
 namespace App\View;
 
 use App\Model\Config;
+use App\Model\Timeline;
 
 /**
  * Formate les données du Back, et les expose au Front
  */
 class VersionView
 {
+    const STATUS_TRANSLATION_TODO = 'À faire';
+    const STATUS_TRANSLATION_IN_PROGRESS = 'En cours';
+    const STATUS_TRANSLATION_DONE = 'Terminé';
+
     private Config $config;
+    private Timeline $timeline;
+
     /**
      * @var array Raw version data provided by the Controller
      */
@@ -38,6 +45,7 @@ class VersionView
     public function __construct(array $versionData, array $versionIssues, array $releaseTimeline = [])
     {
         $this->config = new Config();
+        $this->timeline = new Timeline();
 
         $this->versionData = $versionData;
         $this->versionIssues = $versionIssues;
@@ -46,6 +54,37 @@ class VersionView
         $this->timelineByCategory = $releaseTimeline['byCategory'] ?? [];
     
         $this->calculateVersionLeadAndCycleTime();
+    }
+
+
+    /**
+     * formatAndTranslateStatusName
+     *
+     * @param  mixed $statusName
+     * @return string
+     */
+    public function formatAndTranslateStatusName(string $statusName): string
+    {
+        $originalStatusName = $statusName;
+        $statusName = mb_strtolower($statusName, 'UTF-8');
+
+        switch ($statusName) {
+            case 'to do':
+            case 'todo':
+                $statusName = self::STATUS_TRANSLATION_TODO;
+                break;
+            case 'in progress':
+                $statusName = self::STATUS_TRANSLATION_IN_PROGRESS;
+                break;
+            case 'done':
+                $statusName = self::STATUS_TRANSLATION_DONE;
+                break;
+            default:
+                // leave as is
+                break;
+        }
+
+        return htmlspecialchars(ucfirst($statusName));
     }
     
 
@@ -253,52 +292,18 @@ class VersionView
     {
         return $this->totalLeadTime;
     }
-        
+
     /**
      * getTimelineByStatus
      *
+     * @param  mixed $timelineByStatus
      * @return array
      */
     public function getTimelineByStatus(): array
     {
-        $workflow = $this->config->getJiraWorkflow();
-
-        //Sort as defined in config_files/jira_workflow.json
-        $orderedStatuses = array_merge(
-            $workflow['refinement_statuses'] ?? [],
-            $workflow['sprint_statuses'] ?? [],
-            $workflow['done_statuses'] ?? []
-        );
-
-        $orderedStatuses = array_map('mb_strtolower', $orderedStatuses);
-        $this->timelineByStatus = array_change_key_case($this->timelineByStatus, CASE_LOWER);
-
-        // Sort known statuses first
-        $sortedTimeline = [];
-        foreach ($orderedStatuses as $status) {
-            $status = mb_strtolower($status, 'UTF-8');
-            if (isset($this->timelineByStatus[$status]) && $this->timelineByStatus[$status] > 0) {
-                $sortedTimeline[$status] = mb_strtolower($this->timelineByStatus[$status], 'UTF-8');
-                unset($this->timelineByStatus[$status]);
-            }
-        }
-    
-        // Move unknown statuses to the end
-        $otherStatuses = [];
-        if (!empty($this->timelineByStatus)) {
-            foreach ($this->timelineByStatus as $status => $days) {
-                if ($days <= 0) {
-                    continue;
-                }
-                $otherStatuses[mb_strtolower($status, 'UTF-8')] = $days;
-            }
-        }
-
-        // $this->timelineByStatus = $sortedTimeline;
-        // return $this->timelineByStatus;
-        return ['workflowStatuses' => $sortedTimeline, 'otherStatuses' => $otherStatuses];
+        return $this->timeline->getTimelineByStatus($this->timelineByStatus);
     }
-    
+
     /**
      * getTimelineByCategory
      *

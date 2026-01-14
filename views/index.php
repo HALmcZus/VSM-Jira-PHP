@@ -1,6 +1,7 @@
 <?php
     /** @var \App\Controller\VsmController $this */
     /** @var \App\View\VersionView $view */
+    /** @var \App\Model\Issue $issue */
 ?>
 <!DOCTYPE html>
 <html>
@@ -85,17 +86,18 @@
             <!-- Timeline par Status -->
             <div class="card">
                 <details>
-                    <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Done)</summary>
+                    <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Terminés)</summary>
                     <ul>
                         <?php $timelineData = $view->getTimelineByStatus(); ?>
                         <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
-                            <li><?= ucfirst(htmlspecialchars($status)); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                            <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                         <?php endforeach; ?>
-                        <br/>
+
                         <?php if (!empty($timelineData['otherStatuses'])): ?>
+                            <br/>
                             Autres statuts :
                             <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
-                                <li><?= ucfirst(htmlspecialchars($status)); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </ul>
@@ -139,11 +141,20 @@
                             <td colspan="11">
                                 <!-- Détails temps par status -->
                                 <details>
-                                    <summary>Détails du temps passé par status</summary>
+                                    <summary>Détails du temps passé par status, hors Terminés</summary>
                                     <ul>
-                                        <?php foreach ($issue->getTimeByStatus() as $statusName => $timeSpent): ?>
-                                            <li><?= htmlspecialchars($statusName); ?> : <?= $timeSpent; ?> jours</li>
+                                        <?php $issueTimelineData = $issue->getTimeByStatus(true); ?>
+                                        <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
+                                            <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                                         <?php endforeach; ?>
+                                        
+                                        <?php if (!empty($issueTimelineData['otherStatuses'])): ?>
+                                            <br/>
+                                            Autres statuts :
+                                            <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>
+                                                <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </ul>
                                 </details>
                                 <!-- Détails temps par catégorie de status -->

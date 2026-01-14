@@ -2,8 +2,9 @@
 namespace App\Model;
 
 use Exception;
-use App\Model\ReleaseModel;
 use App\Model\Config;
+use App\Model\ReleaseModel;
+use App\Model\Timeline;
 
 /**
  * Issue
@@ -18,9 +19,10 @@ class Issue
     const STATUS_TODO = 'To Do';
     const STATUS_IN_PROGRESS = 'In Progress';
     const STATUS_DONE = 'Done';
-
-    protected ReleaseModel $releaseModel;
+    
     protected Config $config;
+    protected ReleaseModel $releaseModel;
+    protected Timeline $timeline;
 
     /**
      * Données brutes issues de l’API Jira
@@ -52,8 +54,9 @@ class Issue
      */
     public function __construct(array $data)
     {
-        $this->releaseModel = new ReleaseModel();
         $this->config = new Config();
+        $this->releaseModel = new ReleaseModel();
+        $this->timeline = new Timeline();
 
         $this->initialize($data);
     }
@@ -354,9 +357,9 @@ class Issue
      *
      * @return array<string,int>
      */
-    public function getTimeByStatus(): array
+    public function getTimeByStatus($splitOtherStatuses): array
     {
-        return $this->timeByStatus;
+        return $this->timeline->getTimelineByStatus($this->timeByStatus, $splitOtherStatuses);
     }
 
     /**
