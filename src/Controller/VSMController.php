@@ -3,7 +3,7 @@ namespace App\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use App\Model\ReleaseModel;
+use App\Model\Version;
 use App\View\VersionView;
 
 /**
@@ -56,18 +56,9 @@ class VsmController
                 throw new \Exception('Le paramètre fixVersionId est requis.');
             }
 
-            $release = new ReleaseModel();
-
-            $versionData = $release->getVersionById($versionId);
-            $versionIssues = $release->getIssuesDetailsByVersion($versionId);
-            $timeline = $release->calculateTimelineByStatusAndCategory();
-
-            $view = new VersionView(
-                $versionData,
-                $versionIssues,
-                $timeline
-            );
-
+            // Load data
+            $version = new Version($versionId);
+            $view = new VersionView($version);
             
             // Render view
             ob_start();

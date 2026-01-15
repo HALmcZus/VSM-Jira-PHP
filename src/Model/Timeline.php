@@ -20,15 +20,49 @@ class Timeline
         $this->config = new Config();
     }
 
+    /**
+     * Calcule le nombre de jours ouvrés entre deux dates (week-ends et jours fériés exclus).
+     *
+     * @param \DateTime $start Date de début (incluse)
+     * @param \DateTime $end Date de fin (incluse)
+     *
+     * @return int Nombre de jours ouvrés
+     */
+    public function calculateBusinessDays(\DateTime $start, \DateTime $end): int 
+    {
+        if ($start > $end) {
+            return 0;
+        }
+    
+        $nonWorkingDays = $this->config->getNonWorkingDays();
+        $businessDays = 1;
+        $current = clone $start;
+    
+        while ($current <= $end) {
+            $dayOfWeek = (int) $current->format('N'); // 1 (lundi) → 7 (dimanche)
+            $currentDate = $current->format('Y-m-d');
+    
+            $isWeekend = ($dayOfWeek >= 6);
+            $isHoliday = in_array($currentDate, $nonWorkingDays, true);
+    
+            if (!$isWeekend && !$isHoliday) {
+                $businessDays++;
+            }
+    
+            $current->modify('+1 day');
+        }
+    
+        return $businessDays;
+    }
 
     /**
-     * getTimelineByStatus
+     * getSortedTimelineByStatus : ordonnance les status Jira suivant le workflow configuré
      *
      * @param  mixed $timelineByStatus
      * @param  mixed $splitOtherStatuses
      * @return array
      */
-    public function getTimelineByStatus(array $timelineByStatus, $splitOtherStatuses = true): array
+    public function getSortedTimelineByStatus(array $timelineByStatus, $splitOtherStatuses = true): array
     {
         $workflow = $this->config->getJiraWorkflow();
 

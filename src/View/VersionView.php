@@ -2,6 +2,7 @@
 namespace App\View;
 
 use App\Model\Config;
+use App\Model\Version;
 use App\Model\Timeline;
 
 /**
@@ -19,45 +20,19 @@ class VersionView
 
     private Config $config;
     private Timeline $timeline;
-
-    /**
-     * @var array Raw version data provided by the Controller
-     */
-    private array $versionData;
-    private array $versionIssues;
-    private float $averageCycleTime = 0;
-    private int $totalCycleTime = 0;
-    private float $averageLeadTime = 0;
-    private int $totalLeadTime = 0;
-    private float $averageTimeSpentInRefinement = 0;
-    private int $totalTimeSpentInRefinement = 0;
-    private float $averageTimeSpentInSprint = 0;
-    private int $totalTimeSpentInSprint = 0;
-    private float $averageTimeSpentInOther = 0;
-    private int $totalTimeSpentInOther = 0;
-    private array $timelineByStatus = [];
-    private array $timelineByCategory = []; //pas utilisé
-
+    private Version $version;
+  
     /**
      * __construct
      *
-     * @param  mixed $versionData
-     * @param  mixed $versionIssues
-     * @param  mixed $releaseTimeline
+     * @param  mixed $version
      * @return void
      */
-    public function __construct(array $versionData, array $versionIssues, array $releaseTimeline = [])
+    public function __construct(Version $version)
     {
         $this->config = new Config();
         $this->timeline = new Timeline();
-
-        $this->versionData = $versionData;
-        $this->versionIssues = $versionIssues;
-    
-        $this->timelineByStatus = $releaseTimeline['byStatus'] ?? [];
-        $this->timelineByCategory = $releaseTimeline['byCategory'] ?? [];
-    
-        $this->calculateVersionLeadAndCycleTime();
+        $this->version = $version;
     }
 
     /**
@@ -117,7 +92,7 @@ class VersionView
      */
     public function getVersionId(): string
     {
-        return $this->versionData['id'] ?? '?';
+        return $this->version->getId() ?? '?';
     }
     
     /**
@@ -127,7 +102,7 @@ class VersionView
      */
     public function getVersionName(): string
     {
-        return $this->versionData['name'] ?? '<i>Nom de version non renseigné.</i>';
+        return $this->version->getName() ?? '<i>Nom de version non renseigné.</i>';
     }
     
     /**
@@ -137,9 +112,9 @@ class VersionView
      */
     public function getVersionDescription(): string
     {
-        return (isset($this->versionData['description']) && $this->versionData['description'] !== null)
-            ? htmlspecialchars($this->versionData['description'], ENT_QUOTES, 'UTF-8')
-            : '<i>Description non renseignée.</i>';
+        return $this->version->getDescription() 
+        ? htmlspecialchars($this->version->getDescription(), ENT_QUOTES, 'UTF-8')
+        : '<i>Description non renseignée.</i>'; 
     }
     
     /**
@@ -149,7 +124,7 @@ class VersionView
      */
     public function getVersionUrl(): string
     {
-        return $this->versionData['version_url'] ?? '#';
+        return $this->version->getUrl() ?? '#';
     }
     
     /**
@@ -159,7 +134,7 @@ class VersionView
      */
     public function getVersionStartDate(): string
     {
-        return $this->versionData['startDate'] ?? '<i>Date non renseignée.</i>';
+        return $this->version->getStartDate() ?? '<i>Date non renseignée.</i>';
     }
     
     /**
@@ -169,7 +144,7 @@ class VersionView
      */
     public function getVersionReleaseDate(): string
     {
-        return $this->versionData['releaseDate'] ?? '<i>Non renseignée.</i>';
+        return $this->version->getReleaseDate() ?? '<i>Non renseignée.</i>';
     }
     
     /**
@@ -179,7 +154,7 @@ class VersionView
      */
     public function isVersionReleased(): bool
     {
-        return (bool) ($this->versionData['released'] ?? false);
+        return $this->version->isReleased();
     }
     
     /**
@@ -189,17 +164,85 @@ class VersionView
      */
     public function isVersionOverdue(): bool
     {
-        return (bool) ($this->versionData['overdue'] ?? false);
+        return $this->version->isOverdue();
     }
     
     /**
      * getProjectId
+     */
+    public function getProjectId()
+    {
+        return $this->version->getProjectId();
+    }
+    
+    /**
+     * getTotalLeadTime
+     *
+     * @return float
+     */
+    public function getTotalLeadTime(): int
+    {
+        return $this->version->getTotalLeadTime();
+    }
+    
+    /**
+     * getTotalLeadTime
+     *
+     * @return float
+     */
+    public function getAverageLeadTime(): float
+    {
+        return $this->version->getAverageLeadTime();
+    }
+    
+    /**
+     * getTotalLeadTime
+     *
+     * @return float
+     */
+    public function getTotalCycleTime(): int
+    {
+        return $this->version->getTotalCycleTime();
+    }
+    
+    /**
+     * getTotalLeadTime
+     *
+     * @return float
+     */
+    public function getAverageCycleTime(): float
+    {
+        return $this->version->getAverageCycleTime();
+    }
+    
+    /**
+     * getTotalLeadTime
      *
      * @return int
      */
-    public function getProjectId(): int
+    public function getTotalTimeSpentInRefinement(): int
     {
-        return (int) ($this->versionData['projectId'] ?? 0);
+        return $this->version->getTotalTimeSpentInRefinement();
+    }
+    
+    /**
+     * getTotalLeadTime
+     *
+     * @return int
+     */
+    public function getTotalTimeSpentInSprint(): int
+    {
+        return $this->version->getTotalTimeSpentInSprint();
+    }
+    
+    /**
+     * getTotalLeadTime
+     *
+     * @return int
+     */
+    public function getTotalTimeSpentInOther(): int
+    {
+        return $this->version->getTotalTimeSpentInOther();
     }
 
     /**
@@ -214,7 +257,7 @@ class VersionView
      */
     public function getIssues()
     {
-        return $this->versionIssues;
+        return $this->version->getIssues();
     }
     
     /**
@@ -224,7 +267,7 @@ class VersionView
      */
     public function getIssuesCount(): int
     {
-        return count($this->versionIssues);
+        return $this->version->getIssuesCount();
     }
     
     /**
@@ -245,70 +288,6 @@ class VersionView
         }
         return $cssClass;
     }
-    
-    /**
-     * calculate Version's Lead And Cycle Times (total and average)
-     *
-     * @return void
-     */
-    public function calculateVersionLeadAndCycleTime()
-    {
-        if ($this->getIssuesCount() > 0) {
-            /* @var \App\Model\Issue $issue */
-            foreach ($this->versionIssues as $issue) {
-                $this->totalLeadTime += $issue->getLeadTime() ?? 0;
-                $this->totalCycleTime += $issue->getCycleTime() ?? 0;
-                $this->totalTimeSpentInRefinement += $issue->getTimeSpentInRefinement() ?? 0;
-                $this->totalTimeSpentInSprint += $issue->getTimeSpentInSprint() ?? 0;
-                $this->totalTimeSpentInOther += $issue->getTimeSpentInOther() ?? 0;
-            }
-            $this->averageLeadTime = round($this->totalLeadTime / $this->getIssuesCount(), 2);
-            $this->averageCycleTime = round($this->totalCycleTime / $this->getIssuesCount(), 2);
-            $this->averageTimeSpentInRefinement = round($this->totalTimeSpentInRefinement / $this->getIssuesCount(), 2);
-            $this->averageTimeSpentInSprint = round($this->totalTimeSpentInSprint / $this->getIssuesCount(), 2);
-            $this->averageTimeSpentInOther = round($this->totalTimeSpentInOther / $this->getIssuesCount(), 2);
-        }
-    }
-    
-    /**
-     * getAverageCycleTime
-     *
-     * @return float
-     */
-    public function getAverageCycleTime(): float
-    {
-        return $this->averageCycleTime;
-    }
-
-    /**
-     * getTotalCycleTime
-     *
-     * @return float
-     */
-    public function getTotalCycleTime(): float
-    {
-        return $this->totalCycleTime;
-    }
-
-    /**
-     * getAverageLeadTime
-     *
-     * @return float
-     */
-    public function getAverageLeadTime(): float
-    {
-        return $this->averageLeadTime;
-    }
-
-    /**
-     * getTotalLeadTime
-     *
-     * @return float
-     */
-    public function getTotalLeadTime(): float
-    {
-        return $this->totalLeadTime;
-    }
 
     /**
      * getTimelineByStatus
@@ -318,18 +297,7 @@ class VersionView
      */
     public function getTimelineByStatus(): array
     {
-        return $this->timeline->getTimelineByStatus($this->timelineByStatus);
-    }
-
-    /**
-     * getTimelineByCategory
-     *
-     * @return array
-     */
-    public function getTimelineByCategory(): array
-    {
-        echo ''; //Utilisé ?
-        return $this->timelineByCategory;
+        return $this->version->getTimelineByStatus();
     }
     
     /**
@@ -339,19 +307,9 @@ class VersionView
      */
     public function getAverageTimeSpentInRefinement(): float
     {
-        return $this->averageTimeSpentInRefinement;
+        return $this->version->getAverageTimeSpentInRefinement();
     }
     
-    /**
-     * getTotalTimeSpentInRefinement
-     *
-     * @return int
-     */
-    public function getTotalTimeSpentInRefinement(): int
-    {
-        return $this->totalTimeSpentInRefinement;
-    }
-        
     /**
      * getAverageTimeSpentInSprint
      *
@@ -359,19 +317,9 @@ class VersionView
      */
     public function getAverageTimeSpentInSprint(): float
     {
-        return $this->averageTimeSpentInSprint;
+        return $this->version->getAverageTimeSpentInSprint();
     }
-    
-    /**
-     * getTotalTimeSpentInSprint
-     *
-     * @return int
-     */
-    public function getTotalTimeSpentInSprint(): int
-    {
-        return $this->totalTimeSpentInSprint;
-    }
-    
+        
     /**
      * getAverageTimeSpentInOther
      *
@@ -379,16 +327,6 @@ class VersionView
      */
     public function getAverageTimeSpentInOther(): float
     {
-        return $this->averageTimeSpentInOther;
-    }
-    
-    /**
-     * getTotalTimeSpentInOther
-     *
-     * @return int
-     */
-    public function getTotalTimeSpentInOther(): int
-    {
-        return $this->totalTimeSpentInOther;
+        return $this->version->getAverageTimeSpentInOther();
     }
 }

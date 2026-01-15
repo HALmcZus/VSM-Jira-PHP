@@ -3,7 +3,6 @@ namespace App\Model;
 
 use Exception;
 use App\Model\Config;
-use App\Model\ReleaseModel;
 use App\Model\Timeline;
 
 /**
@@ -22,7 +21,6 @@ class Issue
     const ISSUE_URL = '{base_url}/browse/{issue_key}';
     
     protected Config $config;
-    protected ReleaseModel $releaseModel;
     protected Timeline $timeline;
 
     /**
@@ -56,7 +54,6 @@ class Issue
     public function __construct(array $data)
     {
         $this->config = new Config();
-        $this->releaseModel = new ReleaseModel();
         $this->timeline = new Timeline();
 
         $this->initialize($data);
@@ -358,7 +355,7 @@ class Issue
         }
 
         //Calcul en jours ouvrés (excluant week-ends et jours fériés)
-        $this->cycleTime = $this->releaseModel->calculateBusinessDays(
+        $this->cycleTime = $this->timeline->calculateBusinessDays(
             $this->firstInProgressDate,
             $this->doneDate
         );
@@ -381,7 +378,7 @@ class Issue
      */
     public function getTimeByStatus($splitOtherStatuses): array
     {
-        return $this->timeline->getTimelineByStatus($this->timeByStatus, $splitOtherStatuses);
+        return $this->timeline->getSortedTimelineByStatus($this->timeByStatus, $splitOtherStatuses);
     }
 
     /**
