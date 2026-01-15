@@ -22,5 +22,10 @@
         "Done",
         "terminé(e)",
         "abandonné"
-    ]
+    ],
+    "translations": {
+        "To Do": "à faire",
+        "In Progress": "en cours",
+        "Done": "terminé(e)"
+    }
 }

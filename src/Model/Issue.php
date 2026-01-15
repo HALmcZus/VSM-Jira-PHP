@@ -121,7 +121,7 @@ class Issue
         }
     
         // Status initial
-        $currentStatus = $this->data['fields']['status']['name'];
+        $currentStatus = $this->timeline->normalizeStatusName($this->data['fields']['status']['name']);
         $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
         $currentDate = new \DateTime($this->data['fields']['created']);
     
@@ -138,6 +138,11 @@ class Issue
                 if ($item['field'] !== 'status') {
                     continue;
                 }
+                
+                if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
+                    // Debug
+                    echo "Debugging issue {$this->getKey()}\n";
+                }
 
                 //Date du changement du status
                 $transitionDate = new \DateTime($history['created']);
@@ -150,20 +155,32 @@ class Issue
                 $this->timeByCategory[$currentCategory] =
                     ($this->timeByCategory[$currentCategory] ?? 0) + $days;
     
-                // Premier passage à En cours
-                if ($item['toString'] === self::STATUS_IN_PROGRESS && $this->firstInProgressDate === null) {
+
+                $newStatus = $item['toString'];
+
+                $statusTranslations = $this->timeline->getStatusTranslations();
+                $isInProgress = ($newStatus === self::STATUS_IN_PROGRESS || $newStatus === $statusTranslations['In Progress']);
+                $isDone = ($newStatus === self::STATUS_DONE || $newStatus === $statusTranslations['Done']);
+
+                // S'il s'agit du premier passage à En cours
+                if ($isInProgress && $this->firstInProgressDate === null) {
                     $this->firstInProgressDate = $transitionDate;
                 }
-                // Dernier passage à Done (pour prendre en compte les éventuels allers-retours de status)
-                if ($item['toString'] === self::STATUS_DONE) {
+                // S'il s'agit du dernier passage à Done (pour prendre en compte les éventuels allers-retours de status)
+                if ($isDone) {
                     $this->doneDate = $transitionDate;
                 }
     
                 // Mise à jour du status courant
-                $currentStatus = $item['toString'];
+                $currentStatus = $newStatus;
                 $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
                 $currentDate = $transitionDate;
             }
+        }
+        
+        if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
+            // Debug
+            echo "Debugging issue {$this->getKey()}\n";
         }
     
         // Dernier segment (jusqu'à Done, ou date du jour si ticket pas encore résolu)
@@ -235,7 +252,11 @@ class Issue
 
     public function getStatusName(): string
     {
-        return $this->data['fields']['status']['name'] ?? '';
+        $statusName = '';
+        if (isset($this->data['fields']['status']['name'])) {
+            $statusName = $this->timeline->normalizeStatusName($this->data['fields']['status']['name']);
+        }
+        return $statusName;
     }
 
     public function getStatusCategory(): array
@@ -378,13 +399,13 @@ class Issue
         //Récupère les status Jira du fichier de configuration (config_files/jira_workflow.json)
         $workflow = $this->config->getJiraWorkflow();
 
-        // Normalisation des status (minuscules)
-        $refinementStatuses = array_map(fn ($s) => mb_strtolower($s, 'UTF-8'), $workflow['refinement_statuses'] ?? []);
-        $sprintStatuses = array_map(fn ($s) => mb_strtolower($s, 'UTF-8'), $workflow['sprint_statuses'] ?? []);
-        $doneStatuses = array_map(fn ($s) => mb_strtolower($s, 'UTF-8'), $workflow['done_statuses'] ?? []);
+        // Normalisation des status
+        $refinementStatuses = $this->timeline->normalizeArray($workflow['refinement_statuses'] ?? []);
+        $sprintStatuses = $this->timeline->normalizeArray($workflow['sprint_statuses'] ?? []);
+        $doneStatuses = $this->timeline->normalizeArray($workflow['done_statuses'] ?? []);
 
         // Status initial
-        $currentStatus = mb_strtolower($this->data['fields']['status']['name'], 'UTF-8');
+        $currentStatus = $this->timeline->normalizeStatusName($this->data['fields']['status']['name']);
         $currentDate = new \DateTime($this->data['fields']['created']);
 
         // Ordre chronologique
@@ -398,6 +419,11 @@ class Issue
 
                 if ($item['field'] !== 'status') {
                     continue;
+                }
+
+                if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
+                    // Debug
+                    echo "Debugging issue {$this->getKey()}\n";
                 }
 
                 // Nb de jours dans le status courant
@@ -417,7 +443,7 @@ class Issue
                 }
 
                 // Passage au status suivant
-                $currentStatus = mb_strtolower($item['toString'], 'UTF-8');
+                $currentStatus = $this->timeline->normalizeStatusName($item['toString']);
                 $currentDate = $transitionDate;
             }
         }

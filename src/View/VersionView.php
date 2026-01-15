@@ -12,6 +12,10 @@ class VersionView
     const STATUS_TRANSLATION_TODO = 'À faire';
     const STATUS_TRANSLATION_IN_PROGRESS = 'En cours';
     const STATUS_TRANSLATION_DONE = 'Terminé';
+    const REFINEMENT_ICON = '🧠';
+    const SPRINT_ICON = '⚙️';
+    const DONE_ICON = '✅';
+    const OTHER_ICON = '❓';
 
     private Config $config;
     private Timeline $timeline;
@@ -56,35 +60,48 @@ class VersionView
         $this->calculateVersionLeadAndCycleTime();
     }
 
-
     /**
-     * formatAndTranslateStatusName
+     * normalizeStatusName
      *
      * @param  mixed $statusName
      * @return string
      */
-    public function formatAndTranslateStatusName(string $statusName): string
+    public function normalizeStatusName(string $statusName): string
     {
-        $originalStatusName = $statusName;
-        $statusName = mb_strtolower($statusName, 'UTF-8');
+        $statusName = $this->timeline->normalizeStatusName($statusName);
+        $icon = $this->getCategoryStatusIcon($statusName);
+        return $icon . ' ' . $statusName;
+    }
+    
+    /**
+     * getCategoryStatusIcon
+     *
+     * @param  mixed $statusName
+     * @return string
+     */
+    public function getCategoryStatusIcon(string $statusName): string
+    {
+        $statusName = $this->timeline->normalizeStatusName($statusName);
 
-        switch ($statusName) {
-            case 'to do':
-            case 'todo':
-                $statusName = self::STATUS_TRANSLATION_TODO;
-                break;
-            case 'in progress':
-                $statusName = self::STATUS_TRANSLATION_IN_PROGRESS;
-                break;
-            case 'done':
-                $statusName = self::STATUS_TRANSLATION_DONE;
-                break;
-            default:
-                // leave as is
-                break;
+        $workflow = $this->config->getJiraWorkflow();
+        $refinementStatuses = $this->timeline->normalizeArray($workflow['refinement_statuses']);
+        $sprintStatuses = $this->timeline->normalizeArray($workflow['sprint_statuses']);
+        $doneStatuses = $this->timeline->normalizeArray($workflow['done_statuses']);
+
+         // Détermine l'icône en fonction de la catégorie du status
+         $icon = self::OTHER_ICON;
+
+        if (in_array($statusName, $refinementStatuses ?? [], true)) {
+            $icon = self::REFINEMENT_ICON;
+        } elseif (in_array($statusName, $sprintStatuses ?? [], true)) {
+            $icon = self::SPRINT_ICON;
+        } elseif (in_array($statusName, $doneStatuses ?? [], true)) {
+            $icon = self::DONE_ICON;
+        } else {
+            $icon = self::OTHER_ICON;
         }
 
-        return htmlspecialchars(ucfirst($statusName));
+        return $icon;
     }
     
 

@@ -4,6 +4,7 @@ namespace App\Model;
 use Exception;
 use App\Service\JiraService;
 use App\Model\Config;
+use App\Model\Timeline;
 
 /**
  * ReleaseModel
@@ -14,6 +15,7 @@ class ReleaseModel
 
     protected JiraService $jiraService;
     protected Config $config;
+    protected Timeline $timeline;
 
     protected array $versionData = [];
     protected array $versionIssuesIds = [];
@@ -28,6 +30,7 @@ class ReleaseModel
     {
         $this->jiraService = new JiraService();
         $this->config = new Config();
+        $this->timeline = new Timeline();
     }
     
     /**
@@ -172,7 +175,7 @@ class ReleaseModel
         foreach ($this->versionIssues as $issue) {
             // Agrégation par status
             foreach ($issue->getTimeByStatus(false) as $statusName => $timeSpent) {
-                $statusName = mb_strtolower($statusName, 'UTF-8');
+                $statusName = $this->timeline->normalizeStatusName($statusName);
                 $timeByStatus[$statusName] = ($timeByStatus[$statusName] ?? 0) + $timeSpent;
             }
         }

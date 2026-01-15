@@ -74,9 +74,9 @@
                     <!-- Time Breakdown -->
                     <div class="metric">
                         <span class="metric-title">🧮 <b>Temps par phase</b></span>
-                        <span>Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInRefinement(); ?> jours /ticket.</strong></em></span>
-                        <span>Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInSprint(); ?> jours /ticket.</strong></em></span>
-                        <span>Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInOther(); ?> jours /ticket.</strong></em></span>
+                        <span>🧠 Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInRefinement(); ?> jours /ticket.</strong></em></span>
+                        <span>⚙️ Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInSprint(); ?> jours /ticket.</strong></em></span>
+                        <span>❓ Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInOther(); ?> jours /ticket.</strong></em></span>
                     </div>
                 </div>
             </div>
@@ -90,14 +90,14 @@
                     <ul>
                         <?php $timelineData = $view->getTimelineByStatus(); ?>
                         <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
-                            <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                            <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                         <?php endforeach; ?>
 
                         <?php if (!empty($timelineData['otherStatuses'])): ?>
                             <br/>
                             Autres statuts :
                             <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
-                                <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </ul>
@@ -145,21 +145,21 @@
                                     <ul>
                                         <?php $issueTimelineData = $issue->getTimeByStatus(true); ?>
                                         <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
-                                            <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                            <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                                         <?php endforeach; ?>
                                         
                                         <?php if (!empty($issueTimelineData['otherStatuses'])): ?>
                                             <br/>
                                             Autres statuts :
                                             <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>
-                                                <li><?= $view->formatAndTranslateStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                                             <?php endforeach; ?>
                                         <?php endif; ?>
                                     </ul>
                                 </details>
                                 <!-- Détails temps par catégorie de status -->
                                 <details>
-                                    <summary>Détails du temps passé par étapes du cycle de vie du ticket</summary>
+                                    <summary>Totaux temps passé par étapes du cycle de vie du ticket</summary>
                                     <ul>
                                         <li>🧠 Affinage : <strong><?= $issue->getTimeSpentInRefinement(); ?> jours</strong></li>
                                         <li>⚙️ Réal + Qualif : <strong><?= $issue->getTimeSpentInSprint(); ?> jours</strong></li>
