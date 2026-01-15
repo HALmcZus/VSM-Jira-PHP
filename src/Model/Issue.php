@@ -366,6 +366,8 @@ class Issue
     /**
      * Calcule le temps cumulé par grandes étapes du workflow Jira (Affinage / Travail réel / Autre), basé sur la configuration.
      * Les statuts de type "done" sont ignorés.
+     *
+     * @return void
      */
     public function calculateWorkflowTimeBreakdown()
     {
@@ -375,15 +377,17 @@ class Issue
 
         //Récupère les status Jira du fichier de configuration (config_files/jira_workflow.json)
         $workflow = $this->config->getJiraWorkflow();
-        $refinementStatuses = array_map('mb_strtolower', $workflow['refinement_statuses'] ?? []);
-        $sprintStatuses = array_map('mb_strtolower', $workflow['sprint_statuses'] ?? []);
-        $doneStatuses = array_map('mb_strtolower', $workflow['done_statuses'] ?? []);
+
+        // Normalisation des status (minuscules)
+        $refinementStatuses = array_map(fn ($s) => mb_strtolower($s, 'UTF-8'), $workflow['refinement_statuses'] ?? []);
+        $sprintStatuses = array_map(fn ($s) => mb_strtolower($s, 'UTF-8'), $workflow['sprint_statuses'] ?? []);
+        $doneStatuses = array_map(fn ($s) => mb_strtolower($s, 'UTF-8'), $workflow['done_statuses'] ?? []);
 
         // Status initial
         $currentStatus = mb_strtolower($this->data['fields']['status']['name'], 'UTF-8');
         $currentDate = new \DateTime($this->data['fields']['created']);
 
-        // Sécurisation : tri chronologique
+        // Ordre chronologique
         usort(
             $this->data['changelog']['histories'],
             fn ($a, $b) => strtotime($a['created']) <=> strtotime($b['created'])
@@ -396,12 +400,13 @@ class Issue
                     continue;
                 }
 
+                // Nb de jours dans le status courant
                 $transitionDate = new \DateTime($history['created']);
                 $days = (int) $currentDate->diff($transitionDate)->days;
 
                 // On ignore les statuts dans la catégorie "Done"
                 if (!in_array($currentStatus, $doneStatuses, true)) {
-                    //On compte le nombre de jours par catégorie
+                    //On ajoute le nombre de jours dans la catégorie du status courant
                     if (in_array($currentStatus, $refinementStatuses, true)) {
                         $this->workflowTimeBreakdown['refinement'] += $days;
                     } elseif (in_array($currentStatus, $sprintStatuses, true)) {
