@@ -97,16 +97,4 @@ class Timeline
         ? ['workflowStatuses' => $sortedTimeline, 'otherStatuses' => $otherStatuses] 
         : array_merge($sortedTimeline, $otherStatuses);
     }
-
-    /**
-     * Format a string as a key (snake_case without accents nor special chars)
-     */
-    public function stringAsKey(string $string): string
-    {
-        $string = mb_strtolower($string, 'UTF-8');
-        $string = iconv('UTF-8', 'ASCII//TRANSLIT', $string);
-        $string = preg_replace('/[^a-z0-9]+/', '_', $string);
-    
-        return trim($string, '_');
-    }
 }

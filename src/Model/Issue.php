@@ -135,10 +135,6 @@ class Issue
                 if ($item['field'] !== 'status') {
                     continue;
                 }
-                if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
-                    // Debug
-                    echo "Debugging issue {$this->getKey()}\n";
-                }
 
                 //Date du changement du status
                 $transitionDate = new \DateTime($history['created']);
@@ -153,7 +149,7 @@ class Issue
     
 
                 $newStatus = $item['toString'];
-                
+
                 $isInProgress = ($newStatus === self::STATUS_IN_PROGRESS);
                 $isDone = ($newStatus === self::STATUS_DONE);
 
@@ -171,11 +167,6 @@ class Issue
                 $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
                 $currentDate = $transitionDate;
             }
-        }
-        
-        if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
-            // Debug
-            echo "Debugging issue {$this->getKey()}\n";
         }
     
         // Dernier segment (jusqu'à Done, ou date du jour si ticket pas encore résolu)
@@ -410,11 +401,6 @@ class Issue
 
                 if ($item['field'] !== 'status') {
                     continue;
-                }
-
-                if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
-                    // Debug
-                    echo "Debugging issue {$this->getKey()}\n";
                 }
 
                 // Nb de jours dans le status courant

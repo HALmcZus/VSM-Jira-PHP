@@ -10,7 +10,7 @@
     ],
     "sprint_statuses": [
         "To Do",
-        "à faire",
+        "À faire",
         "In Progress",
         "Revue Dév",
         "Revue Dév / Pair",
@@ -23,10 +23,5 @@
         "Done",
         "Terminé(e)",
         "abandonné"
-    ],
-    "translations": {
-        "To Do": "à faire",
-        "In Progress": "en cours",
-        "Done": "Terminé"
-    }
+    ]
 }
