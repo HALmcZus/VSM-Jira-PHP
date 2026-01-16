@@ -118,7 +118,7 @@ class Issue
         }
     
         // Status initial
-        $currentStatus = $this->timeline->normalizeStatusName($this->data['fields']['status']['name']);
+        $currentStatus = $this->data['fields']['status']['name'];
         $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
         $currentDate = new \DateTime($this->data['fields']['created']);
     
@@ -135,7 +135,6 @@ class Issue
                 if ($item['field'] !== 'status') {
                     continue;
                 }
-                
                 if ($this->getKey() === 'GCS-610' || $this->getKey() === 'GCS-113') {
                     // Debug
                     echo "Debugging issue {$this->getKey()}\n";
@@ -154,10 +153,9 @@ class Issue
     
 
                 $newStatus = $item['toString'];
-
-                $statusTranslations = $this->timeline->getStatusTranslations();
-                $isInProgress = ($newStatus === self::STATUS_IN_PROGRESS || $newStatus === $statusTranslations['In Progress']);
-                $isDone = ($newStatus === self::STATUS_DONE || $newStatus === $statusTranslations['Done']);
+                
+                $isInProgress = ($newStatus === self::STATUS_IN_PROGRESS);
+                $isDone = ($newStatus === self::STATUS_DONE);
 
                 // S'il s'agit du premier passage à En cours
                 if ($isInProgress && $this->firstInProgressDate === null) {
@@ -249,11 +247,7 @@ class Issue
 
     public function getStatusName(): string
     {
-        $statusName = '';
-        if (isset($this->data['fields']['status']['name'])) {
-            $statusName = $this->timeline->normalizeStatusName($this->data['fields']['status']['name']);
-        }
-        return $statusName;
+        return $this->data['fields']['status']['name'] ?? '';
     }
 
     public function getStatusCategory(): array
@@ -397,12 +391,12 @@ class Issue
         $workflow = $this->config->getJiraWorkflow();
 
         // Normalisation des status
-        $refinementStatuses = $this->timeline->normalizeArray($workflow['refinement_statuses'] ?? []);
-        $sprintStatuses = $this->timeline->normalizeArray($workflow['sprint_statuses'] ?? []);
-        $doneStatuses = $this->timeline->normalizeArray($workflow['done_statuses'] ?? []);
+        $refinementStatuses = $workflow['refinement_statuses'] ?? [];
+        $sprintStatuses = $workflow['sprint_statuses'] ?? [];
+        $doneStatuses = $workflow['done_statuses'] ?? [];
 
         // Status initial
-        $currentStatus = $this->timeline->normalizeStatusName($this->data['fields']['status']['name']);
+        $currentStatus = $this->data['fields']['status']['name'];
         $currentDate = new \DateTime($this->data['fields']['created']);
 
         // Ordre chronologique
@@ -440,7 +434,7 @@ class Issue
                 }
 
                 // Passage au status suivant
-                $currentStatus = $this->timeline->normalizeStatusName($item['toString']);
+                $currentStatus = $item['toString'];
                 $currentDate = $transitionDate;
             }
         }

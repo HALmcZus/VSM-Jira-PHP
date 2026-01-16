@@ -43,34 +43,25 @@ class VersionView
      */
     public function normalizeStatusName(string $statusName): string
     {
-        $statusName = $this->timeline->normalizeStatusName($statusName);
         $icon = $this->getCategoryStatusIcon($statusName);
         return $icon . ' ' . $statusName;
     }
     
     /**
-     * getCategoryStatusIcon
+     * Détermine l'icône en fonction de la catégorie du status
      *
      * @param  mixed $statusName
      * @return string
      */
     public function getCategoryStatusIcon(string $statusName): string
     {
-        $statusName = $this->timeline->normalizeStatusName($statusName);
-
         $workflow = $this->config->getJiraWorkflow();
-        $refinementStatuses = $this->timeline->normalizeArray($workflow['refinement_statuses']);
-        $sprintStatuses = $this->timeline->normalizeArray($workflow['sprint_statuses']);
-        $doneStatuses = $this->timeline->normalizeArray($workflow['done_statuses']);
 
-         // Détermine l'icône en fonction de la catégorie du status
-         $icon = self::OTHER_ICON;
-
-        if (in_array($statusName, $refinementStatuses ?? [], true)) {
+        if (in_array($statusName, $workflow['refinement_statuses'] ?? [], true)) {
             $icon = self::REFINEMENT_ICON;
-        } elseif (in_array($statusName, $sprintStatuses ?? [], true)) {
+        } elseif (in_array($statusName, $workflow['sprint_statuses'] ?? [], true)) {
             $icon = self::SPRINT_ICON;
-        } elseif (in_array($statusName, $doneStatuses ?? [], true)) {
+        } elseif (in_array($statusName, $workflow['done_statuses'] ?? [], true)) {
             $icon = self::DONE_ICON;
         } else {
             $icon = self::OTHER_ICON;

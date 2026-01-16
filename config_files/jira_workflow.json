@@ -1,31 +1,32 @@
 {
     "refinement_statuses": [
-        "backlog",
-        "en rédaction",
-        "a affiner",
-        "affinée",
-        "vainci 1",
-        "a planifier"
+        "Backlog",
+        "En rédaction",
+        "A affiner",
+        "Affinée",
+        "Stratégie de Qualif",
+        "Vainci 1",
+        "A planifier"
     ],
     "sprint_statuses": [
         "To Do",
         "à faire",
         "In Progress",
-        "revue dév",
-        "revue dév / pair",
-        "a qualifier",
-        "qualif en cours",
-        "validation PO",
-        "validation PO / Vainci"
+        "Revue Dév",
+        "Revue Dév / Pair",
+        "A qualifier",
+        "Qualif En Cours",
+        "Validation PO",
+        "Validation PO / Vainci"
     ],
     "done_statuses": [
         "Done",
-        "terminé(e)",
+        "Terminé(e)",
         "abandonné"
     ],
     "translations": {
         "To Do": "à faire",
         "In Progress": "en cours",
-        "Done": "terminé(e)"
+        "Done": "Terminé"
     }
 }

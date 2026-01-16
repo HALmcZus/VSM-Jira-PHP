@@ -73,15 +73,11 @@ class Timeline
             $workflow['done_statuses'] ?? []
         );
 
-        $orderedStatuses = array_map('mb_strtolower', $orderedStatuses);
-        $timelineByStatus = array_change_key_case($timelineByStatus, CASE_LOWER);
-
         // Sort known statuses first
         $sortedTimeline = [];
         foreach ($orderedStatuses as $status) {
             if (isset($timelineByStatus[$status]) && $timelineByStatus[$status] > 0) {
-                $key = $this->normalizeStatusName($status);
-                $sortedTimeline[$key] = $this->normalizeStatusName($timelineByStatus[$status]);
+                $sortedTimeline[$status] = $timelineByStatus[$status];
                 unset($timelineByStatus[$status]);
             }
         }
@@ -93,7 +89,7 @@ class Timeline
                 if ($days <= 0) {
                     continue;
                 }
-                $otherStatuses[$this->normalizeStatusName($status)] = $days;
+                $otherStatuses[$status] = $days;
             }
         }
 
@@ -101,56 +97,16 @@ class Timeline
         ? ['workflowStatuses' => $sortedTimeline, 'otherStatuses' => $otherStatuses] 
         : array_merge($sortedTimeline, $otherStatuses);
     }
-    
-    /**
-     * getStatusTranslations
-     *
-     * @return array
-     */
-    public function getStatusTranslations(): array
-    {
-        $workflow = $this->config->getJiraWorkflow();
-        $translations = $workflow['translations'] ?? [];
-        return array_map('mb_strtolower', $translations);
-    }
-    
-    /**
-     * normalizeStatusName : lowercase, translate if needed then capitalize first letter
-     *
-     * @param  mixed $status
-     * @return string
-     */
-    public function normalizeStatusName(string $status): string
-    {
-        // Minuscules
-        $formattedStatus = mb_strtolower($status, 'UTF-8');
-        
-        //Si le status est natif Jira, on le traduit
-        $statusTranslations = $this->getStatusTranslations();
-        if (isset($statusTranslations[$formattedStatus])) {
-            $formattedStatus = $statusTranslations[$formattedStatus];
-        }
 
-        // Première lettre en majuscule
-        return ucfirst($formattedStatus);
-    }
-    
     /**
-     * normalizeArray
-     *
-     * @param  mixed $array
-     * @return array
+     * Format a string as a key (snake_case without accents nor special chars)
      */
-    public function normalizeArray($array): array
+    public function stringAsKey(string $string): string
     {
-        if (empty($array)) {
-            return [];
-        }
-
-        $normalizedArray = [];
-        foreach ($array as $item) {
-            $normalizedArray[] = $this->normalizeStatusName($item);
-        }
-        return $normalizedArray;
+        $string = mb_strtolower($string, 'UTF-8');
+        $string = iconv('UTF-8', 'ASCII//TRANSLIT', $string);
+        $string = preg_replace('/[^a-z0-9]+/', '_', $string);
+    
+        return trim($string, '_');
     }
 }

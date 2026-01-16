@@ -154,7 +154,6 @@ class Version
         foreach ($this->versionIssues as $issue) {
             // Agrégation par status
             foreach ($issue->getTimeByStatus(false) as $statusName => $timeSpent) {
-                $statusName = $this->timeline->normalizeStatusName($statusName);
                 $timeByStatus[$statusName] = ($timeByStatus[$statusName] ?? 0) + $timeSpent;
             }
         }
