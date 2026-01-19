@@ -1,27 +1,23 @@
 <?php
+
 namespace App\View;
 
 use App\Model\Config;
 use App\Model\Version;
-use App\Model\Timeline;
 
 /**
  * Formate les données du Back, et les expose au Front
  */
 class VersionView
 {
-    const STATUS_TRANSLATION_TODO = 'À faire';
-    const STATUS_TRANSLATION_IN_PROGRESS = 'En cours';
-    const STATUS_TRANSLATION_DONE = 'Terminé';
     const REFINEMENT_ICON = '🧠';
     const SPRINT_ICON = '⚙️';
     const DONE_ICON = '✅';
     const OTHER_ICON = '❓';
 
     private Config $config;
-    private Timeline $timeline;
     private Version $version;
-  
+
     /**
      * __construct
      *
@@ -31,7 +27,6 @@ class VersionView
     public function __construct(Version $version)
     {
         $this->config = new Config();
-        $this->timeline = new Timeline();
         $this->version = $version;
     }
 
@@ -46,7 +41,7 @@ class VersionView
         $icon = $this->getCategoryStatusIcon($statusName);
         return $icon . ' ' . $statusName;
     }
-    
+
     /**
      * Détermine l'icône en fonction de la catégorie du status
      *
@@ -69,13 +64,12 @@ class VersionView
 
         return $icon;
     }
-    
 
     /**
      * *********************
      * * All about Version *
      * *********************
-     */    
+     */
     /**
      * getVersionId
      *
@@ -85,7 +79,7 @@ class VersionView
     {
         return $this->version->getId() ?? '?';
     }
-    
+
     /**
      * getVersionName
      *
@@ -95,7 +89,7 @@ class VersionView
     {
         return $this->version->getName() ?? '<i>Nom de version non renseigné.</i>';
     }
-    
+
     /**
      * getVersionDescription
      *
@@ -103,11 +97,11 @@ class VersionView
      */
     public function getVersionDescription(): string
     {
-        return $this->version->getDescription() 
-        ? htmlspecialchars($this->version->getDescription(), ENT_QUOTES, 'UTF-8')
-        : '<i>Description non renseignée.</i>'; 
+        return $this->version->getDescription()
+            ? htmlspecialchars($this->version->getDescription(), ENT_QUOTES, 'UTF-8')
+            : '<i>Description non renseignée.</i>';
     }
-    
+
     /**
      * getVersionUrl
      *
@@ -117,7 +111,7 @@ class VersionView
     {
         return $this->version->getUrl() ?? '#';
     }
-    
+
     /**
      * getVersionStartDate
      *
@@ -127,7 +121,7 @@ class VersionView
     {
         return $this->version->getStartDate() ?? '<i>Date non renseignée.</i>';
     }
-    
+
     /**
      * getVersionReleaseDate
      *
@@ -137,7 +131,7 @@ class VersionView
     {
         return $this->version->getReleaseDate() ?? '<i>Non renseignée.</i>';
     }
-    
+
     /**
      * isVersionReleased
      *
@@ -147,7 +141,7 @@ class VersionView
     {
         return $this->version->isReleased();
     }
-    
+
     /**
      * isVersionOverdue
      *
@@ -157,7 +151,7 @@ class VersionView
     {
         return $this->version->isOverdue();
     }
-    
+
     /**
      * getProjectId
      */
@@ -165,7 +159,7 @@ class VersionView
     {
         return $this->version->getProjectId();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -175,7 +169,7 @@ class VersionView
     {
         return $this->version->getTotalLeadTime();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -185,7 +179,7 @@ class VersionView
     {
         return $this->version->getAverageLeadTime();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -195,7 +189,7 @@ class VersionView
     {
         return $this->version->getTotalCycleTime();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -205,7 +199,7 @@ class VersionView
     {
         return $this->version->getAverageCycleTime();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -215,7 +209,7 @@ class VersionView
     {
         return $this->version->getTotalTimeSpentInRefinement();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -225,7 +219,7 @@ class VersionView
     {
         return $this->version->getTotalTimeSpentInSprint();
     }
-    
+
     /**
      * getTotalLeadTime
      *
@@ -240,7 +234,7 @@ class VersionView
      * ******************************
      * * All about Version's Issues *
      * ******************************
-     */    
+     */
     /**
      * getIssues
      *
@@ -250,7 +244,7 @@ class VersionView
     {
         return $this->version->getIssues();
     }
-    
+
     /**
      * getIssuesCount
      *
@@ -260,7 +254,7 @@ class VersionView
     {
         return $this->version->getIssuesCount();
     }
-    
+
     /**
      * getStatusCSSClass
      *
@@ -290,7 +284,7 @@ class VersionView
     {
         return $this->version->getTimelineByStatus();
     }
-    
+
     /**
      * getAverageTimeSpentInRefinement
      *
@@ -300,7 +294,7 @@ class VersionView
     {
         return $this->version->getAverageTimeSpentInRefinement();
     }
-    
+
     /**
      * getAverageTimeSpentInSprint
      *
@@ -310,7 +304,7 @@ class VersionView
     {
         return $this->version->getAverageTimeSpentInSprint();
     }
-        
+
     /**
      * getAverageTimeSpentInOther
      *

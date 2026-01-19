@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model;
 
 use Exception;
@@ -19,7 +20,7 @@ class Issue
     const STATUS_IN_PROGRESS = 'In Progress';
     const STATUS_DONE = 'Done';
     const ISSUE_URL = '{base_url}/browse/{issue_key}';
-    
+
     protected Config $config;
     protected Timeline $timeline;
 
@@ -39,7 +40,6 @@ class Issue
     protected int $leadTime = 0;
     protected int $cycleTime = 0;
     protected array $timeByStatus = [];
-    protected array $timeByCategory = [];
     protected array $workflowTimeBreakdown = [
         'refinement' => 0,
         'sprint' => 0,
@@ -56,7 +56,10 @@ class Issue
         $this->config = new Config();
         $this->timeline = new Timeline();
 
-        $this->initialize($data);
+        $this->initializeData($data);
+        $this->timeline->buildStatusTimeline($this);
+        $this->setLeadTime();
+        $this->setCycleTime();
     }
 
     /**
@@ -65,17 +68,15 @@ class Issue
      * @param array $data
      * @return void
      */
-    private function initialize(array $data): void
+    private function initializeData(array $data): void
     {
         foreach ($data as $index => $value) {
             $this->setData($index, $value);
         }
 
-        $this->initializeDates();
-        $this->buildTimeline();
-        $this->calculateWorkflowTimeBreakdown();
-        $this->setLeadTime();
-        $this->setCycleTime();
+        if (!empty($this->data['fields']['created'])) {
+            $this->createdDate = new \DateTime($this->data['fields']['created']);
+        }
     }
 
     /**
@@ -90,99 +91,6 @@ class Issue
         $this->data[$key] = $value;
     }
 
-    /**
-     * Initialise les dates principales
-     *
-     * @return void
-     */
-    private function initializeDates(): void
-    {
-        if (!empty($this->data['fields']['created'])) {
-            $this->createdDate = new \DateTime($this->data['fields']['created']);
-        }
-    }
-
-    /**
-     * Reconstruit la timeline de l’issue à partir du changelog Jira
-     * et calcule le temps cumulé par status et par status category.
-     *
-     * Cette méthode est appelée une seule fois à l'initialisation
-     * de l'objet Issue.
-     *
-     * @return void
-     */
-    protected function buildTimeline(): void
-    {
-        if (empty($this->data['changelog']['histories'])) {
-            return;
-        }
-    
-        // Status initial
-        $currentStatus = $this->data['fields']['status']['name'];
-        $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
-        $currentDate = new \DateTime($this->data['fields']['created']);
-    
-        // Sécurisation : tri chronologique du changelog
-        usort(
-            $this->data['changelog']['histories'],
-            fn ($a, $b) => strtotime($a['created']) <=> strtotime($b['created'])
-        );
-    
-        //Parcours du changelog, en ciblant uniquement les changements de status
-        foreach ($this->data['changelog']['histories'] as $history) {
-            foreach ($history['items'] as $item) {
-    
-                if ($item['field'] !== 'status') {
-                    continue;
-                }
-
-                //Date du changement du status
-                $transitionDate = new \DateTime($history['created']);
-                $days = (int) $currentDate->diff($transitionDate)->days;
-    
-                // Agrégation
-                $this->timeByStatus[$currentStatus] =
-                    ($this->timeByStatus[$currentStatus] ?? 0) + $days;
-    
-                $this->timeByCategory[$currentCategory] =
-                    ($this->timeByCategory[$currentCategory] ?? 0) + $days;
-    
-
-                $newStatus = $item['toString'];
-
-                $isInProgress = ($newStatus === self::STATUS_IN_PROGRESS);
-                $isDone = ($newStatus === self::STATUS_DONE);
-
-                // S'il s'agit du premier passage à En cours
-                if ($isInProgress && $this->firstInProgressDate === null) {
-                    $this->firstInProgressDate = $transitionDate;
-                }
-                // S'il s'agit du dernier passage à Done (pour prendre en compte les éventuels allers-retours de status)
-                if ($isDone) {
-                    $this->doneDate = $transitionDate;
-                }
-    
-                // Mise à jour du status courant
-                $currentStatus = $newStatus;
-                $currentCategory = $this->data['fields']['status']['statusCategory']['name'];
-                $currentDate = $transitionDate;
-            }
-        }
-    
-        // Dernier segment (jusqu'à Done, ou date du jour si ticket pas encore résolu)
-        $endDate = !empty($this->data['fields']['resolutiondate'])
-            ? new \DateTime($this->data['fields']['resolutiondate'])
-            : new \DateTime();
-    
-        $days = (int) $currentDate->diff($endDate)->days;
-    
-        $this->timeByStatus[$currentStatus] =
-            ($this->timeByStatus[$currentStatus] ?? 0) + $days;
-    
-        $this->timeByCategory[$currentCategory] =
-            ($this->timeByCategory[$currentCategory] ?? 0) + $days;
-    }
-    
 
     /* =======================
      * ====== GETTERS ========
@@ -241,11 +149,11 @@ class Issue
         return $this->data['fields']['status']['name'] ?? '';
     }
 
-    public function getStatusCategory(): array
-    {
-        return $this->data['fields']['status']['statusCategory'] ?? [];
-    }
-
+    /**
+     * getStatusCategoryColor : retrieves the color name of the status category of the issue
+     *
+     * @return string the color name of the status category, or an empty string if not found
+     */
     public function getStatusCategoryColor(): string
     {
         return $this->data['fields']['status']['statusCategory']['colorName'] ?? '';
@@ -263,11 +171,45 @@ class Issue
             return null;
         }
 
-        return $format 
-        ? $this->createdDate->format('Y-m-d') 
-        : $this->createdDate;
+        return $format
+            ? $this->createdDate->format('Y-m-d')
+            : $this->createdDate;
     }
-    
+
+    /**
+     * Return the resolution date as a DateTime object.
+     *
+     * @return \DateTime|null
+     */
+    public function getResolutionDateTime(): \DateTime|null
+    {
+        return !empty($this->data['fields']['resolutiondate'])
+            ? new \DateTime($this->data['fields']['resolutiondate'])
+            : new \DateTime();
+    }
+
+    /**
+     * Return the history of the issue as an array.
+     * If $sorted is true, the history will be sorted by date (oldest first).
+     *
+     * @return array
+     */
+    public function getHistory($sorted = true): array
+    {
+        $history = $this->data['changelog']['histories'] ?? [];
+        if (empty($history) || !$sorted) {
+            return $history;
+        }
+
+        // Tri chronologique du changelog
+        usort(
+            $history,
+            fn($a, $b) => strtotime($a['created']) <=> strtotime($b['created'])
+        );
+
+        return $history;
+    }
+
     /**
      * getFirstInProgressDate
      *
@@ -280,11 +222,23 @@ class Issue
             return null;
         }
 
-        return $format 
-        ? $this->firstInProgressDate->format('Y-m-d') 
-        : $this->firstInProgressDate;
+        return $format
+            ? $this->firstInProgressDate->format('Y-m-d')
+            : $this->firstInProgressDate;
     }
-    
+
+    /**
+     * Set the first in-progress date of the issue.
+     *
+     * @param \DateTime $date The first in-progress date of the issue.
+     *
+     * @return void
+     */
+    public function setFirstInProgressDate(\DateTime $date): void
+    {
+        $this->firstInProgressDate = $date;
+    }
+
     /**
      * getDoneDate
      *
@@ -297,11 +251,23 @@ class Issue
             return null;
         }
 
-        return $format 
-        ? $this->doneDate->format('Y-m-d') 
-        : $this->doneDate;
+        return $format
+            ? $this->doneDate->format('Y-m-d')
+            : $this->doneDate;
     }
-    
+
+    /**
+     * Set the Done date of the issue.
+     *
+     * @param \DateTime $date The Done date of the issue.
+     *
+     * @return void
+     */
+    public function setDoneDate(\DateTime $date): void
+    {
+        $this->doneDate = $date;
+    }
+
     /**
      * setLeadTime (jours calendaires)
      *
@@ -319,14 +285,14 @@ class Issue
 
     /**
      * Lead Time (jours calendaires)
-     * 
+     *
      * @return int
      */
     public function getLeadTime(): int
     {
         return $this->leadTime;
     }
-    
+
     /**
      * setCycleTime (jours ouvrés)
      *
@@ -355,7 +321,20 @@ class Issue
     {
         return $this->cycleTime;
     }
-    
+
+
+    /**
+     * Set the timeline by status of the issue.
+     *
+     * @param array $timeByStatus Timeline by status, where each key is a status name and each value is the number of days spent in that status.
+     *
+     * @return void
+     */
+    public function setTimeByStatus(array $timeByStatus): void
+    {
+        $this->timeByStatus = $timeByStatus;
+    }
+
     /**
      * Temps cumulé passé par status Jira
      *
@@ -367,63 +346,20 @@ class Issue
     }
 
     /**
-     * Calcule le temps cumulé par grandes étapes du workflow Jira (Affinage / Travail réel / Autre), basé sur la configuration.
-     * Les statuts de type "done" sont ignorés.
+     * Sets the workflow time breakdown for the issue.
+     *
+     * @param array $workflowTimeBreakdown Workflow time breakdown, where each key is a category name and each value is the number of days spent in that category.
      *
      * @return void
      */
-    public function calculateWorkflowTimeBreakdown()
+    public function setWorkflowTimeBreakdown(array $workflowTimeBreakdown)
     {
-        if (empty($this->data['changelog']['histories'])) {
-            return;
-        }
+        $this->workflowTimeBreakdown = $workflowTimeBreakdown;
+    }
 
-        //Récupère les status Jira du fichier de configuration (config_files/jira_workflow.json)
-        $workflow = $this->config->getJiraWorkflow();
-
-        // Normalisation des status
-        $refinementStatuses = $workflow['refinement_statuses'] ?? [];
-        $sprintStatuses = $workflow['sprint_statuses'] ?? [];
-        $doneStatuses = $workflow['done_statuses'] ?? [];
-
-        // Status initial
-        $currentStatus = $this->data['fields']['status']['name'];
-        $currentDate = new \DateTime($this->data['fields']['created']);
-
-        // Ordre chronologique
-        usort(
-            $this->data['changelog']['histories'],
-            fn ($a, $b) => strtotime($a['created']) <=> strtotime($b['created'])
-        );
-
-        foreach ($this->data['changelog']['histories'] as $history) {
-            foreach ($history['items'] as $item) {
-
-                if ($item['field'] !== 'status') {
-                    continue;
-                }
-
-                // Nb de jours dans le status courant
-                $transitionDate = new \DateTime($history['created']);
-                $days = (int) $currentDate->diff($transitionDate)->days;
-
-                // On ignore les statuts dans la catégorie "Done"
-                if (!in_array($currentStatus, $doneStatuses, true)) {
-                    //On ajoute le nombre de jours dans la catégorie du status courant
-                    if (in_array($currentStatus, $refinementStatuses, true)) {
-                        $this->workflowTimeBreakdown['refinement'] += $days;
-                    } elseif (in_array($currentStatus, $sprintStatuses, true)) {
-                        $this->workflowTimeBreakdown['sprint'] += $days;
-                    } else {
-                        $this->workflowTimeBreakdown['other'] += $days;
-                    }
-                }
-
-                // Passage au status suivant
-                $currentStatus = $item['toString'];
-                $currentDate = $transitionDate;
-            }
-        }
+    public function getWorkflowTimeBreakdown(): array
+    {
+        return $this->workflowTimeBreakdown;
     }
 
     public function getTimeSpentInRefinement(): int
