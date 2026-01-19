@@ -105,6 +105,9 @@ class Timeline
 
 
     /**
+     * TODO: à découper
+     * TODO: à vérifier cas par cas
+     *
      * Reconstruit la timeline de l’issue à partir du changelog Jira
      * et calcule le temps cumulé par status et par status category.
      *
@@ -208,6 +211,11 @@ class Timeline
             default:
                 $workflowTimeBreakdown['other'] += $daysInStatus;
                 break;
+        }
+
+        // Suppression des statuts Done
+        foreach ($workflow['done_statuses'] as $doneStatus) {
+            unset($timeByStatus[$doneStatus]);
         }
 
         //Set le résultat
