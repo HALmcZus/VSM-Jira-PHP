@@ -1,0 +1,93 @@
+<?php
+
+/** @var array $timelineData */
+/** @var \App\View\VersionView $view */
+
+// Merge workflow + other statuses
+$chartData = array_merge(
+    $timelineData['workflowStatuses'] ?? [],
+    $timelineData['otherStatuses'] ?? []
+);
+
+$normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status), array_keys($chartData));
+?>
+
+<div class="card">
+    <details>
+        <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Terminés)</summary>
+
+        <!-- Chart container -->
+        <div style="width: 100%; max-width: 900px; margin: 16px auto;">
+            <canvas id="timelineChart"></canvas>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const chartLabels = <?= json_encode($normalizedLabels, JSON_HEX_TAG) ?>;
+            const chartValues = <?= json_encode(array_values($chartData), JSON_HEX_TAG) ?>;
+
+            const chartColors = chartLabels.map(label => {
+                if (label.startsWith('🧠')) return 'rgba(54, 162, 235, 0.7)';
+                if (label.startsWith('⚙️')) return 'rgba(255, 206, 86, 0.7)';
+                if (label.startsWith('❓')) return 'rgba(255, 99, 132, 0.7)';
+                return 'rgba(201, 203, 207, 0.7)';
+            });
+
+            const ctx = document.getElementById('timelineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: 'Jours par statut',
+                        data: chartValues,
+                        backgroundColor: chartColors,
+                        borderColor: chartColors.map(c => c.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jours'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Statuts'
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+
+        <!-- Optional fallback list -->
+        <ul>
+            <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
+                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+            <?php endforeach; ?>
+            <?php if (!empty($timelineData['otherStatuses'])): ?>
+                <br />Autres statuts :
+                <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
+                    <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </ul>
+
+    </details>
+</div>

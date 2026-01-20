@@ -1,15 +1,18 @@
 <?php
-    /** @var \App\Controller\VsmController $this */
-    /** @var \App\View\VersionView $view */
-    /** @var \App\Model\Issue $issue */
+
+/** @var \App\Controller\VsmController $this */
+/** @var \App\View\VersionView $view */
+/** @var \App\Model\Issue $issue */
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>VSM - Jira</title>
     <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
     <?php if ($this->getIsDemo()): ?>
         <div style="color:red;font-weight:bold;">
@@ -18,14 +21,14 @@
     <?php endif; ?>
 
     <div class="card">
-    <h1>Value Stream Mapping - Version Jira</h1>
+        <h1>Value Stream Mapping - Version Jira</h1>
         <form method="POST" action="/vsm">
             <label>FixVersion ID :</label>
             <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">
             <button type="submit">OK</button>
         </form>
     </div>
-    
+
     <?php if ($view): ?>
         <div class="card">
             <h2>
@@ -33,7 +36,7 @@
                     <?= $view->getVersionName(); ?> (<?= 'ID ' . $view->getVersionId(); ?>)
                 </a>
             </h2>
-            
+
             <p style="margin-top: 12px; color: var(--muted);">
                 <?= $view->getVersionDescription(); ?>
             </p>
@@ -54,7 +57,7 @@
                         <span class="badge orange">Status : En cours</span>
                     <?php endif; ?>
                 </div>
-                
+
                 <!-- Métriques -->
                 <div class="meta-line meta-line-metrics">
                     <!-- Lead Time -->
@@ -84,25 +87,10 @@
 
         <div class="timeline-grid">
             <!-- Timeline par Status -->
-            <div class="card">
-                <details>
-                    <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Terminés)</summary>
-                    <ul>
-                        <?php $timelineData = $view->getTimelineByStatus(); ?>
-                        <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
-                            <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-                        <?php endforeach; ?>
-
-                        <?php if (!empty($timelineData['otherStatuses'])): ?>
-                            <br/>
-                            Autres statuts :
-                            <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
-                                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </ul>
-                </details>
-            </div>
+            <?php
+            $timelineData = $view->getTimelineByStatus();
+            include __DIR__ . '/metrics/timelineChart.phtml';
+            ?>
         </div>
 
         <div class="card">
@@ -126,8 +114,8 @@
                     <?php /** @var \App\Model\Issue $issue */ ?>
                     <?php foreach ($view->getIssues() as $issue): ?>
                         <tr>
-                            <td><img src="<?= $issue->getPriorityIcon() ?? '' ?>"/><?= $issue->getPriorityName() ?? '—'; ?></td>
-                            <td><img src="<?= $issue->getIssueTypeIcon() ?? '' ?>"/><?= $issue->getIssueTypeName() ?? '—';?></td>
+                            <td><img src="<?= $issue->getPriorityIcon() ?? '' ?>" /><?= $issue->getPriorityName() ?? '—'; ?></td>
+                            <td><img src="<?= $issue->getIssueTypeIcon() ?? '' ?>" /><?= $issue->getIssueTypeName() ?? '—'; ?></td>
                             <td><strong><?= $issue->getKey(); ?></strong></td>
                             <td><a href="<?= $issue->getIssueUrl(); ?>" target="_blank"><?= htmlspecialchars($issue->getSummary()); ?></a></td>
                             <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
@@ -147,9 +135,9 @@
                                         <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
                                             <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
                                         <?php endforeach; ?>
-                                        
+
                                         <?php if (!empty($issueTimelineData['otherStatuses'])): ?>
-                                            <br/>
+                                            <br />
                                             Autres statuts :
                                             <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>
                                                 <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
@@ -171,9 +159,10 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
-        </div>       
+        </div>
 
     <?php endif; ?>
 
 </body>
+
 </html>
