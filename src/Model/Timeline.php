@@ -35,7 +35,7 @@ class Timeline
      */
     public function calculateBusinessDays(\DateTime $start, \DateTime $end): int
     {
-        if ($start > $end) {
+        if ($start >= $end) {
             return 0;
         }
 
@@ -105,7 +105,7 @@ class Timeline
 
 
     /**
-     * TODO: à vérifier cas par cas
+     * TODO: à vérifier cas par cas, parfois jours incohérents (-1 / +1)
      *
      * Reconstruit la timeline de l’issue à partir du changelog Jira
      * et calcule le temps cumulé par status et par status category.
@@ -142,7 +142,7 @@ class Timeline
                     throw new \RuntimeException('Transition date cannot be null');
                 }
                 $transitionDate = new \DateTime($historyItem['created']);
-                $daysInStatus = (int) $currentStatusCreatedDate->diff($transitionDate)->days;
+                $daysInStatus = $this->calculateBusinessDays($currentStatusCreatedDate, $transitionDate);
 
                 /**
                  * Agrégation du temps par status et catégorie de status
@@ -174,10 +174,9 @@ class Timeline
 
         /**
          * On traite le statut actuel (jusqu'à date du Done, ou date du jour si ticket pas encore résolu)
-         * TODO: à vérifier
          */
         $endDate = $issue->getResolutionDateTime();
-        $daysInStatus = (int) $currentStatusCreatedDate->diff($endDate)->days;
+        $daysInStatus = $this->calculateBusinessDays($currentStatusCreatedDate, $endDate);
 
         if (!isset($timeByStatus[$currentStatus])) {
             $timeByStatus[$currentStatus] = 0;
@@ -197,7 +196,7 @@ class Timeline
     }
 
     /**
-     * buildWorkflowTimeBreakdown
+     * updateWorkflowTimeBreakdown
      *
      * @param  mixed $currentStatus
      * @param  mixed $daysInStatus
