@@ -176,11 +176,60 @@ tr:hover {
     .timeline-grid {
         flex-direction: column;
     }
-    
+
     .meta-line-info {
         flex-wrap: wrap;
     }
     .meta-line-metrics {
         flex-direction: column;
     }
+}
+
+.vsm {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0;
+}
+
+.vsm-step {
+    min-width: 140px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    color: #fff;
+    text-align: center;
+    font-weight: 600;
+}
+
+.vsm-label {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.vsm-metric {
+    font-size: 12px;
+    opacity: 0.85;
+    font-style: italic;
+}
+
+/* catégories */
+.vsm-refinement {
+    background-color: #36a2ebb3;
+}
+
+.vsm-sprint {
+    background-color: #ffce56b3;
+}
+
+.vsm-done {
+    background-color: #2e7d32;
+}
+
+.vsm-other {
+    background-color: #ff6384b3;
+}
+
+.vsm-arrow {
+    font-size: 24px;
+    color: #333;
 }

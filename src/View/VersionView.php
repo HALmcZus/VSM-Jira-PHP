@@ -314,4 +314,55 @@ class VersionView
     {
         return $this->version->getAverageTimeSpentInOther();
     }
+
+    /**
+     * Retourne les étapes du Value Stream Mapping,
+     * prêtes à être affichées dans la vue.
+     *
+     * @return array<int, array{
+     *   key: string,
+     *   label: string,
+     *   average_days: float,
+     *   category: string
+     * }>
+     */
+    public function getVsmSteps(): array
+    {
+        $timeline = $this->version->getTimelineByStatus();
+
+        $steps = [];
+
+        foreach ($timeline['workflowStatuses'] as $statusName => $metrics) {
+            $steps[] = [
+                'key'          => $statusName,
+                'label'        => $this->normalizeStatusName($statusName),
+                'average_days' => round($metrics['average_days'] ?? 0, 1),
+                'category'     => $this->getStatusCategory($statusName),
+            ];
+        }
+
+        return $steps;
+    }
+
+    /**
+     * Retourne la catégorie fonctionnelle du statut
+     */
+    private function getStatusCategory(string $statusName): string
+    {
+        $workflow = $this->config->getJiraWorkflow();
+
+        if (in_array($statusName, $workflow['refinement_statuses'] ?? [], true)) {
+            return 'refinement';
+        }
+
+        if (in_array($statusName, $workflow['sprint_statuses'] ?? [], true)) {
+            return 'sprint';
+        }
+
+        if (in_array($statusName, $workflow['done_statuses'] ?? [], true)) {
+            return 'done';
+        }
+
+        return 'other';
+    }
 }

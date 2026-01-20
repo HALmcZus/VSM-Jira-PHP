@@ -1,0 +1,25 @@
+<?php
+
+/** @var App\View\VersionView $view */
+$vsmSteps = $view->getVsmSteps();
+?>
+
+<div class="vsm">
+    <?php foreach ($vsmSteps as $index => $step): ?>
+        <div class="vsm-step vsm-<?= htmlspecialchars($step['category']) ?>">
+            <div class="vsm-label">
+                <?= htmlspecialchars($step['label']) ?>
+            </div>
+
+            <?php if ($step['average_days'] > 0): ?>
+                <div class="vsm-metric">
+                    Moyenne <?= $step['average_days'] ?> jours
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($index < count($vsmSteps) - 1): ?>
+            <div class="vsm-arrow">→</div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+</div>
