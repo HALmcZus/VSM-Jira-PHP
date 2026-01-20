@@ -105,7 +105,6 @@ class Timeline
 
 
     /**
-     * TODO: à découper
      * TODO: à vérifier cas par cas
      *
      * Reconstruit la timeline de l’issue à partir du changelog Jira
@@ -153,20 +152,7 @@ class Timeline
                 }
                 $timeByStatus[$currentStatus] += $daysInStatus;
 
-                switch ($currentStatus) {
-                    case in_array($currentStatus, $workflow['refinement_statuses'], true):
-                        $workflowTimeBreakdown['refinement'] += $daysInStatus;
-                        break;
-                    case in_array($currentStatus, $workflow['sprint_statuses'], true):
-                        $workflowTimeBreakdown['sprint'] += $daysInStatus;
-                        break;
-                    case in_array($currentStatus, $workflow['done_statuses'], true):
-                        //Ignore Done statuses
-                        break;
-                    default:
-                        $workflowTimeBreakdown['other'] += $daysInStatus;
-                        break;
-                }
+                $this->updateWorkflowTimeBreakdown($currentStatus, $daysInStatus, $workflow, $workflowTimeBreakdown);
 
                 /**
                  * Met à jour les firstInProgressDate et doneDate
@@ -198,6 +184,29 @@ class Timeline
         }
         $timeByStatus[$currentStatus] += $daysInStatus;
 
+        $this->updateWorkflowTimeBreakdown($currentStatus, $daysInStatus, $workflow, $workflowTimeBreakdown);
+
+        // Suppression des statuts Done
+        foreach ($workflow['done_statuses'] as $doneStatus) {
+            unset($timeByStatus[$doneStatus]);
+        }
+
+        //Set le résultat
+        $issue->setTimeByStatus($timeByStatus);
+        $issue->setWorkflowTimeBreakdown($workflowTimeBreakdown);
+    }
+
+    /**
+     * buildWorkflowTimeBreakdown
+     *
+     * @param  mixed $currentStatus
+     * @param  mixed $daysInStatus
+     * @param  mixed $workflow
+     * @param  mixed $workflowTimeBreakdown
+     * @return void
+     */
+    public function updateWorkflowTimeBreakdown(string $currentStatus, int $daysInStatus, array $workflow, array &$workflowTimeBreakdown)
+    {
         switch ($currentStatus) {
             case in_array($currentStatus, $workflow['refinement_statuses'], true):
                 $workflowTimeBreakdown['refinement'] += $daysInStatus;
@@ -212,14 +221,5 @@ class Timeline
                 $workflowTimeBreakdown['other'] += $daysInStatus;
                 break;
         }
-
-        // Suppression des statuts Done
-        foreach ($workflow['done_statuses'] as $doneStatus) {
-            unset($timeByStatus[$doneStatus]);
-        }
-
-        //Set le résultat
-        $issue->setTimeByStatus($timeByStatus);
-        $issue->setWorkflowTimeBreakdown($workflowTimeBreakdown);
     }
 }
