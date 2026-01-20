@@ -103,7 +103,6 @@ class Timeline
             : array_merge($sortedTimeline, $otherStatuses);
     }
 
-
     /**
      * TODO: à vérifier cas par cas, parfois jours incohérents (-1 / +1)
      *

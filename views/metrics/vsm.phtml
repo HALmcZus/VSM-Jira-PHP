@@ -4,16 +4,16 @@
 $vsmSteps = $view->getVsmSteps();
 ?>
 
-<div class="vsm">
+<div class="vsm-timeline">
     <?php foreach ($vsmSteps as $index => $step): ?>
-        <div class="vsm-step vsm-<?= htmlspecialchars($step['category']) ?>">
-            <div class="vsm-label">
+        <div class="vsm-step vsm-timeline-<?= htmlspecialchars($step['category']) ?>">
+            <div class="vsm-timeline-label">
                 <?= htmlspecialchars($step['label']) ?>
             </div>
 
             <?php if ($step['average_days'] > 0): ?>
-                <div class="vsm-metric">
-                    Moyenne <?= $step['average_days'] ?> jours
+                <div class="vsm-timeline-metric">
+                    Moyenne <?= $step['average_days'] ?> jours /ticket
                 </div>
             <?php endif; ?>
         </div>

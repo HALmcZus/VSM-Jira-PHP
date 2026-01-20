@@ -329,6 +329,7 @@ class VersionView
     public function getVsmSteps(): array
     {
         $timeline = $this->version->getTimelineByStatus();
+        $averageTimeByStatus = $this->version->getAverageTimeByStatus();
 
         $steps = [];
 
@@ -336,7 +337,7 @@ class VersionView
             $steps[] = [
                 'key'          => $statusName,
                 'label'        => $this->normalizeStatusName($statusName),
-                'average_days' => round($metrics['average_days'] ?? 0, 1),
+                'average_days' => $averageTimeByStatus[$statusName] ?? '?',
                 'category'     => $this->getStatusCategory($statusName),
             ];
         }

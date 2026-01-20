@@ -16,81 +16,82 @@ $normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status)
     <details>
         <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Terminés)</summary>
 
-        <?php //include __DIR__ . '/vsm.phtml'; //Average by status KO 
-        ?>
+        <div class="vsm-layout">
+            <div class="vsm-text">
+                <ul>
+                    <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
+                        <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                    <?php endforeach; ?>
+                    <?php if (!empty($timelineData['otherStatuses'])): ?>
+                        <br />Autres statuts :
+                        <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
+                            <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+            </div>
 
-        <!-- Chart container -->
-        <div style="width: 100%; max-width: 900px; margin: 16px auto;">
-            <canvas id="timelineChart"></canvas>
-        </div>
+            <!-- Chart container -->
+            <div class="vsm-chart">
+                <canvas id="timelineChart"></canvas>
+            </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script>
-            const chartLabels = <?= json_encode($normalizedLabels, JSON_HEX_TAG) ?>;
-            const chartValues = <?= json_encode(array_values($chartData), JSON_HEX_TAG) ?>;
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                const chartLabels = <?= json_encode($normalizedLabels, JSON_HEX_TAG) ?>;
+                const chartValues = <?= json_encode(array_values($chartData), JSON_HEX_TAG) ?>;
 
-            const chartColors = chartLabels.map(label => {
-                if (label.startsWith('🧠')) return '#36a2ebb3';
-                if (label.startsWith('⚙️')) return '#ffce56b3';
-                if (label.startsWith('❓')) return '#ff6384b3';
-                return '#c9cbcfb3';
-            });
+                const chartColors = chartLabels.map(label => {
+                    if (label.startsWith('🧠')) return '#36a2ebb3';
+                    if (label.startsWith('⚙️')) return '#ffce56b3';
+                    if (label.startsWith('❓')) return '#ff6384b3';
+                    return '#c9cbcfb3';
+                });
 
-            const ctx = document.getElementById('timelineChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: 'Jours par statut',
-                        data: chartValues,
-                        backgroundColor: chartColors,
-                        borderColor: chartColors.map(c => c.replace('0.7', '1')),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false
-                        }
+                const ctx = document.getElementById('timelineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Jours par statut',
+                            data: chartValues,
+                            backgroundColor: chartColors,
+                            borderColor: chartColors.map(c => c.replace('0.7', '1')),
+                            borderWidth: 1
+                        }]
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Jours'
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
                             }
                         },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Statuts'
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Jours'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Statuts'
+                                }
                             }
                         }
                     }
-                }
-            });
-        </script>
+                });
+            </script>
+        </div>
 
-        <!-- Optional fallback list -->
-        <ul>
-            <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
-                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-            <?php endforeach; ?>
-            <?php if (!empty($timelineData['otherStatuses'])): ?>
-                <br />Autres statuts :
-                <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
-                    <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </ul>
-
+        <?php include __DIR__ . '/vsm.phtml'; ?>
     </details>
 </div>

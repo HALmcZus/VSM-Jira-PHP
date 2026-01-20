@@ -36,6 +36,7 @@ class Version
     private float $averageTimeSpentInOther = 0;
     private int $totalTimeSpentInOther = 0;
     private array $timelineByStatus = [];
+    private array $averageTimeByStatus = [];
 
     /**
      * __construct
@@ -57,7 +58,8 @@ class Version
 
         // Calculate Times
         $this->calculateVersionLeadAndCycleTime();
-        $this->calculateTimelineByStatusAndCategory();
+        $this->calculateTimelineByStatus();
+        $this->calculateAverageTimeByStatus();
     }
 
     /**
@@ -143,7 +145,7 @@ class Version
      *   byStatus: array<string, float>
      * }
      */
-    public function calculateTimelineByStatusAndCategory(): void
+    public function calculateTimelineByStatus(): void
     {
         $timeByStatus = [];
 
@@ -169,6 +171,32 @@ class Version
     }
 
     /**
+     * calculateAverageTimeByStatus
+     *
+     * @return void
+     */
+    public function calculateAverageTimeByStatus(): void
+    {
+        foreach ($this->timelineByStatus as $statusName => $timeSpent) {
+            $this->averageTimeByStatus[$statusName] = round($timeSpent / $this->issuesCount, 2);
+        }
+
+        $this->averageTimeSpentInRefinement = round($this->totalTimeSpentInRefinement / $this->issuesCount, 2);
+        $this->averageTimeSpentInSprint = round($this->totalTimeSpentInSprint / $this->issuesCount, 2);
+        $this->averageTimeSpentInOther = round($this->totalTimeSpentInOther / $this->issuesCount, 2);
+    }
+
+    /**
+     * getAverageTimeByStatus
+     *
+     * @return array
+     */
+    public function getAverageTimeByStatus(): array
+    {
+        return $this->averageTimeByStatus;
+    }
+
+    /**
      * calculate Version's Lead And Cycle Times (total and average)
      *
      * @return void
@@ -186,9 +214,6 @@ class Version
             }
             $this->averageLeadTime = round($this->totalLeadTime / $this->issuesCount, 2);
             $this->averageCycleTime = round($this->totalCycleTime / $this->issuesCount, 2);
-            $this->averageTimeSpentInRefinement = round($this->totalTimeSpentInRefinement / $this->issuesCount, 2);
-            $this->averageTimeSpentInSprint = round($this->totalTimeSpentInSprint / $this->issuesCount, 2);
-            $this->averageTimeSpentInOther = round($this->totalTimeSpentInOther / $this->issuesCount, 2);
         }
     }
 
