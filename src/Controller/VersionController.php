@@ -23,7 +23,7 @@ class VersionController
     {
         ob_start();
         $view = null;
-        require __DIR__ . '/../../views/version.php';
+        require __DIR__ . '/../../views/version.phtml';
         $html = ob_get_clean();
         $response->getBody()->write($html);
         return $response;
@@ -63,7 +63,7 @@ class VersionController
 
             // Render view
             ob_start();
-            require __DIR__ . '/../../views/version.php';
+            require __DIR__ . '/../../views/version.phtml';
             $html = ob_get_clean();
 
             $response->getBody()->write($html);
