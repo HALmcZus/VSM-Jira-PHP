@@ -3,7 +3,7 @@
 /** @var array $timelineData */
 /** @var \App\View\VersionView $view */
 
-// Merge workflow + other statuses
+$timelineData = $view->getTimelineByStatus();
 $chartData = array_merge(
     $timelineData['workflowStatuses'] ?? [],
     $timelineData['otherStatuses'] ?? []

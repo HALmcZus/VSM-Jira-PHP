@@ -87,78 +87,12 @@
 
         <div class="timeline-grid">
             <!-- Timeline par Status -->
-            <?php
-            $timelineData = $view->getTimelineByStatus();
-            include __DIR__ . '/metrics/timelineChart.phtml';
-            ?>
+            <?php include __DIR__ . '/metrics/timelineChart.phtml'; ?>
         </div>
 
         <div class="card">
             <h2><?= $view->getIssuesCount(); ?> tickets rattachés à cette version :</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Priorité</th>
-                        <th>Type</th>
-                        <th>Key</th>
-                        <th>Titre</th>
-                        <th>Status</th>
-                        <th>Date de création</th>
-                        <th>1er passage à En cours</th>
-                        <th>Date de résolution (Terminé)</th>
-                        <th>Lead time</th>
-                        <th>Cycle time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php /** @var \App\Model\Issue $issue */ ?>
-                    <?php foreach ($view->getIssues() as $issue): ?>
-                        <tr>
-                            <td><img src="<?= $issue->getPriorityIcon() ?? '' ?>" /><?= $issue->getPriorityName() ?? '—'; ?></td>
-                            <td><img src="<?= $issue->getIssueTypeIcon() ?? '' ?>" /><?= $issue->getIssueTypeName() ?? '—'; ?></td>
-                            <td><strong><?= $issue->getKey(); ?></strong></td>
-                            <td><a href="<?= $issue->getIssueUrl(); ?>" target="_blank"><?= htmlspecialchars($issue->getSummary()); ?></a></td>
-                            <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
-                            <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
-                            <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
-                            <td><?= $issue->getDoneDate() ?? '—'; ?></td>
-                            <td><?= $issue->getLeadTime() > 0 ? $issue->getLeadTime() . ' jours' : '—'; ?></td>
-                            <td><?= $issue->getCycleTime() > 0 ? $issue->getCycleTime() . ' jours' : '—'; ?></td>
-                        </tr>
-                        <tr>
-                            <td colspan="11">
-                                <!-- Détails temps par status -->
-                                <details>
-                                    <summary>Détails du temps passé par status, hors Terminés</summary>
-                                    <ul>
-                                        <?php $issueTimelineData = $issue->getTimeByStatus(true); ?>
-                                        <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
-                                            <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-                                        <?php endforeach; ?>
-
-                                        <?php if (!empty($issueTimelineData['otherStatuses'])): ?>
-                                            <br />
-                                            Autres statuts :
-                                            <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>
-                                                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
-                                    </ul>
-                                </details>
-                                <!-- Détails temps par catégorie de status -->
-                                <details>
-                                    <summary>Totaux temps passé par étapes du cycle de vie du ticket</summary>
-                                    <ul>
-                                        <li>🧠 Affinage : <strong><?= $issue->getTimeSpentInRefinement(); ?> jours</strong></li>
-                                        <li>⚙️ Réal + Qualif : <strong><?= $issue->getTimeSpentInSprint(); ?> jours</strong></li>
-                                        <li>❓ Autre : <strong><?= $issue->getTimeSpentInOther(); ?> jours</strong></li>
-                                    </ul>
-                                </details>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php include __DIR__ . '/issuesList.phtml'; ?>
         </div>
 
     <?php endif; ?>
