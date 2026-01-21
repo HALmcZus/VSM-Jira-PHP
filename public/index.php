@@ -1,9 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 use Slim\Factory\AppFactory;
 use DI\Container;
 use Dotenv\Dotenv;
+
+/**
+ * Bootstrapping the app
+ */
 
 require __DIR__ . '/../vendor/autoload.php';
 

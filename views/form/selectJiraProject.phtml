@@ -1,0 +1,85 @@
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<div x-data="jiraProjectSearch()" class="jira-project-search">
+    <label for="project-search"><strong>Sélectionner mon Projet Jira : </strong></label>
+
+    <input
+        id="project-search"
+        type="text"
+        x-model="query"
+        @input.debounce.300ms="search()"
+        @focus="open = true"
+        class="input"
+        placeholder="Ex: ABC, My Project..."
+        autocomplete="off" />
+
+    <!-- Dropdown -->
+    <div class="project-dropdown"
+        x-show="open && projects.length"
+        @click.outside="open = false">
+        <template x-for="project in projects" :key="project.id">
+            <div
+                @click="select(project)"
+                style="padding: 8px 12px; cursor: pointer;"
+                class="hover-bg">
+                <strong x-text="project.key"></strong>
+                <span x-text="' – ' + project.name"></span>
+            </div>
+        </template>
+    </div>
+
+    <!-- Projet sélectionné -->
+    <template x-if="selected">
+        <div style="margin-top: 8px; font-size: 14px;">
+            ✅ Projet sélectionné :
+            <strong x-text="selected.key"></strong>
+        </div>
+    </template>
+</div>
+
+<script>
+    function jiraProjectSearch() {
+        return {
+            query: '',
+            open: false,
+            projects: [],
+            selected: null,
+            loading: false,
+            error: null,
+
+            search() {
+                if (this.query.length < 2) {
+                    this.projects = [];
+                    return;
+                }
+
+                this.loading = true;
+
+                fetch('/api/jira/projects/search?q=' + encodeURIComponent(this.query))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('HTTP error ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        this.projects = data;
+                        this.open = true;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        this.error = 'Failed to load projects';
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            },
+
+            select(project) {
+                this.selected = project;
+                this.query = project.key + ' – ' + project.name;
+                this.open = false;
+            }
+        }
+    }
+</script>
