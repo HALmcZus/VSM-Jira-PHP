@@ -1,6 +1,6 @@
 <?php
 
-/** @var \App\Controller\VsmController $this */
+/** @var \App\Controller\VersionController $this */
 /** @var \App\View\VersionView $view */
 /** @var \App\Model\Issue $issue */
 ?>

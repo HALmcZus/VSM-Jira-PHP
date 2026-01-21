@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controller;
 
 use Psr\Http\Message\ResponseInterface;
@@ -7,9 +8,9 @@ use App\Model\Version;
 use App\View\VersionView;
 
 /**
- * VsmController
+ * VersionController
  */
-class VsmController
+class VersionController
 {
     /**
      * index
@@ -27,7 +28,7 @@ class VsmController
         $response->getBody()->write($html);
         return $response;
     }
-    
+
     /**
      * getIsDemo
      *
@@ -37,8 +38,8 @@ class VsmController
     {
         return $_ENV['IS_DEMO'] ?? false;
     }
-    
-    
+
+
     /**
      * process
      *
@@ -59,12 +60,12 @@ class VsmController
             // Load data
             $version = new Version($versionId);
             $view = new VersionView($version);
-            
+
             // Render view
             ob_start();
             require __DIR__ . '/../../views/index.php';
             $html = ob_get_clean();
-            
+
             $response->getBody()->write($html);
             return $response;
         } catch (\Throwable $e) {
