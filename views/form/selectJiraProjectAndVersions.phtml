@@ -36,16 +36,27 @@
 
         <!-- Versions du projet selectionné -->
         <div x-show="versions.length" style="margin-top: 16px;">
-            <label><strong>Sélectionner la Version :</strong></label>
+            <form method="POST" action="/version" style="margin-top: 16px;">
+                <label><strong>Sélectionner la Version :</strong></label>
 
-            <select class="input">
-                <template x-for="version in versions" :key="version.id">
-                    <option
-                        :value="version.id"
-                        x-text="`${version.name} (${version.status})`">
+                <select
+                    name="fixVersionId"
+                    class="input"
+                    required
+                    @change="$el.form.submit()">
+
+                    <option value="" disabled selected>
+                        -- Choisir une version --
                     </option>
-                </template>
-            </select>
+
+                    <template x-for="version in versions" :key="version.id">
+                        <option
+                            :value="version.id"
+                            x-text="`${version.name} (${version.status})`">
+                        </option>
+                    </template>
+                </select>
+            </form>
         </div>
 
         <div
