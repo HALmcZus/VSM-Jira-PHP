@@ -23,7 +23,7 @@
     <div class="card">
         <h1>Value Stream Mapping - Version Jira</h1>
 
-        <?php include __DIR__ . '/form/selectJiraProject.phtml'; ?>
+        <?php include __DIR__ . '/form/selectJiraProjectAndVersions.phtml'; ?>
         <form method="POST" action="/version">
             <label>Ou directement par FixVersion ID :</label>
             <input type="text" name="fixVersionId" required placeholder="Indiquer l'ID de la version Jira à utiliser (fixVersion)">

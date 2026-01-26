@@ -29,12 +29,34 @@
     </div>
 
     <!-- Projet sélectionné -->
-    <template x-if="selected">
+    <div x-show="selected">
         <div style="margin-top: 8px; font-size: 14px;">
-            ✅ Projet sélectionné :
-            <strong x-text="selected.key"></strong>
+            ✅ Projet sélectionné : <strong x-text="selected.key"></strong>
         </div>
-    </template>
+
+        <!-- Versions du projet selectionné -->
+        <div x-show="versions.length" style="margin-top: 16px;">
+            <label><strong>Sélectionner la Version :</strong></label>
+
+            <select class="input">
+                <template x-for="version in versions" :key="version.id">
+                    <option
+                        :value="version.id"
+                        x-text="`${version.name} (${version.status})`">
+                    </option>
+                </template>
+            </select>
+        </div>
+
+        <div
+            x-show="!versionLoading && versions.length === 0 && !versionError"
+            style="margin-top: 16px; font-style: italic; color: #666;">
+            ⚠️ Pas de version Jira trouvée pour ce projet
+        </div>
+
+        <div x-show="versionLoading">⏳ Loading versions…</div>
+        <div x-show="versionError" x-text="versionError" style="color:red"></div>
+    </div>
 </div>
 
 <script>
@@ -46,6 +68,9 @@
             selected: null,
             loading: false,
             error: null,
+            versions: [],
+            versionLoading: false,
+            versionError: null,
 
             search() {
                 if (this.query.length < 2) {
@@ -79,6 +104,32 @@
                 this.selected = project;
                 this.query = project.key + ' – ' + project.name;
                 this.open = false;
+                this.loadVersions();
+            },
+
+            loadVersions() {
+                this.versionLoading = true;
+                this.versionError = null;
+                this.versions = [];
+
+                fetch(`/api/jira/projects/${this.selected.key}/versions`)
+                    .then(r => {
+                        if (!r.ok) {
+                            throw new Error('HTTP ' + r.status);
+                        }
+                        return r.json();
+                    })
+                    .then(data => {
+                        this.versions = data;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        this.versionError = err.message;
+                    })
+                    .finally(() => {
+                        this.versionLoading = false;
+                    });
+
             }
         }
     }

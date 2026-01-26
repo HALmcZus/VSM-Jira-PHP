@@ -83,18 +83,17 @@ class JiraService
     }
 
     /**
-     * Get Versions from a Jira Project ID
+     * Get Versions from a Jira Project ID or Key
      *
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-project-versions/#api-rest-api-2-project-project-id-versions-get
      *
-     * @param  mixed $projectId
+     * @param string $projectKey
      * @return array
      */
-    public function getVersionsByProjectId(int $projectId): array
+    public function getVersionsByProject(string $projectKey): array
     {
-        //WIP: pour plus tard : liste les versions d'un projet (future IHM)
         $url = $this->baseUrl . self::API_URL_PROJECT_VERSIONS;
-        $url = str_replace('{project_id}', $projectId, $url);
+        $url = str_replace('{project_id}', $projectKey, $url);
 
         try {
             $result = $this->request($url);
