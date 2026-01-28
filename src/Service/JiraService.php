@@ -49,15 +49,20 @@ class JiraService
         //Force pour 1er check, pour éviter boucle infinie entre request() et checkCredentials()
         $this->areCredentialsVerified = true;
 
-        $url = $this->baseUrl . '/rest/api/3/myself';
-        $response = $this->request($url);
+        try {
+            $url = $this->baseUrl . '/rest/api/3/myself';
+            $response = $this->request($url);
 
-        if (!isset($response['accountId'])) {
+            if (!isset($response['accountId'])) {
+                $this->areCredentialsVerified = false;
+                throw new Exception('Invalid Jira credentials, verify the .env file.' . print_r($response, true));
+            }
+
+            $this->areCredentialsVerified = true;
+        } catch (Exception $e) {
             $this->areCredentialsVerified = false;
-            throw new Exception('Invalid Jira credentials.');
+            throw new Exception('Invalid Jira credentials, verify the .env file. ' . $e->getMessage());
         }
-
-        $this->areCredentialsVerified = true;
     }
 
     /**
