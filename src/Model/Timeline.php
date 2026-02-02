@@ -26,38 +26,133 @@ class Timeline
     }
 
     /**
-     * Calcule le nombre de jours ouvrés entre deux dates (week-ends et jours fériés exclus).
+     * Calcule le coefficient du jour de DÉPART selon l'heure.
      *
-     * @param \DateTime $start Date de début (incluse)
-     * @param \DateTime $end Date de fin (incluse)
+     * Logique métier : ce qui RESTE à travailler dans ce statut.
      *
-     * @return int Nombre de jours ouvrés
+     * @param \DateTime $dateTime Date de départ avec horaire
+     * @return float 0, 0.5 ou 1
      */
-    public function calculateBusinessDays(\DateTime $start, \DateTime $end): int
+    protected function getStartDayCoefficient(\DateTime $dateTime): float
     {
-        if ($start >= $end) {
+        $hour = (int) $dateTime->format('H');
+        $minute = (int) $dateTime->format('i');
+        $totalMinutes = ($hour * 60) + $minute;
+
+        // <= 11h00 (660 minutes)
+        if ($totalMinutes <= 660) {
+            return 1; // Journée complète reste à travailler
+        }
+
+        // > 11h00 et <= 17h00 (1020 minutes)
+        if ($totalMinutes <= 1020) {
+            return 0.5; // Après-midi seulement
+        }
+
+        // > 17h00
+        return 0; // Journée terminée
+    }
+
+    /**
+     * Calcule le coefficient du jour d'ARRIVÉE selon l'heure.
+     *
+     * Logique métier : ce qui a été TRAVAILLÉ dans ce statut.
+     *
+     * @param \DateTime $dateTime Date d'arrivée avec horaire
+     * @return float 0, 0.5 ou 1
+     */
+    protected function getEndDayCoefficient(\DateTime $dateTime): float
+    {
+        $hour = (int) $dateTime->format('H');
+        $minute = (int) $dateTime->format('i');
+        $totalMinutes = ($hour * 60) + $minute;
+
+        // <= 10h00 (600 minutes)
+        if ($totalMinutes <= 600) {
+            return 0; // Rien travaillé encore
+        }
+
+        // > 10h00 et <= 14h00 (840 minutes)
+        if ($totalMinutes <= 840) {
+            return 0.5; // Matinée travaillée
+        }
+
+        // > 14h00
+        return 1; // Journée complète travaillée
+    }
+
+    /**
+     * Calcule le nombre de jours ouvrés entre deux dates avec gestion des demie-journées.
+     *
+     * Algorithme :
+     * 1. Si même jour : différence entre coefficient arrivée et départ
+     * 2. Sinon :
+     *    - Compte les jours ouvrés ENTRE start+1 et end-1 (jours pleins)
+     *    - Ajoute coefficient du jour de départ
+     *    - Ajoute coefficient du jour d'arrivée
+     *
+     * @param \DateTime $start Date de début avec horaire
+     * @param \DateTime $end Date de fin avec horaire
+     * @return float Nombre de jours ouvrés (peut être décimal)
+     */
+    public function calculateBusinessDays(\DateTime $start, \DateTime $end): float
+    {
+        // Si end < start, retourner 0
+        if ($start > $end) {
             return 0;
         }
 
-        $nonWorkingDays = $this->config->getNonWorkingDays();
-        $businessDays = 1;
-        $current = clone $start;
+        $startDate = $start->format('Y-m-d');
+        $endDate = $end->format('Y-m-d');
 
-        while ($current <= $end) {
-            $dayOfWeek = (int) $current->format('N'); // 1 (lundi) → 7 (dimanche)
+        // Cas 1 : Même jour calendaire
+        if ($startDate === $endDate) {
+            $startCoeff = $this->getStartDayCoefficient($start);
+            $endCoeff = $this->getEndDayCoefficient($end);
+
+            // Sur un même jour, on prend le min entre ce qu'on peut faire
+            return min($startCoeff, $endCoeff);
+        }
+
+        // Cas 2 : Jours différents
+        $nonWorkingDays = $this->config->getNonWorkingDays();
+
+        // Compter les jours ouvrés ENTRE start et end (exclus)
+        $intermediaryDays = 0;
+        $current = (clone $start)->modify('+1 day')->setTime(0, 0, 0);
+        $lastDay = (clone $end)->setTime(0, 0, 0);
+
+        while ($current < $lastDay) {
+            $dayOfWeek = (int) $current->format('N');
             $currentDate = $current->format('Y-m-d');
 
             $isWeekend = ($dayOfWeek >= 6);
             $isHoliday = in_array($currentDate, $nonWorkingDays, true);
 
             if (!$isWeekend && !$isHoliday) {
-                $businessDays++;
+                $intermediaryDays++;
             }
 
             $current->modify('+1 day');
         }
 
-        return $businessDays;
+        // Vérifier si le jour de départ est ouvré
+        $startDayOfWeek = (int) $start->format('N');
+        $isStartWeekend = ($startDayOfWeek >= 6);
+        $isStartHoliday = in_array($startDate, $nonWorkingDays, true);
+        $startCoeff = (!$isStartWeekend && !$isStartHoliday)
+            ? $this->getStartDayCoefficient($start)
+            : 0;
+
+        // Vérifier si le jour d'arrivée est ouvré
+        $endDayOfWeek = (int) $end->format('N');
+        $isEndWeekend = ($endDayOfWeek >= 6);
+        $isEndHoliday = in_array($endDate, $nonWorkingDays, true);
+        $endCoeff = (!$isEndWeekend && !$isEndHoliday)
+            ? $this->getEndDayCoefficient($end)
+            : 0;
+
+        return $startCoeff + $intermediaryDays + $endCoeff;
     }
 
     /**
