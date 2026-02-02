@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * Composant d'affichage d'erreur
+ *
+ * @var string|null $error Message d'erreur à afficher
+ */
+if (!empty($error)): ?>
+    <div class="card error-card">
+        <div class="error-icon">⚠️</div>
+        <div class="error-content">
+            <h3>Une erreur s'est produite</h3>
+            <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
+        </div>
+    </div>
+<?php endif; ?>

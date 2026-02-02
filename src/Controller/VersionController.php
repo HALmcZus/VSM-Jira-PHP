@@ -52,6 +52,9 @@ class VersionController
         $data = $request->getParsedBody();
         $versionId = $data['fixVersionId'] ?? null;
 
+        $view = null;
+        $error = null;
+
         try {
             if (!$versionId) {
                 throw new \Exception('Le paramètre fixVersionId est requis.');
@@ -60,22 +63,17 @@ class VersionController
             // Load data
             $version = new Version($versionId);
             $view = new VersionView($version);
-
-            // Render view
-            ob_start();
-            require __DIR__ . '/../../views/version.phtml';
-            $html = ob_get_clean();
-
-            $response->getBody()->write($html);
-            return $response;
         } catch (\Throwable $e) {
-            $response->getBody()->write(json_encode([
-                'success' => false,
-                'error' => $e->getMessage()
-            ]));
-            return $response
-                ->withHeader('Content-Type', 'application/json')
-                ->withStatus(500);
+            // Capturer l'erreur pour l'afficher dans la vue
+            $error = $e->getMessage();
         }
+
+        // Rendu de la vue
+        ob_start();
+        require __DIR__ . '/../../views/version.phtml';
+        $html = ob_get_clean();
+
+        $response->getBody()->write($html);
+        return $response;
     }
 }

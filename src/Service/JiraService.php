@@ -55,13 +55,13 @@ class JiraService
 
             if (!isset($response['accountId'])) {
                 $this->areCredentialsVerified = false;
-                throw new Exception('Invalid Jira credentials, verify the .env file.' . print_r($response, true));
+                throw new Exception('checkCredentials(...) : Invalid Jira credentials, verify the .env file.' . print_r($response, true));
             }
 
             $this->areCredentialsVerified = true;
         } catch (Exception $e) {
             $this->areCredentialsVerified = false;
-            throw new Exception('Invalid Jira credentials, verify the .env file. ' . $e->getMessage());
+            throw new Exception('checkCredentials(...) : Invalid Jira credentials, verify the .env file. ' . $e->getMessage());
         }
     }
 
@@ -77,14 +77,7 @@ class JiraService
     {
         $url = $this->baseUrl . self::API_URL_VERSION . '/' . $versionId;
 
-        try {
-            return $this->request($url);
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
-            ];
-        }
+        return $this->request($url);
     }
 
     /**
@@ -100,19 +93,12 @@ class JiraService
         $url = $this->baseUrl . self::API_URL_PROJECT_VERSIONS;
         $url = str_replace('{project_id}', $projectKey, $url);
 
-        try {
-            $result = $this->request($url);
+        $result = $this->request($url);
 
-            if (!is_array($result)) {
-                throw new Exception("Erreur lors de la récupération de la Version Jira : " . print_r($result, true));
-            }
-            return $result;
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
-            ];
+        if (!is_array($result)) {
+            throw new Exception("Erreur lors de la récupération de la Version Jira : " . print_r($result, true));
         }
+        return $result;
     }
 
     /**
@@ -189,20 +175,13 @@ class JiraService
 
         $fullUrl = $this->baseUrl . self::API_URL_SEARCH . '?' . $query;
 
-        try {
-            $result = $this->request($fullUrl);
+        $result = $this->request($fullUrl);
 
-            if (!isset($result['issues'])) {
-                throw new Exception('Réponse Jira invalide (' . self::API_URL_SEARCH . ')');
-            }
-
-            return $result['issues'];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
-            ];
+        if (!isset($result['issues'])) {
+            throw new Exception('callSearchApiGet(...) : Réponse Jira invalide (' . self::API_URL_SEARCH . ')' . print_r($result, true));
         }
+
+        return $result['issues'];
     }
 
     /**
@@ -219,20 +198,13 @@ class JiraService
 
         $jsonPayload = json_encode($payload, JSON_THROW_ON_ERROR);
 
-        try {
-            $result = $this->request($url, $jsonPayload, true);
+        $result = $this->request($url, $jsonPayload, true);
 
-            if (!isset($result['issues'])) {
-                throw new Exception('Réponse Jira invalide (' . self::API_URL_SEARCH . ')');
-            }
-
-            return $result['issues'];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Erreur lors de l\'appel à Jira : ' . $e->getMessage()
-            ];
+        if (!isset($result['issues'])) {
+            throw new Exception('callSearchApiPost(...) : Réponse Jira invalide (' . self::API_URL_SEARCH . ')' . print_r($result, true));
         }
+
+        return $result['issues'];
     }
 
     /**
@@ -252,7 +224,7 @@ class JiraService
         $result = $this->request($url);
 
         if (!isset($result['values'])) {
-            throw new \Exception('Invalid Jira project search response');
+            throw new \Exception('searchProjects(...) : Invalid Jira project search response.' . print_r($result, true));
         }
 
         return $result['values'];
@@ -298,17 +270,17 @@ class JiraService
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
-            throw new Exception('Erreur cURL : ' . curl_error($ch));
+            throw new Exception('request(...) : Erreur cURL : ' . curl_error($ch));
         }
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($httpCode >= 400) {
-            throw new Exception("Erreur HTTP Jira ($httpCode) : $response");
+            throw new Exception("request(...) : Erreur HTTP Jira ($httpCode) : $response");
         }
 
         $data = json_decode($response, true);
         if (!is_array($data)) {
-            throw new Exception('Réponse Jira invalide (JSON)');
+            throw new Exception('request(...) : Réponse Jira invalide (JSON)' . print_r($data, true));
         }
 
         return $data;

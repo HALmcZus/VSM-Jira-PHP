@@ -267,8 +267,47 @@ tr:hover {
     overflow-y: auto;
 }
 
+/* Error card styling */
+.error-card {
+    background-color: #fee;
+    border-left: 4px solid #c00;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
 
-/* Responsive : empilé sur petits écrans */
+.error-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.error-content h3 {
+    color: #c00;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.error-content p {
+    margin: 0;
+    color: #333;
+    word-break: break-word;
+}
+
+.inline-error {
+    color: #c00;
+    background-color: #fee;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+
+/**
+ * Responsive : empilé sur petits écrans
+*/
 @media (max-width: 900px) {
     .timeline-grid {
         flex-direction: column;

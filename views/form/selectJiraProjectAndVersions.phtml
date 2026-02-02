@@ -66,7 +66,13 @@
         </div>
 
         <div x-show="versionLoading">⏳ Loading versions…</div>
-        <div x-show="versionError" x-text="versionError" style="color:red"></div>
+
+        <div x-show="error" class="inline-error">
+            ❌ <span x-text="error"></span>
+        </div>
+        <div x-show="versionError" class="inline-error">
+            ❌ <span x-text="versionError"></span>
+        </div>
     </div>
 </div>
 
