@@ -256,7 +256,7 @@ Axes d’évolution :
 
 ## 👤 Auteur
 
-[Hugues-Arnaud Lamot](https://www.linkedin.com/in/hugues-arnaud-lamot/) *Scrum Master, et ancien Lead Dev PHP* 😉
+[Hugues-Arnaud Lamot](https://www.linkedin.com/in/hugues-arnaud-lamot/) *Scrum Master, et ancien Lead Dev PHP*
 
 ---
 
