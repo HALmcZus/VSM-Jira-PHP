@@ -17,8 +17,6 @@ class Timeline
 
     /**
      * __construct
-     *
-     * @return void
      */
     public function __construct()
     {
@@ -26,99 +24,150 @@ class Timeline
     }
 
     /**
-     * Calcule le coefficient du jour de DÉPART selon l'heure.
+     * Détermine dans quelle tranche horaire se trouve une DateTime.
      *
-     * Logique métier : ce qui RESTE à travailler dans ce statut.
+     * Tranches :
+     * - 1 : 00h00 → 09h59 (début matinée)
+     * - 2 : 10h00 → 12h59 (fin matinée)
+     * - 3 : 13h00 → 15h59 (début après-midi)
+     * - 4 : 16h00 → 23h59 (fin après-midi)
      *
-     * @param \DateTime $dateTime Date de départ avec horaire
-     * @return float 0, 0.5 ou 1
+     * @param \DateTime $dateTime
+     * @return int Numéro de tranche (1-4)
      */
-    protected function getStartDayCoefficient(\DateTime $dateTime): float
+    protected function getTimeSlot(\DateTime $dateTime): int
     {
         $hour = (int) $dateTime->format('H');
-        $minute = (int) $dateTime->format('i');
-        $totalMinutes = ($hour * 60) + $minute;
 
-        // <= 11h00 (660 minutes)
-        if ($totalMinutes <= 660) {
-            return 1; // Journée complète reste à travailler
+        if ($hour < 10) {
+            return 1;
+        } elseif ($hour < 13) {
+            return 2;
+        } elseif ($hour < 16) {
+            return 3;
+        } else {
+            return 4;
         }
-
-        // > 11h00 et <= 17h00 (1020 minutes)
-        if ($totalMinutes <= 1020) {
-            return 0.5; // Après-midi seulement
-        }
-
-        // > 17h00
-        return 0; // Journée terminée
     }
 
     /**
-     * Calcule le coefficient du jour d'ARRIVÉE selon l'heure.
+     * Vérifie si deux DateTime ont des heures similaires (tolérance en minutes).
      *
-     * Logique métier : ce qui a été TRAVAILLÉ dans ce statut.
+     * Exemples :
+     * - 11h00 vs 11h00 (diff = 0) → true
+     * - 10h30 vs 11h00 (diff = 30) → true
+     * - 11h00 vs 11h30 (diff = 30) → true
+     * - 10h00 vs 11h00 (diff = 60) → false
      *
-     * @param \DateTime $dateTime Date d'arrivée avec horaire
-     * @return float 0, 0.5 ou 1
+     * @param \DateTime $start
+     * @param \DateTime $end
+     * @param int $toleranceMinutes Tolérance en minutes (défaut 30)
+     * @return bool
      */
-    protected function getEndDayCoefficient(\DateTime $dateTime): float
+    private function isSimilarTime(\DateTime $start, \DateTime $end, int $toleranceMinutes = 30): bool
     {
-        $hour = (int) $dateTime->format('H');
-        $minute = (int) $dateTime->format('i');
-        $totalMinutes = ($hour * 60) + $minute;
+        $startMinutes = ((int) $start->format('H') * 60) + (int) $start->format('i');
+        $endMinutes = ((int) $end->format('H') * 60) + (int) $end->format('i');
 
-        // <= 10h00 (600 minutes)
-        if ($totalMinutes <= 600) {
-            return 0; // Rien travaillé encore
-        }
+        $diff = abs($endMinutes - $startMinutes);
 
-        // > 10h00 et <= 14h00 (840 minutes)
-        if ($totalMinutes <= 840) {
-            return 0.5; // Matinée travaillée
-        }
-
-        // > 14h00
-        return 1; // Journée complète travaillée
+        return $diff <= $toleranceMinutes;
     }
 
     /**
-     * Calcule le nombre de jours ouvrés entre deux dates avec gestion des demie-journées.
+     * Compte le nombre de jours ouvrés calendaires entre deux dates.
      *
-     * Algorithme :
-     * 1. Si même jour : différence entre coefficient arrivée et départ
-     * 2. Sinon :
-     *    - Compte les jours ouvrés ENTRE start+1 et end-1 (jours pleins)
-     *    - Ajoute coefficient du jour de départ
-     *    - Ajoute coefficient du jour d'arrivée
+     * Utilisé pour le cas spécial "même heure ±30min".
+     * Compte les jours ouvrés du jour après start au jour de end (inclus).
      *
-     * @param \DateTime $start Date de début avec horaire
-     * @param \DateTime $end Date de fin avec horaire
-     * @return float Nombre de jours ouvrés (peut être décimal)
+     * Exemple : Lun → Mar retourne 1 (seulement le Mar, car Lun est le jour de départ)
+     *
+     * @param \DateTime $start
+     * @param \DateTime $end
+     * @return int Nombre de jours ouvrés
      */
-    public function calculateBusinessDays(\DateTime $start, \DateTime $end): float
+    private function countBusinessDaysBetween(\DateTime $start, \DateTime $end): int
     {
-        // Si end < start, retourner 0
-        if ($start > $end) {
-            return 0;
+        $nonWorkingDays = $this->config->getNonWorkingDays();
+        $businessDays = 0;
+
+        $current = clone $start;
+        $current->modify('+1 day')->setTime(0, 0, 0);
+
+        $endDate = clone $end;
+        $endDate->setTime(0, 0, 0);
+
+        while ($current <= $endDate) {
+            $dayOfWeek = (int) $current->format('N');
+            $currentDate = $current->format('Y-m-d');
+
+            $isWeekend = ($dayOfWeek >= 6);
+            $isHoliday = in_array($currentDate, $nonWorkingDays, true);
+
+            if (!$isWeekend && !$isHoliday) {
+                $businessDays++;
+            }
+
+            $current->modify('+1 day');
         }
 
+        return $businessDays;
+    }
+
+    /**
+     * Calcule le nombre de jours par logique de tranches horaires.
+     *
+     * Chaque jour ouvré est divisé en 4 tranches de 0.25 jour :
+     * - Tranche 1 (00h-10h) : 0.25
+     * - Tranche 2 (10h-13h) : 0.25
+     * - Tranche 3 (13h-16h) : 0.25
+     * - Tranche 4 (16h-24h) : 0.25
+     *
+     * @param \DateTime $start
+     * @param \DateTime $end
+     * @return float
+     */
+    private function calculateByTimeSlots(\DateTime $start, \DateTime $end): float
+    {
         $startDate = $start->format('Y-m-d');
         $endDate = $end->format('Y-m-d');
+        $nonWorkingDays = $this->config->getNonWorkingDays();
+
+        $totalSlots = 0;
 
         // Cas 1 : Même jour calendaire
         if ($startDate === $endDate) {
-            $startCoeff = $this->getStartDayCoefficient($start);
-            $endCoeff = $this->getEndDayCoefficient($end);
+            // Vérifier si jour ouvré
+            $dayOfWeek = (int) $start->format('N');
+            $isWeekend = ($dayOfWeek >= 6);
+            $isHoliday = in_array($startDate, $nonWorkingDays, true);
 
-            // Sur un même jour, on prend le min entre ce qu'on peut faire
-            return min($startCoeff, $endCoeff);
+            if ($isWeekend || $isHoliday) {
+                return 0;
+            }
+
+            $startSlot = $this->getTimeSlot($start);
+            $endSlot = $this->getTimeSlot($end);
+
+            // Compter les tranches incluses
+            $totalSlots = $endSlot - $startSlot + 1;
+
+            return $totalSlots * 0.25;
         }
 
         // Cas 2 : Jours différents
-        $nonWorkingDays = $this->config->getNonWorkingDays();
 
-        // Compter les jours ouvrés ENTRE start et end (exclus)
-        $intermediaryDays = 0;
+        // Jour de départ : compter de la tranche de start jusqu'à la tranche 4
+        $startDayOfWeek = (int) $start->format('N');
+        $isStartWeekend = ($startDayOfWeek >= 6);
+        $isStartHoliday = in_array($startDate, $nonWorkingDays, true);
+
+        if (!$isStartWeekend && !$isStartHoliday) {
+            $startSlot = $this->getTimeSlot($start);
+            $totalSlots += (4 - $startSlot + 1); // De startSlot à 4 inclus
+        }
+
+        // Jours intermédiaires (complets)
         $current = (clone $start)->modify('+1 day')->setTime(0, 0, 0);
         $lastDay = (clone $end)->setTime(0, 0, 0);
 
@@ -130,36 +179,64 @@ class Timeline
             $isHoliday = in_array($currentDate, $nonWorkingDays, true);
 
             if (!$isWeekend && !$isHoliday) {
-                $intermediaryDays++;
+                $totalSlots += 4; // Journée complète = 4 tranches
             }
 
             $current->modify('+1 day');
         }
 
-        // Vérifier si le jour de départ est ouvré
-        $startDayOfWeek = (int) $start->format('N');
-        $isStartWeekend = ($startDayOfWeek >= 6);
-        $isStartHoliday = in_array($startDate, $nonWorkingDays, true);
-        $startCoeff = (!$isStartWeekend && !$isStartHoliday)
-            ? $this->getStartDayCoefficient($start)
-            : 0;
-
-        // Vérifier si le jour d'arrivée est ouvré
+        // Jour d'arrivée : compter de la tranche 1 jusqu'à la tranche de end
         $endDayOfWeek = (int) $end->format('N');
         $isEndWeekend = ($endDayOfWeek >= 6);
         $isEndHoliday = in_array($endDate, $nonWorkingDays, true);
-        $endCoeff = (!$isEndWeekend && !$isEndHoliday)
-            ? $this->getEndDayCoefficient($end)
-            : 0;
 
-        return $startCoeff + $intermediaryDays + $endCoeff;
+        if (!$isEndWeekend && !$isEndHoliday) {
+            $endSlot = $this->getTimeSlot($end);
+            $totalSlots += $endSlot; // De 1 à endSlot inclus
+        }
+
+        return $totalSlots * 0.25;
+    }
+
+    /**
+     * Calcule le nombre de jours ouvrés entre deux dates.
+     *
+     * Logique hybride :
+     * 1. Cas spécial : si jours différents + même heure (±30min)
+     *    → Retourne le nombre de jours calendaires ouvrés
+     *    Exemple : Lun 11h → Mar 11h = 1 jour ouvré (le mardi)
+     *
+     * 2. Sinon : logique par tranches horaires
+     *    → 4 tranches de 0.25 jour par jour ouvré
+     *    Exemple : Lun 8h → Lun 15h30 = 0.75 jour (3 tranches)
+     *
+     * @param \DateTime $start Date/heure de début
+     * @param \DateTime $end Date/heure de fin
+     * @return float Nombre de jours ouvrés
+     */
+    public function calculateBusinessDays(\DateTime $start, \DateTime $end): float
+    {
+        if ($start > $end) {
+            return 0;
+        }
+
+        $startDate = $start->format('Y-m-d');
+        $endDate = $end->format('Y-m-d');
+
+        // Cas spécial : jours différents + même heure (tolérance ±30min)
+        if ($startDate !== $endDate && $this->isSimilarTime($start, $end, 30)) {
+            return $this->countBusinessDaysBetween($start, $end);
+        }
+
+        // Logique par tranches
+        return $this->calculateByTimeSlots($start, $end);
     }
 
     /**
      * getSortedTimelineByStatus : ordonnance les status Jira suivant le workflow configuré
      *
-     * @param  mixed $timelineByStatus
-     * @param  mixed $splitOtherStatuses
+     * @param  array $timelineByStatus
+     * @param  bool $splitOtherStatuses
      * @return array
      */
     public function getSortedTimelineByStatus(array $timelineByStatus, $splitOtherStatuses = true): array
@@ -199,17 +276,16 @@ class Timeline
     }
 
     /**
-     * TODO: à vérifier cas par cas, parfois jours incohérents (-1 / +1)
-     *
-     * Reconstruit la timeline de l’issue à partir du changelog Jira
+     * Reconstruit la timeline de l'issue à partir du changelog Jira
      * et calcule le temps cumulé par status et par status category.
      *
      * Cette méthode est appelée une seule fois à l'initialisation
      * de l'objet Issue.
      *
+     * @param Issue $issue
      * @return void
      */
-    public function buildStatusTimeline(Issue $issue)
+    public function buildStatusTimeline($issue)
     {
         $history = $issue->getHistory();
         if (empty($history)) {
@@ -292,13 +368,13 @@ class Timeline
     /**
      * updateWorkflowTimeBreakdown
      *
-     * @param  mixed $currentStatus
-     * @param  mixed $daysInStatus
-     * @param  mixed $workflow
-     * @param  mixed $workflowTimeBreakdown
+     * @param  string $currentStatus
+     * @param  float $daysInStatus
+     * @param  array $workflow
+     * @param  array $workflowTimeBreakdown
      * @return void
      */
-    public function updateWorkflowTimeBreakdown(string $currentStatus, int $daysInStatus, array $workflow, array &$workflowTimeBreakdown)
+    public function updateWorkflowTimeBreakdown(string $currentStatus, float $daysInStatus, array $workflow, array &$workflowTimeBreakdown)
     {
         switch ($currentStatus) {
             case in_array($currentStatus, $workflow['refinement_statuses'], true):
