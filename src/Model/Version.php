@@ -25,16 +25,16 @@ class Version
     protected int $issuesCount = 0;
 
     /** Timeline data */
-    private float $averageCycleTime = 0;
-    private int $totalCycleTime = 0;
-    private float $averageLeadTime = 0;
-    private int $totalLeadTime = 0;
-    private float $averageTimeSpentInRefinement = 0;
-    private int $totalTimeSpentInRefinement = 0;
-    private float $averageTimeSpentInSprint = 0;
-    private int $totalTimeSpentInSprint = 0;
-    private float $averageTimeSpentInOther = 0;
-    private int $totalTimeSpentInOther = 0;
+    private float $averageCycleTime = 0.0;
+    private float $totalCycleTime = 0.0;
+    private float $averageLeadTime = 0.0;
+    private float $totalLeadTime = 0.0;
+    private float $averageTimeSpentInRefinement = 0.0;
+    private float $totalTimeSpentInRefinement = 0.0;
+    private float $averageTimeSpentInSprint = 0.0;
+    private float $totalTimeSpentInSprint = 0.0;
+    private float $averageTimeSpentInOther = 0.0;
+    private float $totalTimeSpentInOther = 0.0;
     private array $timelineByStatus = [];
     private array $averageTimeByStatus = [];
 
@@ -208,9 +208,9 @@ class Version
             foreach ($this->versionIssues as $issue) {
                 $this->totalLeadTime += $issue->getLeadTime() ?? 0;
                 $this->totalCycleTime += $issue->getCycleTime() ?? 0;
-                $this->totalTimeSpentInRefinement += $issue->getTimeSpentInRefinement() ?? 0;
-                $this->totalTimeSpentInSprint += $issue->getTimeSpentInSprint() ?? 0;
-                $this->totalTimeSpentInOther += $issue->getTimeSpentInOther() ?? 0;
+                $this->totalTimeSpentInRefinement += $issue->getTimeSpentInRefinement() ?? 0.0;
+                $this->totalTimeSpentInSprint += $issue->getTimeSpentInSprint() ?? 0.0;
+                $this->totalTimeSpentInOther += $issue->getTimeSpentInOther() ?? 0.0;
             }
             $this->averageLeadTime = round($this->totalLeadTime / $this->issuesCount, 2);
             $this->averageCycleTime = round($this->totalCycleTime / $this->issuesCount, 2);
@@ -270,9 +270,9 @@ class Version
     /**
      * getTotalTimeSpentInRefinement
      *
-     * @return int
+     * @return float
      */
-    public function getTotalTimeSpentInRefinement(): int
+    public function getTotalTimeSpentInRefinement(): float
     {
         return $this->totalTimeSpentInRefinement;
     }
@@ -290,9 +290,9 @@ class Version
     /**
      * getTotalTimeSpentInSprint
      *
-     * @return int
+     * @return float
      */
-    public function getTotalTimeSpentInSprint(): int
+    public function getTotalTimeSpentInSprint(): float
     {
         return $this->totalTimeSpentInSprint;
     }
@@ -310,9 +310,9 @@ class Version
     /**
      * getTotalTimeSpentInOther
      *
-     * @return int
+     * @return float
      */
-    public function getTotalTimeSpentInOther(): int
+    public function getTotalTimeSpentInOther(): float
     {
         return $this->totalTimeSpentInOther;
     }

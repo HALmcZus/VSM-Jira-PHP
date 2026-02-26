@@ -165,7 +165,7 @@ class VersionView
      *
      * @return float
      */
-    public function getTotalLeadTime(): int
+    public function getTotalLeadTime(): float
     {
         return $this->version->getTotalLeadTime();
     }
@@ -185,9 +185,9 @@ class VersionView
      *
      * @return float
      */
-    public function getTotalCycleTime(): int
+    public function getTotalCycleTime(): float
     {
-        return $this->version->getTotalCycleTime();
+        return (float) $this->version->getTotalCycleTime();
     }
 
     /**
@@ -203,19 +203,19 @@ class VersionView
     /**
      * getTotalLeadTime
      *
-     * @return int
+     * @return float
      */
-    public function getTotalTimeSpentInRefinement(): int
+    public function getTotalTimeSpentInRefinement(): float
     {
-        return $this->version->getTotalTimeSpentInRefinement();
+        return (float) $this->version->getTotalTimeSpentInRefinement();
     }
 
     /**
      * getTotalLeadTime
      *
-     * @return int
+     * @return float
      */
-    public function getTotalTimeSpentInSprint(): int
+    public function getTotalTimeSpentInSprint(): float
     {
         return $this->version->getTotalTimeSpentInSprint();
     }
@@ -223,9 +223,9 @@ class VersionView
     /**
      * getTotalLeadTime
      *
-     * @return int
+     * @return float
      */
-    public function getTotalTimeSpentInOther(): int
+    public function getTotalTimeSpentInOther(): float
     {
         return $this->version->getTotalTimeSpentInOther();
     }

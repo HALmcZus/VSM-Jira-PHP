@@ -37,13 +37,13 @@ class Issue
     protected ?\DateTime $createdDate = null;
     protected ?\DateTime $firstInProgressDate = null;
     protected ?\DateTime $doneDate = null;
-    protected int $leadTime = 0;
-    protected int $cycleTime = 0;
+    protected float $leadTime = 0.0;
+    protected float $cycleTime = 0.0;
     protected array $timeByStatus = [];
     protected array $workflowTimeBreakdown = [
-        'refinement' => 0,
-        'sprint' => 0,
-        'other' => 0,
+        'refinement' => 0.0,
+        'sprint' => 0.0,
+        'other' => 0.0
     ];
 
     /**
@@ -286,9 +286,9 @@ class Issue
     /**
      * Lead Time (jours calendaires)
      *
-     * @return int
+     * @return float
      */
-    public function getLeadTime(): int
+    public function getLeadTime(): float
     {
         return $this->leadTime;
     }
@@ -315,9 +315,9 @@ class Issue
     /**
      * Cycle Time (jours ouvrés)
      *
-     * @return int
+     * @return float
      */
-    public function getCycleTime(): int
+    public function getCycleTime(): float
     {
         return $this->cycleTime;
     }
@@ -362,17 +362,17 @@ class Issue
         return $this->workflowTimeBreakdown;
     }
 
-    public function getTimeSpentInRefinement(): int
+    public function getTimeSpentInRefinement(): float
     {
         return $this->workflowTimeBreakdown['refinement'];
     }
 
-    public function getTimeSpentInSprint(): int
+    public function getTimeSpentInSprint(): float
     {
         return $this->workflowTimeBreakdown['sprint'];
     }
 
-    public function getTimeSpentInOther(): int
+    public function getTimeSpentInOther(): float
     {
         return $this->workflowTimeBreakdown['other'];
     }
