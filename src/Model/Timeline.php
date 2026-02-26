@@ -12,6 +12,7 @@ class Timeline
     const STATUS_TODO = 'To Do';
     const STATUS_IN_PROGRESS = 'In Progress';
     const STATUS_DONE = 'Done';
+    const WAIT_LABEL_KEYWORD = 'attente';
 
     private Config $config;
 
@@ -390,5 +391,63 @@ class Timeline
                 $workflowTimeBreakdown['other'] += $daysInStatus;
                 break;
         }
+    }
+
+    /**
+     * Calculate the waiting times, based an Jira labels "*attente*"
+     */
+    public function buildWaitingTimes(Issue $issue)
+    {
+        $history = $issue->getHistory();
+        if (empty($history)) {
+            return;
+        }
+
+        $waitingTimes = [];
+
+        foreach ($history as $historyItem) {
+            foreach ($historyItem['items'] as $item) {
+                // Ignore les éléments d'historique ne concernant pas les étiquettes (champs labels)
+                if ($item['field'] !== 'labels') {
+                    continue;
+                }
+
+                //Extrait les labels contenant "attente" dans les champs fromString et toString
+                foreach (['fromString', 'toString'] as $field) {
+                    $labels = strtolower($item[$field] ?? '');
+                    $waitingTimes = array_merge(
+                        $waitingTimes,
+                        $this->extractWaitingLabelsFromItem($labels)
+                    );
+                }
+            }
+        }
+
+        $waitingTimes = array_unique($waitingTimes);
+
+        if ($waitingTimes) {
+            echo "<pre>waitingTimes :".print_r($waitingTimes,true)."</pre>";
+            die();
+        }
+
+        $issue->setWaitingTimes($waitingTimes);
+    }
+
+    /**
+     * Search for waiting label in a given labels string, and return it as array
+     *
+     * @param  string $string
+     * @return array
+     */
+    protected function extractWaitingLabelsFromItem(string $string): array
+    {
+        $result = [];
+        $labels = explode(' ', $string);
+        foreach ($labels as $label) {
+            if (str_contains($label, self::WAIT_LABEL_KEYWORD)) {
+                $result[] = $label;
+            }
+        }
+        return $result;
     }
 }

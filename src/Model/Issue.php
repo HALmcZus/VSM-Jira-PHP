@@ -45,6 +45,7 @@ class Issue
         'sprint' => 0.0,
         'other' => 0.0
     ];
+    protected array $waitingTimes = [];
 
     /**
      * Issue constructor
@@ -58,6 +59,7 @@ class Issue
 
         $this->initializeData($data);
         $this->timeline->buildStatusTimeline($this);
+        $this->timeline->buildWaitingTimes($this);
         $this->setLeadTime();
         $this->setCycleTime();
     }
@@ -384,5 +386,15 @@ class Issue
             [$_ENV['JIRA_BASE_URL'], $this->getKey()],
             self::ISSUE_URL
         );
+    }
+
+    public function setWaitingTimes(array $waitingTimes): void
+    {
+        $this->waitingTimes = $waitingTimes;
+    }
+
+    public function getWaitingTimes(): array
+    {
+        return $this->waitingTimes;
     }
 }

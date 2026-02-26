@@ -124,6 +124,8 @@ class Version
             $rawIssues = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
 
             foreach ($rawIssues as $rawIssueData) {
+                // echo "<pre>".print_r($rawIssueData,true)."</pre>";
+                // die();
                 $this->versionIssues[] = new Issue($rawIssueData);
             }
 
