@@ -67,7 +67,7 @@ Il est développé en PHP ^8.5, framework Slim ^4.15 pour le Backend, et en HTML
 │   ├── jira_workflow.json          # Configuration du workflow Jira de votre projet (status correspondants aux phases d'affinage, de sprint et Done)
 │   └── non_working_days.json.css   # Liste des jours non travaillés (fériés FR) --Sera remplacée par un appel API officielle des jours fériés français.
 │
-├── php/                   # Pour la version Standalone : moteur PHP portable
+├── php/                   # Pour la version Standalone : moteur PHP portable (version 8.5)
 │
 ├── public/
 │   ├── index.php          # Front controller
@@ -120,8 +120,8 @@ Responsabilités :
 
 ## 📊 Métriques exposées
 
-* **Lead Time** (jours calendaires entre la date de Création et la date de passage à Done/Terminé))
-* **Cycle Time** (jours ouvrés entre la date de passage à In progress et la date de passage à Done/Terminé))
+* **Lead Time** (jours calendaires entre la date de création et la date de passage à Done/Terminé)
+* **Cycle Time** (jours ouvrés entre la date de passage à In progress et la date de passage à Done/Terminé)
 * **Durée moyenne par statut**
 * **Waiting times** basé sur les étiquettes (champ labels)
 * Timelines consolidées (Version + Issues)
@@ -157,7 +157,9 @@ IS_DEMO=false
 ```
 
 => **Il faut modifier ces valeurs avec les vôtres (se rapprocher d'un Admin Jira si besoin). Sans ces informations, l'application ne peut pas communiquer avec les API Jira, et serait donc inutilisable.**
+
 => **Pour générer un token personnel API Jira** : https://id.atlassian.com/manage-profile/security/api-tokens (Doc officielle https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token)
+
 
 2. La pertinence des métriques basées sur les statuts Jira se base sur la déclaration de votre propre workflow Jira.
 
@@ -239,7 +241,7 @@ Après avoir configuré le projet (cf point précédent), il suffit de double-cl
 
 Celui-ci démarre automatiquement le serveur PHP embarqué et ouvre l'appli dans votre navigateur ([http://localhost:8080/](http://localhost:8080/))
 
-***Si vous n'avez pas le serveur PHP embarqué, téléchargez php en version 8.5 et mettez le dossier dans le dossier de l'application, et vérifier le chemin de php.exe dans start.bat***
+***Si vous n'avez pas le serveur PHP embarqué, téléchargez php en version 8.5 et mettez le dossier php dans le dossier de l'application, puis vérifiez le chemin de php.exe dans start.bat***
 
 
 ---
