@@ -1,5 +1,6 @@
 .env
 .phpunit.cache/*
 .vscode/*
+cache/*
 php/*
 vendor/*

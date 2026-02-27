@@ -2,15 +2,16 @@
 
 namespace App\Model;
 
+use App\Service\GovApiService;
+
 /**
  * Config
  */
-class Config 
+class Config
 {
     const CONFIG_FILES_DIR = "config_files";
-    const NON_WORKING_DAYS_FILE = "non_working_days.json";
     const JIRA_WORKFLOW_FILE = "jira_workflow.json";
-    
+
     /**
      * getFileContent
      *
@@ -29,19 +30,41 @@ class Config
 
         return $data ?? [];
     }
-    
+
     /**
-     * getNonWorkingDays from config file
+     * Retourne la liste des dates de jours fériés pour les 5 années précédentes
+     * et l'année en cours, issues de l'API du gouvernement français.
      *
-     * @return array
+     * Algorithme :
+     * 1. Récupère tous les jours fériés disponibles via GovApiService (un seul appel HTTP)
+     * 2. Filtre sur la plage d'années [année_courante - 5 ; année_courante]
+     * 3. Retourne un tableau plat de dates au format Y-m-d
+     *
+     * @return string[]  Ex: ['2025-01-01', '2025-05-01', ...]
+     *
+     * @throws \RuntimeException Si l'API est inaccessible
      */
     public function getNonWorkingDays(): array
     {
-        $result = $this->getFileContent(self::NON_WORKING_DAYS_FILE);
+        $currentYear = (int) date('Y');
+        $minYear     = $currentYear - 5;
 
-        return $result['non_working_days'] ?? [];
+        // Récupération (avec cache statique interne à GovApiService)
+        $govApi      = new GovApiService();
+        $allHolidays = $govApi->fetchAllHolidays();
+
+        // Filtre sur la plage d'années voulue, et retourne les dates (clés du tableau)
+        return array_values(
+            array_filter(
+                array_keys($allHolidays),
+                static function (string $date) use ($minYear, $currentYear): bool {
+                    $year = (int) substr($date, 0, 4);
+                    return $year >= $minYear && $year <= $currentYear;
+                }
+            )
+        );
     }
-    
+
     /**
      * getJiraWorkflow from config file
      *
@@ -50,5 +73,5 @@ class Config
     public function getJiraWorkflow(): array
     {
         return $this->getFileContent(self::JIRA_WORKFLOW_FILE);
-    }  
+    }
 }
