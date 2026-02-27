@@ -5,8 +5,12 @@ echo ===================================
 
 cd /d %~dp0
 
-set PHP_BIN=%~dp0php\php.exe
 set APP_PUBLIC=%~dp0public
+
+::Chemin si dossier php dans le projet (version standalone)
+set PHP_BIN=%~dp0php\php.exe
+::Chemin si dossier php est à la racine du lecteur C:\
+set PHP_BIN=C:\php\php.exe
 
 start http://localhost:8080
 
