@@ -16,8 +16,9 @@
         "Revue Dév / Pair",
         "A qualifier",
         "Qualif En Cours",
-        "Validation PO",
-        "Validation PO / Vainci"
+        "Vainci 2",
+        "Validation PO / Vainci",
+        "Validation PO"
     ],
     "done_statuses": [
         "Done",

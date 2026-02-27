@@ -423,14 +423,9 @@ class Timeline
             }
         }
 
-        $waitingTimes = array_unique($waitingTimes);
-
-        if ($waitingTimes) {
-            echo "<pre>waitingTimes :".print_r($waitingTimes,true)."</pre>";
-            die();
-        }
-
-        $issue->setWaitingTimes($waitingTimes);
+        $issue->setWaitingTimes(
+            array_unique($waitingTimes)
+        );
     }
 
     /**

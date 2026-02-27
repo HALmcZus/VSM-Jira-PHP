@@ -1,1 +1,2 @@
 dans un terminal : php -S localhost:8080 -t public
+ou double-clic sur start.bat

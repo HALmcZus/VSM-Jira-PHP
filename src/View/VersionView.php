@@ -238,9 +238,9 @@ class VersionView
     /**
      * getIssues
      *
-     * @return void
+     * @return array
      */
-    public function getIssues()
+    public function getIssues(): array
     {
         return $this->version->getIssues();
     }

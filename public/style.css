@@ -92,6 +92,11 @@ h2 {
     color: #991b1b;
 }
 
+.badge.grey {
+    background: #a1a1a1;
+    color: #000000;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
