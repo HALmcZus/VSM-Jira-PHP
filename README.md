@@ -120,12 +120,13 @@ Responsabilités :
 
 ## 📊 Métriques exposées
 
-* Lead Time
-* Cycle Time
-* Durée moyenne par étape
+* **Lead Time** (jours calendaires entre la date de Création et la date de passage à Done/Terminé))
+* **Cycle Time** (jours ouvrés entre la date de passage à In progress et la date de passage à Done/Terminé))
+* **Durée moyenne par statut**
+* **Waiting times** basé sur les étiquettes (champ labels)
 * Timelines consolidées (Version + Issues)
 
-Les métriques sont calculées **à partir des dates Jira réelles**, sans estimation.
+Les métriques sont calculées **à partir des dates Jira réelles**.
 
 ---
 
@@ -156,10 +157,12 @@ IS_DEMO=false
 ```
 
 => **Il faut modifier ces valeurs avec les vôtres (se rapprocher d'un Admin Jira si besoin). Sans ces informations, l'application ne peut pas communiquer avec les API Jira, et serait donc inutilisable.**
+=> **Pour générer un token personnel API Jira** : https://id.atlassian.com/manage-profile/security/api-tokens (Doc officielle https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token)
 
 2. La pertinence des métriques basées sur les statuts Jira se base sur la déclaration de votre propre workflow Jira.
 
 Celui-ci est à indiquer dans le fichier config_files\jira_workflow.json
+***Note : il est important que les trois statuts Jira par défaut (To Do, In progress, Done) soient indiqués, même s'ils sont traduits ou si vous ne les utilisez pas***
 
 Exemple :
 ```
@@ -178,11 +181,10 @@ Exemple :
         "À faire",
         "In Progress",
         "Revue Dév",
-        "Revue Dév / Pair",
         "A qualifier",
-        "Qualif En Cours",
+        "Qualif En Cours"
         "Validation PO",
-        "Validation PO / Vainci"
+        "Vainci 2"
     ],
     "done_statuses": [
         "Done",
@@ -235,7 +237,9 @@ Exemple :
 
 Après avoir configuré le projet (cf point précédent), il suffit de double-cliquer sur le fichier **start.bat**.
 
-Celui-ci démarre le serveur PHP embarqué et ouvre l'appli dans votre navigateur ([http://localhost:8080/](http://localhost:8080/))
+Celui-ci démarre automatiquement le serveur PHP embarqué et ouvre l'appli dans votre navigateur ([http://localhost:8080/](http://localhost:8080/))
+
+***Si vous n'avez pas le serveur PHP embarqué, téléchargez php en version 8.5 et mettez le dossier dans le dossier de l'application, et vérifier le chemin de php.exe dans start.bat***
 
 
 ---
@@ -265,5 +269,3 @@ Axes d’évolution :
 Ce projet n’est **pas un produit officiel Atlassian** et n’a aucune affiliation avec Jira.
 
 ---
-
-> "If you can’t measure it, you can’t improve it."
