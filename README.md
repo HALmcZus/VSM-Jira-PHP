@@ -234,4 +234,7 @@ Axes d’évolution :
 
 Ce projet n’est **pas un produit officiel Atlassian** et n’a aucune affiliation avec Jira.
 
+Ce projet est conçu et **développé de ma propre initiative, sur mon temps libre**, au service de mes équipes en tant que Scrum Master.
+
+Il n'est **pas lié à mon client actuel, ni à mon employeur, ni à un budget ou à une feuille de route engagée**.
 ---
