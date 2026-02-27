@@ -4,6 +4,8 @@
 $vsmSteps = $view->getVsmSteps();
 ?>
 
+<h4>📚 Value Stream Map par statut</h4>
+
 <div class="vsm-timeline">
     <?php foreach ($vsmSteps as $index => $step): ?>
         <div class="vsm-step vsm-timeline-<?= htmlspecialchars($step['category']) ?>">

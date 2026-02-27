@@ -5,7 +5,7 @@
             <th>Type</th>
             <th>Key</th>
             <th>Titre</th>
-            <th>Status</th>
+            <th>Statut</th>
             <th>Date de création</th>
             <th>1er passage à En cours</th>
             <th>Date de résolution (Terminé)</th>
@@ -38,9 +38,9 @@
                         <?php endforeach; ?>
                     <?php endif; ?>
 
-                    <!-- Détails temps par status -->
+                    <!-- Détails temps par statut -->
                     <details>
-                        <summary>Détails du temps passé par status, hors Terminés</summary>
+                        <summary>Détails du temps passé par statut, hors Terminés</summary>
                         <ul>
                             <?php $issueTimelineData = $issue->getTimeByStatus(true); ?>
                             <?php if (is_array($issueTimelineData['workflowStatuses']) && !empty($issueTimelineData['workflowStatuses'])): ?>
@@ -58,7 +58,7 @@
                             <?php endif; ?>
                         </ul>
                     </details>
-                    <!-- Détails temps par catégorie de status -->
+                    <!-- Détails temps par catégorie de statut -->
                     <details>
                         <summary>Totaux temps passé par étapes du cycle de vie du ticket</summary>
                         <ul>

@@ -366,4 +366,14 @@ class VersionView
 
         return 'other';
     }
+
+    /**
+     * Retourne les temps d'attente agrégés sur tous les tickets de la version.
+     *
+     * @return array<string, float> label => jours ouvrés cumulés
+     */
+    public function getAggregatedWaitingTimes(): array
+    {
+        return $this->version->getAggregatedWaitingTimes();
+    }
 }

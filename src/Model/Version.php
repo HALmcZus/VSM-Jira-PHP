@@ -37,6 +37,7 @@ class Version
     private float $totalTimeSpentInOther = 0.0;
     private array $timelineByStatus = [];
     private array $averageTimeByStatus = [];
+    private array $aggregatedWaitingTimes = [];
 
     /**
      * __construct
@@ -211,6 +212,10 @@ class Version
                 $this->totalTimeSpentInRefinement += $issue->getTimeSpentInRefinement() ?? 0.0;
                 $this->totalTimeSpentInSprint += $issue->getTimeSpentInSprint() ?? 0.0;
                 $this->totalTimeSpentInOther += $issue->getTimeSpentInOther() ?? 0.0;
+                // Agrégation des temps d'attente par label
+                foreach ($issue->getWaitingTimes() as $label => $days) {
+                    $this->aggregatedWaitingTimes[$label] = ($this->aggregatedWaitingTimes[$label] ?? 0.0) + $days;
+                }
             }
             $this->averageLeadTime = round($this->totalLeadTime / $this->issuesCount, 2);
             $this->averageCycleTime = round($this->totalCycleTime / $this->issuesCount, 2);
@@ -416,5 +421,17 @@ class Version
     public function getIssuesCount(): int
     {
         return $this->issuesCount;
+    }
+
+    /**
+     * Retourne le cumul des temps d'attente par label "attente",
+     * agrégés sur l'ensemble des issues de la version.
+     *
+     * @return array<string, float> label => jours ouvrés cumulés, trié par durée décroissante
+     */
+    public function getAggregatedWaitingTimes(): array
+    {
+        arsort($this->aggregatedWaitingTimes);
+        return $this->aggregatedWaitingTimes;
     }
 }

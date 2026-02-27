@@ -176,6 +176,42 @@ tr:hover {
     flex: 1;
 }
 
+.waiting-times-summary {
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.waiting-times-summary h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.waiting-times-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.waiting-times-summary li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #000000;
+    background: #bbbbbb;
+    border: 1px solid #808080;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+.waiting-label {
+    color: #000000;
+}
+
 .vsm-layout {
     display: flex;
     align-items: flex-start;
@@ -219,7 +255,7 @@ tr:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin: 24px 0;
+    margin-top: -20px;
 }
 
 .vsm-timeline-label {

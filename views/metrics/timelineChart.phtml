@@ -14,7 +14,7 @@ $normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status)
 
 <div class="card">
     <details>
-        <summary>🧭 Timeline globale par status (cumul tickets de la Release, hors Terminés)</summary>
+        <summary>🧭 Timeline globale par statut (cumul tickets de la Release, hors Terminés)</summary>
 
         <div class="vsm-layout">
             <div class="vsm-text">
@@ -91,6 +91,21 @@ $normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status)
                 });
             </script>
         </div>
+
+        <?php $waitingTimes = $view->getAggregatedWaitingTimes(); ?>
+        <?php if (!empty($waitingTimes)): ?>
+            <div class="waiting-times-summary">
+                <h4>⏳ Temps de blocage cumulés (labels "attente" des tickets)</h4>
+                <ul>
+                    <?php foreach ($waitingTimes as $label => $days): ?>
+                        <li>
+                            <span class="waiting-label"><?= htmlspecialchars($label) ?></span>
+                            <strong><?= round($days, 1) ?> jours</strong>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
 
         <?php include __DIR__ . '/vsm.phtml'; ?>
     </details>
