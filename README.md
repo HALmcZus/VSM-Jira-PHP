@@ -161,7 +161,7 @@ IS_DEMO=false
 => **Pour générer un token personnel API Jira** : https://id.atlassian.com/manage-profile/security/api-tokens (Doc officielle https://support.atlassian.com/atlassian-account/docs/manage-api-tokens-for-your-atlassian-account/#Create-an-API-token)
 
 
-2. La pertinence des métriques basées sur les statuts Jira se base sur la déclaration de votre propre workflow Jira.
+2. La pertinence des métriques basées sur les statuts Jira se base sur la **déclaration de votre propre workflow Jira**.
 
 Celui-ci est à indiquer dans le fichier config_files\jira_workflow.json
 ***Note : il est important que les trois statuts Jira par défaut (To Do, In progress, Done) soient indiqués, même s'ils sont traduits ou si vous ne les utilisez pas***
@@ -196,42 +196,6 @@ Exemple :
 }
 ```
 
-3. *En attendant l'implémentation de l'appel à l'API officielle des jours fériés en France :*
-
-La métrique "Cycle Time" étant mesurée en jours _ouvrés_, il faut également indiquer les jours fériés de l'année en cours et de l'année N-1.
-
-Cela se fait dans le fichier config_files\non_working_days.json
-
-Exemple :
-```
-{
-    "non_working_days": {
-        "Y-1 Jour de l'An" : "2025-01-01",
-        "Y-1 Lundi de Pâques" : "2025-04-21",
-        "Y-1 Fête du Travail" : "2025-05-01",
-        "Y-1 Victoire 1945" : "2025-05-08",
-        "Y-1 Ascension" : "2025-05-29",
-        "Y-1 Lundi de Pentecôte" : "2025-06-09",
-        "Y-1 Fête Nationale" : "2025-07-14",
-        "Y-1 Assomption" : "2025-08-15",
-        "Y-1 Toussaint" : "2025-11-01",
-        "Y-1 Armistice 1918" : "2025-11-11",
-        "Y-1 Noël" : "2025-12-25",
-
-        "Jour de l'An" : "2026-01-01",
-        "Lundi de Pâques" : "2026-04-06",
-        "Fête du Travail" : "2026-05-01",
-        "Victoire 1945" : "2026-05-08",
-        "Ascension" : "2026-05-14",
-        "Lundi de Pentecôte" : "2026-05-25",
-        "Fête Nationale" : "2026-07-14",
-        "Assomption" : "2026-08-15",
-        "Toussaint" : "2026-11-01",
-        "Armistice 1918" : "2026-11-11",
-        "Noël" : "2026-12-25"
-    }
-}
-```
 
 ---
 
