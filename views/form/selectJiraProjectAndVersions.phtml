@@ -32,6 +32,9 @@
     <div x-show="selected">
         <div style="margin-top: 8px; font-size: 14px;">
             ✅ Projet sélectionné : <strong x-text="selected.key"></strong>
+            <button type="button" @click="reset()" style="font-size: 12px; cursor: pointer;">
+                🔄 Changer de projet
+            </button>
         </div>
 
         <!-- Versions du projet selectionné -->
@@ -77,6 +80,8 @@
 <script>
     function jiraProjectSearch() {
         return {
+            _storageKey: 'jira_selected_project',
+
             query: '',
             open: false,
             projects: [],
@@ -87,19 +92,66 @@
             versionLoading: false,
             versionError: null,
 
+            /**
+             * Restaure l'état depuis localStorage au chargement du composant.
+             * Appelé automatiquement par Alpine.js.
+             */
+            init() {
+                try {
+                    const saved = localStorage.getItem(this._storageKey);
+                    if (!saved) return;
+
+                    const {
+                        project,
+                        versions
+                    } = JSON.parse(saved);
+                    if (project && versions) {
+                        this.selected = project;
+                        this.versions = versions;
+                        this.query = project.key + ' – ' + project.name;
+                    }
+                } catch (e) {
+                    // Données corrompues → on ignore silencieusement
+                    localStorage.removeItem(this._storageKey);
+                }
+            },
+
+            /**
+             * Persiste le projet sélectionné et ses versions dans localStorage.
+             */
+            _saveToStorage() {
+                try {
+                    localStorage.setItem(this._storageKey, JSON.stringify({
+                        project: this.selected,
+                        versions: this.versions,
+                    }));
+                } catch (e) {
+                    console.warn('localStorage indisponible', e);
+                }
+            },
+
+            /**
+             * Réinitialise la sélection et supprime le cache localStorage.
+             */
+            reset() {
+                this.selected = null;
+                this.versions = [];
+                this.query = '';
+                this.projects = [];
+                this.error = null;
+                this.versionError = null;
+                localStorage.removeItem(this._storageKey);
+            },
+
             search() {
                 if (this.query.length < 2) {
                     this.projects = [];
                     return;
                 }
-
                 this.loading = true;
-
                 fetch('/api/jira/projects/search?q=' + encodeURIComponent(this.query))
                     .then(response => {
-                        if (!response.ok) {
-                            throw new Error('HTTP error ' + response.status);
-                        }
+                        if (!response.ok) throw new Error('HTTP error ' + response.status);
                         return response.json();
                     })
                     .then(data => {
@@ -129,13 +181,12 @@
 
                 fetch(`/api/jira/projects/${this.selected.key}/versions`)
                     .then(r => {
-                        if (!r.ok) {
-                            throw new Error('HTTP ' + r.status);
-                        }
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
                         return r.json();
                     })
                     .then(data => {
                         this.versions = data;
+                        this._saveToStorage(); // ← persist après chargement réussi
                     })
                     .catch(err => {
                         console.error(err);
@@ -144,7 +195,6 @@
                     .finally(() => {
                         this.versionLoading = false;
                     });
-
             }
         }
     }
