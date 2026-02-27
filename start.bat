@@ -10,6 +10,6 @@ set APP_PUBLIC=%~dp0public
 
 start http://localhost:8080
 
-php\php.exe -S localhost:8080 -t public
+"%PHP_BIN%" -S localhost:8080 -t "%APP_PUBLIC%"
 
 pause
