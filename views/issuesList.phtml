@@ -30,11 +30,11 @@
             </tr>
             <tr>
                 <td colspan="11">
-                    <!-- Affichage des étiquettes "attente" -->
+                    <!-- Affichage des étiquettes "attente", indiquant un blocage temporaire -->
                     <?php if ($issue->getWaitingTimes()): ?>
                         ⏳ Mises en attente :
-                        <?php foreach ($issue->getWaitingTimes() as $waitingTime): ?>
-                            <span class="badge grey"><?= $waitingTime; ?></span>
+                        <?php foreach ($issue->getWaitingTimes() as $label => $days): ?>
+                            <span class="badge grey"><?= htmlspecialchars($label); ?> — <?= round($days, 1); ?> jours</span>
                         <?php endforeach; ?>
                     <?php endif; ?>
 
@@ -43,11 +43,13 @@
                         <summary>Détails du temps passé par status, hors Terminés</summary>
                         <ul>
                             <?php $issueTimelineData = $issue->getTimeByStatus(true); ?>
-                            <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
-                                <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
-                            <?php endforeach; ?>
+                            <?php if (is_array($issueTimelineData['workflowStatuses']) && !empty($issueTimelineData['workflowStatuses'])): ?>
+                                <?php foreach ($issueTimelineData['workflowStatuses'] as $status => $days): ?>
+                                    <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
 
-                            <?php if (!empty($issueTimelineData['otherStatuses'])): ?>
+                            <?php if (is_array($issueTimelineData['otherStatuses']) && !empty($issueTimelineData['otherStatuses'])): ?>
                                 <br />
                                 Autres statuts :
                                 <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>

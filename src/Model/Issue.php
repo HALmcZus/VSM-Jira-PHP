@@ -388,11 +388,22 @@ class Issue
         );
     }
 
+    /**
+     * Définit les temps d'attente calculés par label "attente".
+     *
+     * @param array<string, float> $waitingTimes Tableau associatif label => jours ouvrés
+     * @return void
+     */
     public function setWaitingTimes(array $waitingTimes): void
     {
         $this->waitingTimes = $waitingTimes;
     }
 
+    /**
+     * Retourne les temps d'attente par label "attente".
+     *
+     * @return array<string, float> Tableau associatif label => jours ouvrés
+     */
     public function getWaitingTimes(): array
     {
         return $this->waitingTimes;

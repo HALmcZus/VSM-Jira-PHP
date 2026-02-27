@@ -286,7 +286,7 @@ class Timeline
      * @param Issue $issue
      * @return void
      */
-    public function buildStatusTimeline($issue)
+    public function buildStatusTimeline(Issue $issue)
     {
         $history = $issue->getHistory();
         if (empty($history)) {
@@ -394,55 +394,94 @@ class Timeline
     }
 
     /**
-     * Calculate the waiting times, based an Jira labels "*attente*"
+     * Calcule le temps passé sous chaque label "attente" pour une Issue, indiquant un blocage temporaire.
+     *
+     * Algorithme :
+     * 1. Pour chaque changement de labels dans le changelog :
+     *    - Détecte les labels ajoutés (présents dans toString, absents de fromString)
+     *    - Détecte les labels retirés (présents dans fromString, absents de toString)
+     * 2. À l'ajout d'un label "attente" → enregistre la date d'entrée
+     * 3. Au retrait → calcule les jours ouvrés écoulés depuis l'entrée
+     * 4. Labels encore actifs en fin d'historique → calculés jusqu'à la date de résolution
+     *
+     * @param Issue $issue
+     * @return void
      */
-    public function buildWaitingTimes(Issue $issue)
+    public function buildWaitingTimes(Issue $issue): void
     {
         $history = $issue->getHistory();
         if (empty($history)) {
             return;
         }
 
+        /** @var array<string, \DateTime> $activeWaitingLabels label => date d'ajout */
+        $activeWaitingLabels = [];
+
+        /** @var array<string, float> $waitingTimes label => jours ouvrés cumulés */
         $waitingTimes = [];
 
         foreach ($history as $historyItem) {
             foreach ($historyItem['items'] as $item) {
-                // Ignore les éléments d'historique ne concernant pas les étiquettes (champs labels)
+                // Ignore les éléments d'historique ne concernant pas les étiquettes (champ "labels")
                 if ($item['field'] !== 'labels') {
                     continue;
                 }
 
-                //Extrait les labels contenant "attente" dans les champs fromString et toString
-                foreach (['fromString', 'toString'] as $field) {
-                    $labels = strtolower($item[$field] ?? '');
-                    $waitingTimes = array_merge(
-                        $waitingTimes,
-                        $this->extractWaitingLabelsFromItem($labels)
-                    );
+                $transitionDate = new \DateTime($historyItem['created']);
+
+                $previousLabels = $this->splitLabels($item['fromString'] ?? '');
+                $newLabels      = $this->splitLabels($item['toString'] ?? '');
+
+                // Labels ajoutés lors de cette transition
+                foreach (array_diff($newLabels, $previousLabels) as $label) {
+                    if ($this->isWaitingLabel($label)) {
+                        $activeWaitingLabels[$label] = $transitionDate;
+                    }
+                }
+
+                // Labels retirés lors de cette transition → on calcule la durée
+                foreach (array_diff($previousLabels, $newLabels) as $label) {
+                    if ($this->isWaitingLabel($label) && isset($activeWaitingLabels[$label])) {
+                        $days = $this->calculateBusinessDays($activeWaitingLabels[$label], $transitionDate);
+                        $waitingTimes[$label] = ($waitingTimes[$label] ?? 0.0) + $days;
+                        unset($activeWaitingLabels[$label]);
+                    }
                 }
             }
         }
 
-        $issue->setWaitingTimes(
-            array_unique($waitingTimes)
-        );
+        // Labels encore actifs (jamais retirés) → on calcule jusqu'à la date de résolution
+        $endDate = $issue->getResolutionDateTime();
+        foreach ($activeWaitingLabels as $label => $addedDate) {
+            $days = $this->calculateBusinessDays($addedDate, $endDate);
+            $waitingTimes[$label] = ($waitingTimes[$label] ?? 0.0) + $days;
+        }
+
+        $issue->setWaitingTimes($waitingTimes);
     }
 
     /**
-     * Search for waiting label in a given labels string, and return it as array
+     * Découpe une chaîne de labels Jira (séparés par des espaces) en tableau normalisé.
      *
-     * @param  string $string
-     * @return array
+     * @param string $labelsString Chaîne brute issue du changelog Jira (fromString / toString)
+     * @return string[]
      */
-    protected function extractWaitingLabelsFromItem(string $string): array
+    private function splitLabels(string $labelsString): array
     {
-        $result = [];
-        $labels = explode(' ', $string);
-        foreach ($labels as $label) {
-            if (str_contains($label, self::WAIT_LABEL_KEYWORD)) {
-                $result[] = $label;
-            }
+        if (empty($labelsString)) {
+            return [];
         }
-        return $result;
+        return array_values(array_filter(explode(' ', strtolower($labelsString))));
+    }
+
+    /**
+     * Indique si un label est un label "attente".
+     *
+     * @param string $label
+     * @return bool
+     */
+    private function isWaitingLabel(string $label): bool
+    {
+        return str_contains($label, self::WAIT_LABEL_KEYWORD);
     }
 }
