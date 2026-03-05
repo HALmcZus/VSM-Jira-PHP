@@ -1,0 +1,19 @@
+<?php if ($this->getIsDemo()): ?>
+    <div style="color:red;font-weight:bold;">
+        ⚠️ Mode DÉMO activé dans .env => Vérification SSL <u>désactivée</u> ⚠️
+    </div>
+<?php endif; ?>
+
+<?php
+$currentPage = $currentPage ?? 'version';
+?>
+
+<div class="top-nav">
+    <a href="/" class="nav-item <?= $currentPage === 'version' ? 'active' : '' ?>">
+        🚀 VSM Version
+    </a>
+
+    <a href="/feature" class="nav-item <?= $currentPage === 'feature' ? 'active' : '' ?>">
+        ⭐ VSM Feature
+    </a>
+</div>

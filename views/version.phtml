@@ -1,8 +1,8 @@
 <?php
-
 /** @var \App\Controller\VersionController $this */
 /** @var \App\View\VersionView $view */
 /** @var \App\Model\Issue $issue */
+$currentPage = 'version';
 ?>
 <!DOCTYPE html>
 <html>
@@ -14,11 +14,9 @@
 </head>
 
 <body>
-    <?php if ($this->getIsDemo()): ?>
-        <div style="color:red;font-weight:bold;">
-            ⚠️ Mode DÉMO activé dans .env => Vérification SSL <u>désactivée</u> ⚠️
-        </div>
-    <?php endif; ?>
+    <?php
+        include __DIR__ . '/components/topNavigation.phtml';
+    ?>
 
     <div class="card">
         <h1>Value Stream Mapping - Version Jira</h1>

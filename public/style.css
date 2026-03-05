@@ -345,6 +345,31 @@ tr:hover {
     font-size: 0.9rem;
 }
 
+/* Bandeau navigation */
+.top-nav {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.nav-item {
+    padding: 10px 18px;
+    border-radius: 8px;
+    text-decoration: none;
+    background: #f0f2f5;
+    color: #333;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background: #e2e6ea;
+}
+
+.nav-item.active {
+    background: #3a7afe;
+    color: white;
+}
 
 /**
  * Responsive : empilé sur petits écrans
