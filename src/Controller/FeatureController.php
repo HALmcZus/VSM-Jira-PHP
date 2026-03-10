@@ -70,7 +70,7 @@ class FeatureController
 
         // Rendu de la vue
         ob_start();
-        require __DIR__ . '/../../views/version.phtml';
+        require __DIR__ . '/../../views/feature.phtml';
         $html = ob_get_clean();
 
         $response->getBody()->write($html);

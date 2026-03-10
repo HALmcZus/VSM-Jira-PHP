@@ -13,4 +13,6 @@ return function (App $app) {
     $app->post('/feature', [FeatureController::class, 'process']);
     $app->get('/api/jira/projects/search', [JiraProjectController::class, 'search']);
     $app->get('/api/jira/projects/{projectKey}/versions', [ProjectVersionsController::class, 'versionsListByProject']);
+    //TODO
+    $app->get('/api/jira/projects/{projectKey}/features', [ProjectVersionsController::class, 'versionsListByProject']);
 };

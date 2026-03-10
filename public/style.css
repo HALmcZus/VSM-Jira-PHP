@@ -350,6 +350,7 @@ tr:hover {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
+    background: #505050;
 }
 
 .nav-item {
