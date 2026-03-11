@@ -20,6 +20,8 @@ class GovApiService
     const CACHE_DIR      = __DIR__ . '/../../cache';
     const CACHE_TTL      = 365 * 24 * 3600; // 1 an en secondes
 
+    private bool $isDemo = false;
+
     /**
      * Cache mémoire statique : évite les lectures disque répétées
      * au sein d'une même requête PHP (Config est instancié plusieurs fois).
@@ -27,6 +29,11 @@ class GovApiService
      * @var array<string, array<string, string>>
      */
     private static array $memoryCache = [];
+
+    public function __construct()
+    {
+        $this->isDemo  = $_ENV['IS_DEMO'] ?? false;
+    }
 
     /**
      * Retourne tous les jours fériés disponibles pour une zone donnée.
@@ -157,6 +164,12 @@ class GovApiService
             CURLOPT_TIMEOUT        => 5,
             CURLOPT_HTTPHEADER     => ['Accept: application/json'],
         ]);
+
+        if ($this->isDemo === true) {
+            // ⚠️ Démo uniquement ⚠️ (proxy SSL corporate) => on bypass la vérification SSL
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
 
         $response = curl_exec($ch);
 
