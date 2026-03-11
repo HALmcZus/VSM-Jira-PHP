@@ -11,14 +11,18 @@ use App\Service\JiraService;
  */
 class ProjectFeaturesRepository
 {
-    const STATUS_ANALYSING = '🔎Analysing';
-    const STATUS_READY = '🚦Prêt';
-    const STATUS_PLANNED = '🔜Planifié';
-    const STATUS_TODO = '▶️À faire';
-    const STATUS_WORKING = '⚙️En cours';
-    const STATUS_DONE = '✅Terminé(e)';
-    const STATUS_UNACHIEVABLE = '📦Non Atteignable';
-    const STATUS_ABANDONED = '🗑️ABANDONNE';
+    const STATUS_LABELS = [
+        'Analysing' => '🔎Analysing',
+        'Prêt' => '🚦Prêt',
+        'Planifié' => '🔜Planifié',
+        'À faire' => '▶️À faire',
+        'En cours' => '⚙️En cours',
+        'Validating on staging' => '🧪Validating on staging',
+        'Releasing' => '🚀Releasing',
+        'Terminé(e)' => '✅Terminé(e)',
+        'Non atteignable' => '📦Non Atteignable',
+        'ABANDONNE' => '🗑️ABANDONNE',
+    ];
 
     private JiraService $jira;
 
@@ -48,7 +52,7 @@ class ProjectFeaturesRepository
      * Algorithme :
      * 1. Mapping vers une structure normalisée avec extraction du PI
      * 2. Tri primaire : PI décroissant (null → fin de liste)
-     * 3. Tri secondaire : partie numérique de la key croissante (REP-1 < REP-2)
+     * 3. Tri secondaire : partie numérique de la key décroissante (REP-2 > REP-1)
      *
      * @param array $features Issues brutes retournées par l'API Jira
      * @return array
@@ -56,7 +60,7 @@ class ProjectFeaturesRepository
     protected function sortFeaturesList(array $features): array
     {
         $mapped = array_map(function (array $f): array {
-            $status = $f['fields']['status']['name'] ?? ''; //TODO picto selon status, cf const de class
+            $status = $this->getStatusLabel($f['fields']['status']['name'] ?? '');
             $name   = $f['fields']['summary'] ?? '';
             $key    = $f['key'] ?? '';
             $lastPI = $this->extractLastPlanningInterval($f['fields'][$this->jira::PLANNING_INTERVAL_CUSTOM_FIELD] ?? null);
@@ -91,6 +95,14 @@ class ProjectFeaturesRepository
         });
 
         return $mapped;
+    }
+
+    protected function getStatusLabel(string $status): string
+    {
+        if (isset(self::STATUS_LABELS[$status])) {
+            return self::STATUS_LABELS[$status];
+        }
+        return $status;
     }
 
     /**
