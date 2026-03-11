@@ -16,6 +16,8 @@ class JiraService
     const API_URL_PROJECT_VERSIONS = '/rest/api/2/project/{project_id}/versions';
     const API_URL_FETCH_ISSUES = '/rest/api/3/issue/bulkfetch';
     const API_URL_PROJECT_SEARCH = '/rest/api/3/project/search';
+    const API_URL_ISSUE = '/rest/api/3/issue';
+    const PLANNING_INTERVAL_CUSTOM_FIELD = 'customfield_11400';
 
     private string $baseUrl;
     private string $email;
@@ -164,13 +166,15 @@ class JiraService
      *
      * @param  mixed $jql
      * @param  mixed $fields
+     * @param  int   $maxResults Nombre max de résultats (défaut 50, max Jira : 100)
      * @return array
      */
-    public function callSearchApiGet(string $jql, array $fields = []): array
+    public function callSearchApiGet(string $jql, array $fields = [], int $maxResults = 50): array
     {
         $query = http_build_query([
             'jql' => $jql,
-            'fields' => $fields ? implode(',', $fields) : ''
+            'fields' => $fields ? implode(',', $fields) : '',
+            'maxResults' => $maxResults
         ]);
 
         $fullUrl = $this->baseUrl . self::API_URL_SEARCH . '?' . $query;
@@ -228,6 +232,60 @@ class JiraService
         }
 
         return $result['values'];
+    }
+
+    /**
+     * Récupère une issue Jira par son ID numérique.
+     *
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get
+     *
+     * @param int    $issueId Identifiant numérique de l'issue
+     * @param array  $fields  Liste des champs à retourner (vide = tous)
+     * @return array
+     */
+    public function getIssueById(int $issueId, array $fields = []): array
+    {
+        $query = $fields ? '?fields=' . implode(',', $fields) : '';
+        $url   = $this->baseUrl . self::API_URL_ISSUE . '/' . $issueId . $query;
+
+        return $this->request($url);
+    }
+
+    /**
+     * Récupère les issues enfants d'une Feature via JQL parent = {parentId}.
+     * Embarque le changelog pour le calcul des timelines.
+     *
+     * @param int $parentId ID numérique de la Feature parente
+     * @return array        Tableau d'issues brutes (format API Jira)
+     */
+    public function getIssuesByParent(int $parentId): array
+    {
+        $payload = [
+            'jql'        => "parent = $parentId",
+            'fields'     => ['summary', 'project', 'priority', 'status', 'created', 'resolutiondate', 'issuetype'],
+            'expand'     => 'changelog',
+            'maxResults' => 100,
+        ];
+
+        return $this->callSearchApiPost($payload);
+    }
+
+    /**
+     * Récupère les 100 dernières Features d'un projet Jira, sur un an maximum.
+     *
+     * @param string $projectKey Clé du projet (ex: "ABC")
+     * @return array Tableau d'issues brutes (format API Jira search)
+     */
+    public function getFeaturesByProject(string $projectKey): array
+    {
+        $jql = 'project = ' . $projectKey
+            . ' AND issuetype = Feature'
+            . ' AND created >= -365d'
+            . ' ORDER BY updated DESC';
+
+        $fields = ['summary', 'status', self::PLANNING_INTERVAL_CUSTOM_FIELD];
+
+        return $this->callSearchApiGet($jql, $fields, 100);
     }
 
     /**

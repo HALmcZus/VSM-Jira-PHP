@@ -1,0 +1,191 @@
+<?php
+
+/**
+ * Composant générique de sélection Projet + Item (Version ou Feature)
+ *
+ * @var string $itemApiEndpoint  URL API des items avec placeholder {key} pour la project key
+ * @var string $formAction       Action du formulaire de soumission
+ * @var string $inputName        Nom du champ soumis (contient l'ID numérique de l'item)
+ * @var string $storageKey       Clé localStorage pour la persistance (différente par page)
+ */
+?>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<div x-data="jiraProjectSearch()" class="jira-project-search">
+    <label for="project-search-<?= htmlspecialchars($storageKey) ?>">
+        <strong>Sélectionner mon Projet Jira : </strong>
+    </label>
+
+    <input
+        id="project-search-<?= htmlspecialchars($storageKey) ?>"
+        type="text"
+        x-model="query"
+        @input.debounce.300ms="search()"
+        @focus="open = true"
+        class="input"
+        placeholder="Mon projet"
+        autocomplete="off" />
+
+    <div class="project-dropdown"
+        x-show="open && projects.length"
+        @click.outside="open = false">
+        <template x-for="project in projects" :key="project.id">
+            <div @click="select(project)" style="padding: 8px 12px; cursor: pointer;" class="hover-bg">
+                <strong x-text="project.key"></strong>
+                <span x-text="' – ' + project.name"></span>
+            </div>
+        </template>
+    </div>
+
+    <div x-show="selected">
+        <div style="margin-top: 8px; font-size: 14px;">
+            ✅ Projet sélectionné : <strong x-text="selected?.key"></strong>
+            <button type="button" @click="reset()" style="font-size: 12px; cursor: pointer;">
+                🔄 Changer de projet
+            </button>
+        </div>
+
+        <div x-show="items.length" style="margin-top: 16px;">
+            <form method="POST" action="<?= htmlspecialchars($formAction) ?>" style="margin-top: 16px;">
+                <label><strong>Sélectionner :</strong></label>
+                <select
+                    name="<?= htmlspecialchars($inputName) ?>"
+                    class="input"
+                    required
+                    @change="$el.form.submit()">
+                    <option value="" disabled selected>-- Choisir --</option>
+                    <template x-for="item in items" :key="item.id">
+                        <option :value="item.id" x-text="item.label"></option>
+                    </template>
+                </select>
+            </form>
+        </div>
+
+        <div x-show="!itemLoading && items.length === 0 && !itemError"
+            style="margin-top: 16px; font-style: italic; color: #ff0000;">
+            ⚠️ Aucun élément trouvé pour ce projet
+        </div>
+
+        <div x-show="itemLoading">⏳ Chargement…</div>
+
+        <div x-show="error" class="inline-error">❌ <span x-text="error"></span></div>
+        <div x-show="itemError" class="inline-error">❌ <span x-text="itemError"></span></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const ITEM_API_ENDPOINT = <?= json_encode($itemApiEndpoint) ?>;
+        const STORAGE_KEY = <?= json_encode($storageKey) ?>;
+
+        window.jiraProjectSearch = function() {
+            return {
+                query: '',
+                open: false,
+                projects: [],
+                selected: null,
+                loading: false,
+                error: null,
+                items: [],
+                itemLoading: false,
+                itemError: null,
+
+                init() {
+                    try {
+                        const saved = localStorage.getItem(STORAGE_KEY);
+                        if (!saved) return;
+
+                        const {
+                            project,
+                            items
+                        } = JSON.parse(saved);
+                        if (project && items) {
+                            this.selected = project;
+                            this.items = items;
+                            this.query = project.key + ' – ' + project.name;
+                        }
+                    } catch (e) {
+                        localStorage.removeItem(STORAGE_KEY);
+                    }
+                },
+
+                _saveToStorage() {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                            project: this.selected,
+                            items: this.items,
+                        }));
+                    } catch (e) {
+                        console.warn('localStorage indisponible', e);
+                    }
+                },
+
+                reset() {
+                    this.selected = null;
+                    this.items = [];
+                    this.query = '';
+                    this.projects = [];
+                    this.error = null;
+                    this.itemError = null;
+                    localStorage.removeItem(STORAGE_KEY);
+                },
+
+                search() {
+                    if (this.query.length < 2) {
+                        this.projects = [];
+                        return;
+                    }
+                    this.loading = true;
+                    fetch('/api/jira/projects/search?q=' + encodeURIComponent(this.query))
+                        .then(r => {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        })
+                        .then(data => {
+                            this.projects = data;
+                            this.open = true;
+                        })
+                        .catch(err => {
+                            this.error = 'Erreur chargement projets';
+                            console.error(err);
+                        })
+                        .finally(() => {
+                            this.loading = false;
+                        });
+                },
+
+                select(project) {
+                    this.selected = project;
+                    this.query = project.key + ' – ' + project.name;
+                    this.open = false;
+                    this.loadItems();
+                },
+
+                loadItems() {
+                    this.itemLoading = true;
+                    this.itemError = null;
+                    this.items = [];
+
+                    const url = ITEM_API_ENDPOINT.replace('{key}', this.selected.key);
+
+                    fetch(url)
+                        .then(r => {
+                            if (!r.ok) throw new Error('HTTP ' + r.status);
+                            return r.json();
+                        })
+                        .then(data => {
+                            this.items = data;
+                            this._saveToStorage();
+                        })
+                        .catch(err => {
+                            this.itemError = err.message;
+                            console.error(err);
+                        })
+                        .finally(() => {
+                            this.itemLoading = false;
+                        });
+                },
+            };
+        };
+    })();
+</script>

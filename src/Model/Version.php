@@ -3,79 +3,31 @@
 namespace App\Model;
 
 use Exception;
-use App\Service\JiraService;
-use App\Model\Config;
-use App\Model\Timeline;
 
 /**
  * Version
+ *
+ * Agrégat d'issues Jira rattachées à une Version (fixVersion).
+ * Hérite de toute la logique de métriques via AbstractIssueCollection.
  */
-class Version
+class Version extends AbstractIssueCollection
 {
     const VERSION_URL = '{base_url}/projects/{project_key}/versions/{version_id}';
 
-    protected JiraService $jiraService;
-    protected Config $config;
-    protected Timeline $timeline;
-
-    /** Version & Issues data */
-    protected array $versionData = [];
-    protected array $versionIssuesIds = [];
-    protected array $versionIssues = [];
-    protected int $issuesCount = 0;
-
-    /** Timeline data */
-    private float $averageCycleTime = 0.0;
-    private float $totalCycleTime = 0.0;
-    private float $averageLeadTime = 0.0;
-    private float $totalLeadTime = 0.0;
-    private float $averageTimeSpentInRefinement = 0.0;
-    private float $totalTimeSpentInRefinement = 0.0;
-    private float $averageTimeSpentInSprint = 0.0;
-    private float $totalTimeSpentInSprint = 0.0;
-    private float $averageTimeSpentInOther = 0.0;
-    private float $totalTimeSpentInOther = 0.0;
-    private array $timelineByStatus = [];
-    private array $averageTimeByStatus = [];
-    private array $aggregatedWaitingTimes = [];
+    private array $versionData = [];
+    private array $versionIssuesIds = [];
 
     /**
-     * __construct
+     * {@inheritdoc}
      *
-     * @param  mixed $versionId
-     * @return void
+     * Charge les métadonnées de la Version Jira (nom, dates, statut...).
      */
-    public function __construct(int $versionId)
+    protected function loadCollectionData(int $id): void
     {
-        $this->jiraService = new JiraService();
-        $this->config = new Config();
-        $this->timeline = new Timeline();
+        $result = $this->jiraService->getVersionById($id);
 
-        // Load version data from Jira
-        $this->getVersionById($versionId);
-
-        // Load version's issues
-        $this->getIssuesDetailsByVersion($versionId);
-
-        // Calculate Times
-        $this->calculateVersionLeadAndCycleTime();
-        $this->calculateTimelineByStatus();
-        $this->calculateAverageTimeByStatus();
-    }
-
-    /**
-     * getVersionById
-     *
-     * @param  mixed $versionId
-     * @return array
-     */
-    public function getVersionById(int $versionId): array
-    {
-        $result = $this->jiraService->getVersionById($versionId);
-
-        //TODO: afficher message erreur si version non trouvée pour l'ID demandé
         if (!isset($result['id']) || isset($result['error'])) {
-            throw new Exception("Erreur lors de la récupération de la Version Jira (Version::getVersionById) : " . print_r($result, true));
+            throw new Exception("Erreur lors de la récupération de la Version Jira : " . print_r($result, true));
         }
 
         $result['version_url'] = str_replace(
@@ -85,353 +37,81 @@ class Version
         );
 
         $this->versionData = $result;
-        return $this->versionData;
     }
 
     /**
-     * getIssuesIdsByVersion
+     * {@inheritdoc}
      *
-     * @param  mixed $versionId
-     * @return array
+     * Charge les issues via deux appels : récupération des IDs, puis des détails+changelog.
      */
-    public function getIssuesIdsByVersion(int $versionId): array
-    {
-        $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
-
-        $result = [];
-        foreach ($issues as $issue) {
-            $result[] = $issue['id'] ?? '';
-        }
-
-        $this->versionIssuesIds = $result;
-
-        return $this->versionIssuesIds;
-    }
-
-    /**
-     * getIssuesDetailsByVersion
-     *
-     * @param  mixed $versionId
-     * @return array
-     */
-    public function getIssuesDetailsByVersion(int $versionId): array
+    protected function loadIssues(int $id): void
     {
         try {
-            //Evite un second appel pour récupérer les IDs si on les a déjà
-            if (!$this->versionIssuesIds) {
-                $this->getIssuesIdsByVersion($versionId);
-            }
+            $this->loadIssueIds($id);
 
             $rawIssues = $this->jiraService->getIssuesDetails($this->versionIssuesIds);
 
             foreach ($rawIssues as $rawIssueData) {
-                $this->versionIssues[] = new Issue($rawIssueData);
+                $this->issues[] = new Issue($rawIssueData);
             }
 
-            $this->issuesCount = count($this->versionIssues);
-
-            return $this->versionIssues;
+            $this->issuesCount = count($this->issues);
         } catch (Exception $e) {
-            throw new Exception("Erreur lors de la récupération des tickets Jira rattachés à la Version : " . $e->getMessage());
+            throw new Exception("Erreur lors de la récupération des tickets de la Version : " . $e->getMessage());
         }
     }
 
     /**
-     * Calcule le temps cumulé de la release par status
-     * et par catégorie de status Jira.
+     * Charge les IDs des issues de la version via JQL fixVersion.
      *
-     * Agrège les timelines calculées dans chaque Issue.
-     *
-     * @return array{
-     *   byStatus: array<string, float>
-     * }
+     * @param int $versionId
      */
-    public function calculateTimelineByStatus(): void
+    private function loadIssueIds(int $versionId): void
     {
-        $timeByStatus = [];
+        $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
 
-        /** @var \App\Model\Issue $issue */
-        foreach ($this->versionIssues as $issue) {
-            // Agrégation par status
-            foreach ($issue->getTimeByStatus(false) as $statusName => $timeSpent) {
-                $timeByStatus[$statusName] = ($timeByStatus[$statusName] ?? 0) + $timeSpent;
-            }
-        }
-
-        $this->timelineByStatus = $timeByStatus;
+        $this->versionIssuesIds = array_map(
+            static fn($issue) => $issue['id'] ?? '',
+            $issues
+        );
     }
 
-    /**
-     * getTimelineByStatus
-     *
-     * @return array
-     */
-    public function getTimelineByStatus(): array
-    {
-        return $this->timeline->getSortedTimelineByStatus($this->timelineByStatus);
-    }
+    // ==================== Getters Version-spécifiques ====================
 
-    /**
-     * calculateAverageTimeByStatus
-     *
-     * @return void
-     */
-    public function calculateAverageTimeByStatus(): void
-    {
-        foreach ($this->timelineByStatus as $statusName => $timeSpent) {
-            $this->averageTimeByStatus[$statusName] = round($timeSpent / $this->issuesCount, 2);
-        }
-
-        $this->averageTimeSpentInRefinement = round($this->totalTimeSpentInRefinement / $this->issuesCount, 2);
-        $this->averageTimeSpentInSprint = round($this->totalTimeSpentInSprint / $this->issuesCount, 2);
-        $this->averageTimeSpentInOther = round($this->totalTimeSpentInOther / $this->issuesCount, 2);
-    }
-
-    /**
-     * getAverageTimeByStatus
-     *
-     * @return array
-     */
-    public function getAverageTimeByStatus(): array
-    {
-        return $this->averageTimeByStatus;
-    }
-
-    /**
-     * calculate Version's Lead And Cycle Times (total and average)
-     *
-     * @return void
-     */
-    public function calculateVersionLeadAndCycleTime()
-    {
-        if ($this->issuesCount > 0) {
-            /* @var \App\Model\Issue $issue */
-            foreach ($this->versionIssues as $issue) {
-                $this->totalLeadTime += $issue->getLeadTime() ?? 0;
-                $this->totalCycleTime += $issue->getCycleTime() ?? 0;
-                $this->totalTimeSpentInRefinement += $issue->getTimeSpentInRefinement() ?? 0.0;
-                $this->totalTimeSpentInSprint += $issue->getTimeSpentInSprint() ?? 0.0;
-                $this->totalTimeSpentInOther += $issue->getTimeSpentInOther() ?? 0.0;
-                // Agrégation des temps d'attente par label
-                foreach ($issue->getWaitingTimes() as $label => $days) {
-                    $this->aggregatedWaitingTimes[$label] = ($this->aggregatedWaitingTimes[$label] ?? 0.0) + $days;
-                }
-            }
-            $this->averageLeadTime = round($this->totalLeadTime / $this->issuesCount, 2);
-            $this->averageCycleTime = round($this->totalCycleTime / $this->issuesCount, 2);
-        }
-    }
-
-    /**
-     * getAverageCycleTime
-     *
-     * @return float
-     */
-    public function getAverageCycleTime(): float
-    {
-        return $this->averageCycleTime;
-    }
-
-    /**
-     * getTotalCycleTime
-     *
-     * @return float
-     */
-    public function getTotalCycleTime(): float
-    {
-        return $this->totalCycleTime;
-    }
-
-    /**
-     * getAverageLeadTime
-     *
-     * @return float
-     */
-    public function getAverageLeadTime(): float
-    {
-        return $this->averageLeadTime;
-    }
-
-    /**
-     * getTotalLeadTime
-     *
-     * @return float
-     */
-    public function getTotalLeadTime(): float
-    {
-        return $this->totalLeadTime;
-    }
-
-    /**
-     * getAverageTimeSpentInRefinement
-     *
-     * @return float
-     */
-    public function getAverageTimeSpentInRefinement(): float
-    {
-        return $this->averageTimeSpentInRefinement;
-    }
-
-    /**
-     * getTotalTimeSpentInRefinement
-     *
-     * @return float
-     */
-    public function getTotalTimeSpentInRefinement(): float
-    {
-        return $this->totalTimeSpentInRefinement;
-    }
-
-    /**
-     * getAverageTimeSpentInSprint
-     *
-     * @return float
-     */
-    public function getAverageTimeSpentInSprint(): float
-    {
-        return $this->averageTimeSpentInSprint;
-    }
-
-    /**
-     * getTotalTimeSpentInSprint
-     *
-     * @return float
-     */
-    public function getTotalTimeSpentInSprint(): float
-    {
-        return $this->totalTimeSpentInSprint;
-    }
-
-    /**
-     * getAverageTimeSpentInOther
-     *
-     * @return float
-     */
-    public function getAverageTimeSpentInOther(): float
-    {
-        return $this->averageTimeSpentInOther;
-    }
-
-    /**
-     * getTotalTimeSpentInOther
-     *
-     * @return float
-     */
-    public function getTotalTimeSpentInOther(): float
-    {
-        return $this->totalTimeSpentInOther;
-    }
-
-    /** *******************
-     *** DATA GETTERS **
-     ******************* **/
-    /**
-     * getId
-     */
-    public function getId()
+    public function getId(): ?string
     {
         return $this->versionData['id'] ?? null;
     }
-
-    /**
-     * getName
-     */
-    public function getName()
+    public function getName(): ?string
     {
         return $this->versionData['name'] ?? null;
     }
-
-    /**
-     * getDescription
-     */
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->versionData['description'] ?? null;
     }
-
-    /**
-     * getUrl
-     */
-    public function getUrl()
+    public function getUrl(): string
     {
         return $this->versionData['version_url'] ?? '#';
     }
-
-    /**
-     * getStartDate
-     */
-    public function getStartDate()
+    public function getStartDate(): ?string
     {
         return $this->versionData['startDate'] ?? null;
     }
-
-    /**
-     * getReleaseDate
-     */
-    public function getReleaseDate()
+    public function getReleaseDate(): ?string
     {
         return $this->versionData['releaseDate'] ?? null;
     }
-
-    /**
-     * isReleased
-     *
-     * @return bool
-     */
     public function isReleased(): bool
     {
         return (bool) ($this->versionData['released'] ?? false);
     }
-
-    /**
-     * isOverdue
-     *
-     * @return bool
-     */
     public function isOverdue(): bool
     {
         return (bool) ($this->versionData['overdue'] ?? false);
     }
-
-    /**
-     * getProjectId
-     *
-     * @return bool
-     */
-    public function getProjectId(): bool
+    public function getProjectId(): mixed
     {
         return $this->versionData['projectId'] ?? null;
-    }
-
-    /**
-     * getIssues
-     *
-     * @return array
-     */
-    public function getIssues(): array
-    {
-        return $this->versionIssues;
-    }
-
-    /**
-     * getIssuesCount
-     *
-     * @return int
-     */
-    public function getIssuesCount(): int
-    {
-        return $this->issuesCount;
-    }
-
-    /**
-     * Retourne le cumul des temps d'attente par label "attente",
-     * agrégés sur l'ensemble des issues de la version.
-     *
-     * @return array<string, float> label => jours ouvrés cumulés, trié par durée décroissante
-     */
-    public function getAggregatedWaitingTimes(): array
-    {
-        arsort($this->aggregatedWaitingTimes);
-        return $this->aggregatedWaitingTimes;
     }
 }

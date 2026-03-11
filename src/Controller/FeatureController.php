@@ -49,26 +49,23 @@ class FeatureController
      */
     public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $data = $request->getParsedBody();
-        $versionId = $data['fixVersionId'] ?? null;
+        $data      = $request->getParsedBody();
+        $featureId = $data['featureId'] ?? null;
 
-        $view = null;
+        $view  = null;
         $error = null;
 
         try {
-            if (!$versionId) {
-                throw new \Exception('Le paramètre fixVersionId est requis.');
+            if (!$featureId) {
+                throw new \Exception('Le paramètre featureId est requis.');
             }
 
-            // Load data
-            $version = new Version($versionId);
-            $view = new VersionView($version);
+            $feature = new \App\Model\Feature((int) $featureId);
+            $view    = new \App\View\FeatureView($feature);
         } catch (\Throwable $e) {
-            // Capturer l'erreur pour l'afficher dans la vue
             $error = $e->getMessage();
         }
 
-        // Rendu de la vue
         ob_start();
         require __DIR__ . '/../../views/feature.phtml';
         $html = ob_get_clean();

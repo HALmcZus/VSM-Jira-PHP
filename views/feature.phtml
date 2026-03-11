@@ -1,28 +1,34 @@
 <?php
-    $currentPage = 'feature';
- ?>
 
+/** @var \App\Controller\FeatureController $this */
+/** @var \App\View\FeatureView $view */
+$currentPage = 'feature';
+
+$itemApiEndpoint = '/api/jira/projects/{key}/features';
+$formAction      = '/feature';
+$inputName       = 'featureId';
+$storageKey      = 'jira_project_feature';
+?>
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>VSM - Jira</title>
+    <title>VSM - Feature Jira</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-    <?php
-        include __DIR__ . '/components/topNavigation.phtml';
-    ?>
+    <?php include __DIR__ . '/components/topNavigation.phtml'; ?>
 
     <div class="card">
         <h1>Value Stream Mapping - Feature Jira</h1>
 
-        <?php include __DIR__ . '/components/form/selectJiraProjectAndFeatures.phtml'; ?>
+        <?php include __DIR__ . '/components/form/selectJiraProject.phtml'; ?>
+
         <form method="POST" action="/feature">
-            <label>Ou directement par Jira ID de la Feature :</label>
-            <input type="text" name="featureId" required placeholder="REP-XXX, TSD-XXX ...">
+            <label>Ou directement par ID numérique de la Feature :</label>
+            <input type="text" name="featureId" required placeholder="ID numérique Jira de la Feature">
             <button type="submit">OK</button>
         </form>
     </div>
@@ -32,70 +38,52 @@
     <?php if ($view): ?>
         <div class="card">
             <h2>
-                <a href="<?= $view->getVersionUrl(); ?>" target="_blank">
-                    <?= $view->getVersionName(); ?> (<?= 'ID ' . $view->getVersionId(); ?>)
+                <a href="<?= $view->getFeatureUrl() ?>" target="_blank">
+                    <?= $view->getFeatureKey() ?> – <?= $view->getFeatureName() ?>
                 </a>
             </h2>
 
-            <p style="margin-top: 12px; color: var(--muted);">
-                <?= $view->getVersionDescription(); ?>
-            </p>
-
             <div class="meta">
-                <!-- Infos version -->
                 <div class="meta-line meta-line-info">
-                    <span>📅 Date de démarrage : <?= $view->getVersionStartDate() ?? '—'; ?></span>
-                    <span>🎯 Date cible de livraison : <?= $view->getVersionReleaseDate() ?? '—'; ?></span>
-
-                    <?php if ($view->isVersionOverdue()): ?>
-                        <span class="badge red">🕗Deadline dépassée</span>
+                    <?php if ($view->getPlanningIntervalLabel()): ?>
+                        <span>🗓️ <?= htmlspecialchars($view->getPlanningIntervalLabel()) ?></span>
                     <?php endif; ?>
-
-                    <?php if ($view->isVersionReleased()): ?>
-                        <span class="badge green">Statut : Terminée 🚀</span>
-                    <?php else: ?>
-                        <span class="badge orange">Statut : En cours</span>
-                    <?php endif; ?>
+                    <span class="badge orange">
+                        Statut : <?= htmlspecialchars($view->getStatusName()) ?>
+                    </span>
+                    <span><?= $view->getIssuesCount() ?> ticket(s) associé(s)</span>
                 </div>
 
-                <!-- Métriques -->
                 <div class="meta-line meta-line-metrics">
-                    <!-- Lead Time -->
                     <div class="metric">
-                        <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
-                        <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours /ticket</strong></span>
+                        <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création → Terminé)</em></span>
+                        <span>Total : <strong><?= $view->getTotalLeadTime() ?> jours</strong></span>
+                        <span>Moyen : <strong><?= $view->getAverageLeadTime() ?> jours /ticket</strong></span>
                     </div>
-
-                    <!-- Cycle Time -->
                     <div class="metric">
-                        <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
-                        <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours /ticket</strong></span>
+                        <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours → Terminé)</em></span>
+                        <span>Total : <strong><?= $view->getTotalCycleTime() ?> jours</strong></span>
+                        <span>Moyen : <strong><?= $view->getAverageCycleTime() ?> jours /ticket</strong></span>
                     </div>
-
-                    <!-- Time Breakdown -->
                     <div class="metric">
                         <span class="metric-title">🧮 <b>Temps par phase</b></span>
-                        <span>🧠 Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInRefinement(); ?> jours /ticket.</strong></em></span>
-                        <span>⚙️ Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInSprint(); ?> jours /ticket.</strong></em></span>
-                        <span>❓ Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInOther(); ?> jours /ticket.</strong></em></span>
+                        <span>🧠 Affinage : <strong><?= $view->getTotalTimeSpentInRefinement() ?> jours</strong> <em>Moy. <?= $view->getAverageTimeSpentInRefinement() ?> j/ticket</em></span>
+                        <span>⚙️ Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint() ?> jours</strong> <em>Moy. <?= $view->getAverageTimeSpentInSprint() ?> j/ticket</em></span>
+                        <span>❓ Autre : <strong><?= $view->getTotalTimeSpentInOther() ?> jours</strong> <em>Moy. <?= $view->getAverageTimeSpentInOther() ?> j/ticket</em></span>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="timeline-grid">
-            <!-- Timeline par statut -->
             <?php include __DIR__ . '/components/metrics/timelineChart.phtml'; ?>
         </div>
 
         <div class="card">
-            <h2><?= $view->getIssuesCount(); ?> tickets rattachés à cette version :</h2>
+            <h2><?= $view->getIssuesCount() ?> tickets rattachés à cette Feature :</h2>
             <?php include __DIR__ . '/components/issuesList.phtml'; ?>
         </div>
-
     <?php endif; ?>
-
 </body>
+
 </html>

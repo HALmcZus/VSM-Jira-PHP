@@ -1,30 +1,34 @@
 <?php
+
 /** @var \App\Controller\VersionController $this */
 /** @var \App\View\VersionView $view */
-/** @var \App\Model\Issue $issue */
 $currentPage = 'version';
+
+$itemApiEndpoint = '/api/jira/projects/{key}/versions';
+$formAction      = '/version';
+$inputName       = 'fixVersionId';
+$storageKey      = 'jira_project_version';
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="UTF-8">
-    <title>VSM - Jira</title>
+    <title>VSM - Version Jira</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-    <?php
-        include __DIR__ . '/components/topNavigation.phtml';
-    ?>
+    <?php include __DIR__ . '/components/topNavigation.phtml'; ?>
 
     <div class="card">
         <h1>Value Stream Mapping - Version Jira</h1>
 
-        <?php include __DIR__ . '/components/form/selectJiraProjectAndVersions.phtml'; ?>
+        <?php include __DIR__ . '/components/form/selectJiraProject.phtml'; ?>
+
         <form method="POST" action="/version">
-            <label>Ou directement par FixVersion ID :</label>
-            <input type="text" name="fixVersionId" required placeholder="ID version Jira (fixVersion)">
+            <label><em>Ou directement par FixVersion ID :</em></label>
+            <input type="text" name="fixVersionId" required placeholder="ID numérique de la Version Jira">
             <button type="submit">OK</button>
         </form>
     </div>

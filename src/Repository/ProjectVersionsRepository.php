@@ -51,13 +51,12 @@ class ProjectVersionsRepository
             }
 
             return [
-                'id' => $v['id'],
-                'name' => $v['name'],
-                'status' => $status,
-                'updated' => $v['releaseDate']
-                    ?? $v['startDate']
-                    ?? $v['userReleaseDate']
-                    ?? '1970-01-01',
+                'id'      => $v['id'],
+                'key'     => $v['key'] ?? null,
+                'name'    => $v['name'],
+                'status'  => $status,
+                'updated' => $v['releaseDate'] ?? $v['startDate'] ?? $v['userReleaseDate'] ?? '1970-01-01',
+                'label'   => $v['name'] . ' (' . $status . ')'
             ];
         }, $versions);
 
