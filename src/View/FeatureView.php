@@ -49,7 +49,7 @@ class FeatureView extends AbstractCollectionView
      */
     public function getPlanningIntervalLabel(): ?string
     {
-        $pi = $this->feature->getPlanningInterval();
-        return $pi !== null ? 'PI ' . $pi : null;
+        $lastPI = $this->feature->getPlanningInterval();
+        return $lastPI !== null ? 'PI ' . $lastPI : null;
     }
 }

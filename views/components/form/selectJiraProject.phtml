@@ -7,6 +7,7 @@
  * @var string $formAction       Action du formulaire de soumission
  * @var string $inputName        Nom du champ soumis (contient l'ID numérique de l'item)
  * @var string $storageKey       Clé localStorage pour la persistance (différente par page)
+ * @var bool   $enablePiFilter   Active le filtre par Planning Interval (false par défaut)
  */
 ?>
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -45,7 +46,33 @@
             </button>
         </div>
 
-        <div x-show="items.length" style="margin-top: 16px;">
+        <!-- Filtre PI — affiché uniquement si $enablePiFilter est actif -->
+        <?php if ($enablePiFilter ?? false): ?>
+            <div x-show="items.length" style="margin-top: 16px;">
+                <label><strong>Filtrer par PI :</strong></label>
+                <input
+                    type="number"
+                    min="1"
+                    x-model="piFilter"
+                    class="input"
+                    style="width: 80px;"
+                    placeholder="Ex: 7" />
+                <button
+                    type="button"
+                    x-show="piFilter !== ''"
+                    @click="piFilter = ''"
+                    style="margin-left: 8px; font-size: 12px; cursor: pointer;">
+                    ✕ Effacer
+                </button>
+                <span
+                    x-show="piFilter !== '' && filteredItems.length === 0"
+                    style="margin-left: 8px; color: #ff0000; font-size: 13px;">
+                    Aucune feature pour ce PI
+                </span>
+            </div>
+        <?php endif; ?>
+
+        <div x-show="filteredItems.length" style="margin-top: 16px;">
             <form method="POST" action="<?= htmlspecialchars($formAction) ?>" style="margin-top: 16px;">
                 <label><strong>Sélectionner :</strong></label>
                 <select
@@ -54,14 +81,14 @@
                     required
                     @change="$el.form.submit()">
                     <option value="" disabled selected>-- Choisir --</option>
-                    <template x-for="item in items" :key="item.id">
+                    <template x-for="item in filteredItems" :key="item.id">
                         <option :value="item.id" x-text="item.label"></option>
                     </template>
                 </select>
             </form>
         </div>
 
-        <div x-show="!itemLoading && items.length === 0 && !itemError"
+        <div x-show="!itemLoading && filteredItems.length === 0 && !itemError"
             style="margin-top: 16px; font-style: italic; color: #ff0000;">
             ⚠️ Aucun élément trouvé pour ce projet
         </div>
@@ -77,6 +104,7 @@
     (function() {
         const ITEM_API_ENDPOINT = <?= json_encode($itemApiEndpoint) ?>;
         const STORAGE_KEY = <?= json_encode($storageKey) ?>;
+        const ENABLE_PI_FILTER = <?= json_encode($enablePiFilter ?? false) ?>;
 
         window.jiraProjectSearch = function() {
             return {
@@ -89,6 +117,23 @@
                 items: [],
                 itemLoading: false,
                 itemError: null,
+                piFilter: '',
+
+                /**
+                 * Computed property : retourne les items filtrés par PI si le filtre est actif.
+                 * Si ENABLE_PI_FILTER est false ou que piFilter est vide, retourne tous les items.
+                 * Un item passe le filtre si son tableau "PIs" contient la valeur saisie.
+                 */
+                get filteredItems() {
+                    if (!ENABLE_PI_FILTER || this.piFilter === '') {
+                        return this.items;
+                    }
+                    const pi = parseInt(this.piFilter, 10);
+                    if (isNaN(pi)) {
+                        return this.items;
+                    }
+                    return this.items.filter(item => Array.isArray(item.PIs) && item.PIs.includes(pi));
+                },
 
                 init() {
                     try {
@@ -127,6 +172,7 @@
                     this.projects = [];
                     this.error = null;
                     this.itemError = null;
+                    this.piFilter = '';
                     localStorage.removeItem(STORAGE_KEY);
                 },
 

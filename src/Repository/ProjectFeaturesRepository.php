@@ -50,32 +50,34 @@ class ProjectFeaturesRepository
             $status = $f['fields']['status']['name'] ?? '';
             $name   = $f['fields']['summary'] ?? '';
             $key    = $f['key'] ?? '';
-            $pi     = $this->extractPlanningInterval($f['fields'][$this->jira::PLANNING_INTERVAL_CUSTOM_FIELD] ?? null);
-            $piLabel = $pi !== null ? '[PI' . $pi . '] ' : null;
+            $lastPI = $this->extractLastPlanningInterval($f['fields'][$this->jira::PLANNING_INTERVAL_CUSTOM_FIELD] ?? null);
+            $pis    = $this->extractPlanningIntervals($f['fields'][$this->jira::PLANNING_INTERVAL_CUSTOM_FIELD] ?? null);
+            $piLabel = $lastPI !== null ? '[PI' . $lastPI . '] ' : null;
 
             return [
                 'id'     => $f['id'],
                 'key'    => $key,
                 'name'   => $name,
                 'status' => $status,
-                'pi'     => $pi,
+                'lastPI' => $lastPI,
+                'PIs'    => $pis,
                 'label'  => $piLabel . $key . ' – ' . $name . ' (' . $status . ')',
             ];
         }, $features);
 
         usort($mapped, function (array $a, array $b): int {
             // PI décroissant — null toujours en dernier
-            if ($a['pi'] !== $b['pi']) {
-                if ($a['pi'] === null) {
+            if ($a['lastPI'] !== $b['lastPI']) {
+                if ($a['lastPI'] === null) {
                     return 1;
                 }
-                if ($b['pi'] === null) {
+                if ($b['lastPI'] === null) {
                     return -1;
                 }
-                return $b['pi'] <=> $a['pi'];
+                return $b['lastPI'] <=> $a['lastPI'];
             }
 
-            // À PI égal : key numérique croissante (REP-1, REP-2...)
+            // À PI égal : key numérique décroissante (REP-2, REP-1...)
             return $this->extractKeyNumber($b['key']) <=> $this->extractKeyNumber($a['key']);
         });
 
@@ -93,7 +95,7 @@ class ProjectFeaturesRepository
      * @param mixed $rawValue
      * @return int|null
      */
-    private function extractPlanningInterval(mixed $rawValue): ?int
+    private function extractLastPlanningInterval(mixed $rawValue): ?int
     {
         if ($rawValue === null) {
             return null;
@@ -104,6 +106,43 @@ class ProjectFeaturesRepository
         }
 
         return $rawValue !== null ? (int) $rawValue : null;
+    }
+
+    /**
+     * Extrait toutes les valeurs numériques du Planning Interval depuis la valeur brute Jira.
+     *
+     * Contrairement à extractLastPlanningInterval() qui retourne uniquement la valeur max,
+     * cette méthode retourne le tableau complet pour permettre le filtre multi-PI.
+     *
+     * Exemple : si une Feature est affectée aux PI 5, 6 et 7 → retourne [5, 6, 7]
+     *
+     * @param mixed $rawValue Valeur brute du champ customfield_11400
+     * @return int[]
+     */
+    private function extractPlanningIntervals(mixed $rawValue): array
+    {
+        if ($rawValue === null) {
+            return [];
+        }
+
+        // Champ scalaire (int ou string) : une seule valeur
+        if (!is_array($rawValue)) {
+            return [(int) $rawValue];
+        }
+
+        // Champ select multiple Jira : tableau d'objets ["value" => "7", ...]
+        // ou tableau de scalaires selon la configuration de l'instance
+        return array_values(
+            array_filter(
+                array_map(static function (mixed $item): ?int {
+                    if (is_array($item)) {
+                        $item = $item['value'] ?? null;
+                    }
+                    return $item !== null ? (int) $item : null;
+                }, $rawValue),
+                static fn(?int $v): bool => $v !== null
+            )
+        );
     }
 
     /**
