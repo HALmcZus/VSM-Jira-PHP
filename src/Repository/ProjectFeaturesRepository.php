@@ -11,6 +11,15 @@ use App\Service\JiraService;
  */
 class ProjectFeaturesRepository
 {
+    const STATUS_ANALYSING = '🔎Analysing';
+    const STATUS_READY = '🚦Prêt';
+    const STATUS_PLANNED = '🔜Planifié';
+    const STATUS_TODO = '▶️À faire';
+    const STATUS_WORKING = '⚙️En cours';
+    const STATUS_DONE = '✅Terminé(e)';
+    const STATUS_UNACHIEVABLE = '📦Non Atteignable';
+    const STATUS_ABANDONED = '🗑️ABANDONNE';
+
     private JiraService $jira;
 
     public function __construct()
@@ -47,7 +56,7 @@ class ProjectFeaturesRepository
     protected function sortFeaturesList(array $features): array
     {
         $mapped = array_map(function (array $f): array {
-            $status = $f['fields']['status']['name'] ?? '';
+            $status = $f['fields']['status']['name'] ?? ''; //TODO picto selon status, cf const de class
             $name   = $f['fields']['summary'] ?? '';
             $key    = $f['key'] ?? '';
             $lastPI = $this->extractLastPlanningInterval($f['fields'][$this->jira::PLANNING_INTERVAL_CUSTOM_FIELD] ?? null);
