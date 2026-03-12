@@ -9,6 +9,7 @@ use App\Controller\ProjectFeaturesController;
 
 return function (App $app) {
     $app->get('/', [VersionController::class, 'index']);
+    $app->get('/version', [VersionController::class, 'index']);
     $app->post('/version', [VersionController::class, 'process']);
     $app->get('/feature', [FeatureController::class, 'index']);
     $app->post('/feature', [FeatureController::class, 'process']);

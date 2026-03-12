@@ -9,11 +9,19 @@ $currentPage = $currentPage ?? 'version';
 ?>
 
 <div class="top-nav">
-    <a href="/" class="nav-item <?= $currentPage === 'version' ? 'active' : '' ?>">
+    <a href="/version" class="nav-item <?= $currentPage === 'version' ? 'active' : '' ?>">
         🚀 VSM par Version <em>(v. beta)</em>
     </a>
 
     <a href="/feature" class="nav-item <?= $currentPage === 'feature' ? 'active' : '' ?>">
         ⭐ VSM par Feature <em>(v. alpha)</em>
+    </a>
+
+    <a href="/#" class="nav-item <?= $currentPage === 'sprint' ? 'active' : '' ?>">
+        🛠️ Sprint en cours <em>(</em>🔒<em>TODO)</em>
+    </a>
+
+    <a href="/#" class="nav-item <?= $currentPage === 'team_metrics' ? 'active' : '' ?>">
+        📊 Métriques de l'équipe <em>(</em>🔒<em>TODO)</em>
     </a>
 </div>
