@@ -44,9 +44,7 @@ $storageKey      = 'jira_project_feature';
 
             <div class="meta">
                 <div class="meta-line meta-line-info">
-                    <?php foreach ($view->getPlanningIntervals() as $pi): ?>
-                        <span>🗓️ PI <?= htmlspecialchars($pi) ?></span>
-                    <?php endforeach; ?>
+                    <span>🗓️ PI <?= htmlspecialchars($view->getPlanningIntervals()) ?></span>
                     <span class="badge orange">
                         Statut : <?= htmlspecialchars($view->getStatusName()) ?>
                     </span>
