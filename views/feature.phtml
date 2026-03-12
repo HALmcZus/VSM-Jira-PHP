@@ -26,8 +26,8 @@ $storageKey      = 'jira_project_feature';
         <?php include __DIR__ . '/components/form/selectJiraProject.phtml'; ?>
 
         <form method="POST" action="/feature">
-            <label>Ou directement par ID numérique de la Feature :</label>
-            <input type="text" name="featureId" required placeholder="ID numérique Jira de la Feature">
+            <label><em>Ou directement par ID de la Feature :</em></label>
+            <input type="text" name="featureId" required placeholder="ID de la Feature">
             <button type="submit">OK</button>
         </form>
     </div>
@@ -44,33 +44,20 @@ $storageKey      = 'jira_project_feature';
 
             <div class="meta">
                 <div class="meta-line meta-line-info">
-                    <?php if ($view->getPlanningIntervalLabel()): ?>
-                        <span>🗓️ <?= htmlspecialchars($view->getPlanningIntervalLabel()) ?></span>
-                    <?php endif; ?>
+                    <?php foreach ($view->getPlanningIntervals() as $pi): ?>
+                        <span>🗓️ PI <?= htmlspecialchars($pi) ?></span>
+                    <?php endforeach; ?>
                     <span class="badge orange">
                         Statut : <?= htmlspecialchars($view->getStatusName()) ?>
                     </span>
                     <span><?= $view->getIssuesCount() ?> ticket(s) associé(s)</span>
                 </div>
 
-                <div class="meta-line meta-line-metrics">
-                    <div class="metric">
-                        <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création → Terminé)</em></span>
-                        <span>Total : <strong><?= $view->getTotalLeadTime() ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageLeadTime() ?> jours /ticket</strong></span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours → Terminé)</em></span>
-                        <span>Total : <strong><?= $view->getTotalCycleTime() ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageCycleTime() ?> jours /ticket</strong></span>
-                    </div>
-                    <div class="metric">
-                        <span class="metric-title">🧮 <b>Temps par phase</b></span>
-                        <span>🧠 Affinage : <strong><?= $view->getTotalTimeSpentInRefinement() ?> jours</strong> <em>Moy. <?= $view->getAverageTimeSpentInRefinement() ?> j/ticket</em></span>
-                        <span>⚙️ Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint() ?> jours</strong> <em>Moy. <?= $view->getAverageTimeSpentInSprint() ?> j/ticket</em></span>
-                        <span>❓ Autre : <strong><?= $view->getTotalTimeSpentInOther() ?> jours</strong> <em>Moy. <?= $view->getAverageTimeSpentInOther() ?> j/ticket</em></span>
-                    </div>
+                <div class="card">
+                    TODO : ici métriques de la Feature (cycle/lead times + temps par phases)
                 </div>
+
+                <?php include __DIR__ . '/components/metrics/totals.phtml'; ?>
             </div>
         </div>
 

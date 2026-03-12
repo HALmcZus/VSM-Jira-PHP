@@ -100,6 +100,16 @@ class Feature extends AbstractIssueCollection
     }
 
     /**
+     * Retourne les valeurs numériques du Planning Interval.
+     *
+     * @return array
+     */
+    public function getPlanningIntervals(): array
+    {
+        return $this->featureData['fields'][self::PLANNING_INTERVAL_CUSTOM_FIELD] ?? ['N/C'];
+    }
+
+    /**
      * Retourne l'URL Jira de la Feature.
      */
     public function getUrl(): string

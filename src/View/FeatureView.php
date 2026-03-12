@@ -42,6 +42,10 @@ class FeatureView extends AbstractCollectionView
     {
         return $this->feature->getStatusName() ?? '—';
     }
+    public function getPlanningIntervals(): array
+    {
+        return $this->feature->getPlanningIntervals();
+    }
 
     /**
      * Retourne le Planning Interval formaté pour l'affichage.

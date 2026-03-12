@@ -26,7 +26,7 @@ $storageKey      = 'jira_project_version';
 
         <form method="POST" action="/version">
             <label><em>Ou directement par FixVersion ID :</em></label>
-            <input type="text" name="fixVersionId" required placeholder="ID numérique de la Version Jira">
+            <input type="text" name="fixVersionId" required placeholder="ID de la Version">
             <button type="submit">OK</button>
         </form>
     </div>
@@ -62,30 +62,7 @@ $storageKey      = 'jira_project_version';
                     <?php endif; ?>
                 </div>
 
-                <!-- Métriques -->
-                <div class="meta-line meta-line-metrics">
-                    <!-- Lead Time -->
-                    <div class="metric">
-                        <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
-                        <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours /ticket</strong></span>
-                    </div>
-
-                    <!-- Cycle Time -->
-                    <div class="metric">
-                        <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
-                        <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
-                        <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours /ticket</strong></span>
-                    </div>
-
-                    <!-- Time Breakdown -->
-                    <div class="metric">
-                        <span class="metric-title">🧮 <b>Temps par phase</b></span>
-                        <span>🧠 Affinage : <strong><?= $view->getTotalTimeSpentInRefinement(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInRefinement(); ?> jours /ticket.</strong></em></span>
-                        <span>⚙️ Réal + Qualif : <strong><?= $view->getTotalTimeSpentInSprint(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInSprint(); ?> jours /ticket.</strong></em></span>
-                        <span>❓ Autre : <strong><?= $view->getTotalTimeSpentInOther(); ?> jours.</strong> <em>Moyenne : <strong><?= $view->getAverageTimeSpentInOther(); ?> jours /ticket.</strong></em></span>
-                    </div>
-                </div>
+                <?php include __DIR__ . '/components/metrics/totals.phtml'; ?>
             </div>
         </div>
 

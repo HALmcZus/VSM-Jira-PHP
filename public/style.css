@@ -294,8 +294,16 @@ tr:hover {
 }
 
 .jira-project-search {
-    max-width: 400px;
     position: relative;
+    width: 100%;
+}
+
+.input {
+
+}
+
+.input-large {
+    width: auto;
 }
 
 .project-dropdown {
