@@ -98,7 +98,7 @@ class Issue
      * ====== GETTERS ========
      * =======================
      */
-    public function getData(string $data = null): array
+    public function getData(string|null $data = null): array
     {
         if ($data !== null && isset($this->data[$data])) {
             return $this->data[$data];
