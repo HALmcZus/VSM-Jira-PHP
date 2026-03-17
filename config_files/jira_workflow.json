@@ -1,28 +1,83 @@
 {
     "refinement_statuses": [
         "Backlog",
+        "A prioriser",
+        "à rédiger",
+
         "En rédaction",
+        "en--rédaction",
+        "EN -- RÉDACTION",
+        "rédaction en cours",
+
+        "A RELIRE EQUIPE",
+        "A clarifier",
+        "BESOIN DE CLARIFICATION",
         "A affiner",
+        "Ready for Refinement",
+        "PRET-POUR-REFINEMENT",
+        "A analyser MO",
+        "ATTENTE INFO METIER",
+        "Ready for Triamigo",
+        "Tri-Amigo",
+        "Tri - Analyse",
         "Affinée",
+        "A chiffrer",
+
         "Stratégie de Qualif",
+        "Stratégie",
+        "Relecture par un pair",
         "Vainci 1",
-        "A planifier"
+
+        "A planifier",
+        "PRET A PLANIFIER",
+        "Livraison prévue"
     ],
     "sprint_statuses": [
         "To Do",
         "À faire",
+        "RUN - A FAIRE",
+        "Analyser",
+
+        "Analyse en Cours",
+        "RUN - Analyse en Cours",
+        "RUN - EN COURS DE TRAITEMENT",
         "In Progress",
+        "En cours",
+        "En cours de dev",
+        "En Attente Autre Equipe",
+
         "Revue Dév",
         "Revue Dév / Pair",
+        "Revue de Code",
+        "Merge request",
+        "REWORK",
+
         "A qualifier",
+        "A Qualifier",
+        "En attente de Qualif",
         "Qualif En Cours",
+        "Pair-testing",
+        "Test en cours",
+        "En Test",
+        "RUN - Bloqué",
+
+        "A valider PO",
         "Vainci 2",
+        "A PRENDRE EN CHARGE (PO)",
         "Validation PO / Vainci",
-        "Validation PO"
+        "Validation PO/PM",
+        "Validation PO",
+        "Check DOD",
+        "FSU validée",
+
+        "A DEPLOYER",
+        "A déployer"
     ],
     "done_statuses": [
         "Done",
         "Terminé(e)",
-        "abandonné"
+        "Abandonné",
+        "abandonné",
+        "Annulé"
     ]
 }
