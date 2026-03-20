@@ -16,8 +16,10 @@
 - [🧠 Principes clés](#-principes-clés)
 - [🏗️ Architecture](#️-architecture)
 - [🧩 Cas d’usage principaux](#-cas-dusage-principaux)
-  - [🔹 VSM par Version](#-vsm-par-version)
-  - [🔹 VSM par Feature (à venir)](#-vsm-par-feature-à-venir)
+  - [🔹 VSM par Version (Beta)](#-vsm-par-version)
+  - [🔹 VSM par Feature (WIP)](#-vsm-par-feature)
+  - [🔹 Analyse du Sprint en cours (à venir)](#-analyse-du-sprint-en-cours-à-venir)
+  - [🔹 Historique des métriques de l'équipe (à venir)](#-historique-des-métriques-de-l-équipe-à-venir)
 - [📊 Métriques exposées](#-métriques-exposées)
 - [🖥️ Frontend](#️-frontend)
 - [🔐 Configuration](#-configuration)
@@ -92,7 +94,7 @@ Il est développé en PHP ^8.5, framework Slim ^4.15 pour le Backend, et en HTML
 
 ## 🧩 Cas d’usage principaux
 
-### 🔹 VSM par Version
+### 🔹 VSM par Version (Beta)
 
 > *Afficher une version Jira avec l’ensemble de ses issues et leurs timelines*
 
@@ -111,10 +113,23 @@ Responsabilités :
 
 ---
 
-### 🔹 VSM par Feature (à venir)
+### 🔹 VSM par Feature (WIP)
 
 * basées sur les liens Jira (Epic / REP / Issues)
 * navigation transverse par flux de valeur
+
+---
+
+### 🔹 Analyse du Sprint en cours (à venir)
+
+* basée sur le board Jira du sprint en cours
+
+---
+
+### 🔹 Historique des métriques de l'équipe (à venir)
+
+* IHM d'historisation des métriques de l'équipe (vélocité, capacité, travail planifié, travail terminé...)
+* Graphiques, tendances...
 
 ---
 
