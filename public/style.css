@@ -354,32 +354,69 @@ tr:hover {
 }
 
 /* Bandeau navigation */
-.top-nav {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    background: #505050;
+/* ===== Demo banner ===== */
+.demo-banner {
+    background: #fff3cd;
+    color: #856404;
+    text-align: center;
+    padding: 6px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #ffc107;
 }
 
-.nav-item {
-    padding: 10px 18px;
-    border-radius: 8px;
-    text-decoration: none;
-    background: #a1a1a1;
-    color: #333;
+/* ===== App header ===== */
+.app-header {
+    background: #1e293b;
+    padding: 0;
+    margin-bottom: 24px;
+}
+
+.app-header__title {
+    padding: 14px 24px 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #f8fafc;
+    letter-spacing: 0.02em;
+}
+
+.app-header__title span {
     font-weight: 400;
-    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #94a3b8;
 }
 
-.nav-item:hover {
-    /* background: #e2e6ea; */
-    background: #a5c3ff;
+.app-header__nav {
+    display: flex;
+    gap: 4px;
+    padding: 0 20px;
+    border-top: 1px solid #334155;
 }
 
-.nav-item.active {
-    background: #3a7afe;
-    color: white;
+.app-header__nav .nav-item {
+    padding: 8px 16px;
+    border-radius: 6px 6px 0 0;
+    text-decoration: none;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-weight: 400;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.app-header__nav .nav-item:hover {
+    background: #334155;
+    color: #f8fafc;
+}
+
+.app-header__nav .nav-item.active {
+    background: #f6f7fb;
+    color: #1e293b;
     font-weight: 600;
+}
+
+.app-header__nav .nav-item em {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-left: 4px;
 }
 
 /**

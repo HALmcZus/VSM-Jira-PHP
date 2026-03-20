@@ -1,27 +1,27 @@
 <?php if ($this->getIsDemo()): ?>
-    <div style="color:red;font-weight:bold;">
-        ⚠️ Mode DÉMO activé dans .env => Vérification SSL <u>désactivée</u> ⚠️
+    <div class="demo-banner">
+        ⚠️ Mode DÉMO activé dans .env — Vérification SSL <u>désactivée</u> ⚠️
     </div>
 <?php endif; ?>
 
-<?php
-$currentPage = $currentPage ?? 'version';
-?>
+<?php $currentPage = $currentPage ?? 'version'; ?>
 
-<div class="top-nav">
-    <a href="/version" class="nav-item <?= $currentPage === 'version' ? 'active' : '' ?>">
-        🚀 VSM par Version <em>(v. beta)</em>
-    </a>
-
-    <a href="/feature" class="nav-item <?= $currentPage === 'feature' ? 'active' : '' ?>">
-        ⭐ VSM par Feature <em>(v. alpha)</em>
-    </a>
-
-    <a href="/#" class="nav-item <?= $currentPage === 'sprint' ? 'active' : '' ?>">
-        🛠️ Sprint en cours <em>(</em>🔒<em>TODO)</em>
-    </a>
-
-    <a href="/#" class="nav-item <?= $currentPage === 'team_metrics' ? 'active' : '' ?>">
-        📊 Métriques de l'équipe <em>(</em>🔒<em>TODO)</em>
-    </a>
-</div>
+<header class="app-header">
+    <div class="app-header__title">
+        Bienvenue sur 🦙 LAMA — <span>Leviers d'Amélioration par Métriques Agiles</span>
+    </div>
+    <nav class="app-header__nav">
+        <a href="/version" class="nav-item <?= $currentPage === 'version' ? 'active' : '' ?>">
+            🚀 VSM par Version <em>(v. beta)</em>
+        </a>
+        <a href="/feature" class="nav-item <?= $currentPage === 'feature' ? 'active' : '' ?>">
+            ⭐ VSM par Feature <em>(v. alpha)</em>
+        </a>
+        <a href="/#" class="nav-item <?= $currentPage === 'sprint' ? 'active' : '' ?>">
+            🛠️ Sprint en cours <em>🔒à venir</em>
+        </a>
+        <a href="/#" class="nav-item <?= $currentPage === 'team_metrics' ? 'active' : '' ?>">
+            📊 Métriques équipe <em>🔒à venir</em>
+        </a>
+    </nav>
+</header>
