@@ -4,3 +4,4 @@
 cache/*
 php/*
 vendor/*
+start.bat
