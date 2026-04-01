@@ -209,20 +209,35 @@ class FeatureView extends AbstractCollectionView
     }
 
     /**
-     * Retourne la catégorie d'un statut selon jira_workflow_features.json.
+     * Retourne la catégorie d'un statut selon jira_workflow_features.json
      *
      * @param  string $statusName
      * @return string 'refinement'|'sprint'|'done'|'other'
      */
-    private function getSelfStatusCategory(string $statusName): string
+    public function getSelfStatusCategory(string $statusName = ''): string
     {
         $workflow = $this->config->getJiraWorkflow(Config::ISSUE_TYPE_FEATURE);
 
+        if ($statusName === '') {
+            $statusName = $this->getStatusName();
+        }
+
         return match (true) {
-            in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => 'refinement',
-            in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => 'sprint',
-            in_array($statusName, $workflow['done_statuses'] ?? [], true)       => 'done',
-            default                                                             => 'other',
+            in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::STATUS_CATEGORY_REFINEMENT,
+            in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::STATUS_CATEGORY_SPRINT,
+            in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::STATUS_CATEGORY_DONE,
+            default                                                             => self::STATUS_CATEGORY_OTHER,
+        };
+    }
+
+    public function getSelfStatusCategoryColor(): string
+    {
+        return match ($this->getSelfStatusCategory()) {
+            self::STATUS_CATEGORY_REFINEMENT => 'grey',
+            self::STATUS_CATEGORY_SPRINT     => 'blue',
+            self::STATUS_CATEGORY_DONE       => 'green',
+            self::STATUS_CATEGORY_OTHER      => 'orange',
+            default                          => 'orange',
         };
     }
 

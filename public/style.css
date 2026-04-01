@@ -92,6 +92,11 @@ h2 {
     color: #991b1b;
 }
 
+.badge.blue {
+    background: #bfdbfe;
+    color: #5067b6;
+}
+
 .badge.grey {
     background: #bbbbbb;
     color: #000000;

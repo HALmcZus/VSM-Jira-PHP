@@ -17,6 +17,10 @@ abstract class AbstractCollectionView
     const SPRINT_ICON     = '⚙️';
     const DONE_ICON       = '✅';
     const OTHER_ICON      = '❓';
+    const STATUS_CATEGORY_REFINEMENT = 'refinement';
+    const STATUS_CATEGORY_SPRINT     = 'sprint';
+    const STATUS_CATEGORY_DONE       = 'done';
+    const STATUS_CATEGORY_OTHER      = 'other';
 
     protected Config $config;
     protected AbstractIssueCollection $collection;
@@ -148,10 +152,10 @@ abstract class AbstractCollectionView
         $workflow = $this->config->getJiraWorkflow();
 
         return match (true) {
-            in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => 'refinement',
-            in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => 'sprint',
-            in_array($statusName, $workflow['done_statuses'] ?? [], true)       => 'done',
-            default                                                             => 'other',
+            in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::STATUS_CATEGORY_REFINEMENT,
+            in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::STATUS_CATEGORY_SPRINT,
+            in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::STATUS_CATEGORY_DONE,
+            default                                                             => self::STATUS_CATEGORY_OTHER,
         };
     }
 }

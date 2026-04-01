@@ -54,8 +54,8 @@ $storageKey      = 'jira_project_feature';
                     </span>
 
                     <!-- Statut -->
-                    <span class="badge orange">
-                        Statut : <?= htmlspecialchars($view->getStatusName()) ?>
+                    <span class="badge <?= $view->getSelfStatusCategoryColor() ?>">
+                        Statut : <?= $view->getStatusName() ?>
                     </span>
 
                     <!-- PI -->
