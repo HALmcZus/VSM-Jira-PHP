@@ -1,0 +1,101 @@
+<?php
+
+/** @var \App\View\FeatureView $view */
+
+$timelineData = $view->getSelfTimelineByStatus();
+$chartData = array_merge(
+    $timelineData['workflowStatuses'] ?? [],
+    $timelineData['otherStatuses'] ?? []
+);
+
+if (empty($chartData)) {
+    return;
+}
+
+$normalizedLabels = array_map(
+    fn($status) => $view->normalizeSelfStatusName($status),
+    array_keys($chartData)
+);
+?>
+
+<div class="card">
+    <details open>
+        <summary>🧭 Timeline de la Feature par statut</summary>
+
+        <div class="vsm-layout">
+            <div class="vsm-text">
+                <ul>
+                    <?php foreach ($timelineData['workflowStatuses'] as $status => $days): ?>
+                        <li><?= $view->normalizeSelfStatusName($status) ?> : <strong><?= round($days, 2) ?> jours</strong></li>
+                    <?php endforeach; ?>
+                    <?php if (!empty($timelineData['otherStatuses'])): ?>
+                        <br />Autres statuts :
+                        <?php foreach ($timelineData['otherStatuses'] as $status => $days): ?>
+                            <li><?= $view->normalizeSelfStatusName($status) ?> : <strong><?= round($days, 2) ?> jours</strong></li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </ul>
+            </div>
+
+            <div class="vsm-chart">
+                <canvas id="featureSelfTimelineChart"></canvas>
+            </div>
+        </div>
+
+        <?php include __DIR__ . '/featureSelfVsm.phtml'; ?>
+    </details>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    (function() {
+        const labels = <?= json_encode($normalizedLabels, JSON_HEX_TAG) ?>;
+        const values = <?= json_encode(array_values($chartData), JSON_HEX_TAG) ?>;
+
+        const colors = labels.map(label => {
+            if (label.startsWith('🧠')) return '#36a2ebb3';
+            if (label.startsWith('⚙️')) return '#ffce56b3';
+            if (label.startsWith('✅')) return '#4caf50b3';
+            return '#ff6384b3';
+        });
+
+        new Chart(
+            document.getElementById('featureSelfTimelineChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Jours par statut',
+                        data: values,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Jours'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Statuts'
+                            }
+                        }
+                    }
+                }
+            }
+        );
+    })();
+</script>

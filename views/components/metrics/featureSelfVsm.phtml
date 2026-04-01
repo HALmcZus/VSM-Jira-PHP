@@ -1,0 +1,27 @@
+<?php
+
+/** @var \App\View\FeatureView $view */
+$steps = $view->getSelfVsmSteps();
+?>
+
+<?php if (!empty($steps)): ?>
+    <h4>📚 Value Stream Map — Feature</h4>
+    <div class="vsm-timeline">
+        <?php foreach ($steps as $index => $step): ?>
+            <div class="vsm-step vsm-timeline-<?= htmlspecialchars($step['category']) ?>">
+                <div class="vsm-timeline-label">
+                    <?= htmlspecialchars($step['label']) ?>
+                </div>
+                <?php if ($step['days'] > 0): ?>
+                    <div class="vsm-timeline-metric">
+                        <?= $step['days'] ?> jours
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($index < count($steps) - 1): ?>
+                <div class="vsm-arrow">→</div>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>

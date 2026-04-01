@@ -346,13 +346,18 @@ class Issue
     }
 
     /**
-     * Temps cumulé passé par status Jira
+     * Temps cumulé passé par status Jira, trié selon le workflow du type d'issue.
      *
-     * @return array<string,int>
+     * @param  bool $splitOtherStatuses
+     * @return array
      */
-    public function getTimeByStatus($splitOtherStatuses): array
+    public function getTimeByStatus(bool $splitOtherStatuses): array
     {
-        return $this->timeline->getSortedTimelineByStatus($this->timeByStatus, $splitOtherStatuses);
+        return $this->timeline->getSortedTimelineByStatus(
+            $this->timeByStatus,
+            $splitOtherStatuses,
+            $this->getIssueTypeName()
+        );
     }
 
     /**

@@ -4,20 +4,21 @@
         "À faire",
         "Funnel",
         "cotation à valider",
-        "analysing",
-        "prêt"
+        "Analysing",
+        "Ready",
+        "Prêt"
     ],
     "sprint_statuses": [
-        "planifié",
-        "en cours",
-        "in progress",
+        "Planifié",
+        "En cours",
+        "In Progress",
         "implementing",
-        "validating on staging",
-        "validé",
-        "deploying n production",
-        "non atteignable",
-        "non atteint pendant le PI",
-        "releasing"
+        "Validating on staging",
+        "Validé",
+        "Deploying n production",
+        "Non atteignable",
+        "NON ATTEINT PENDANT LE PI",
+        "Releasing"
     ],
     "done_statuses": [
         "Done",
@@ -25,6 +26,7 @@
         "Atteint",
         "Abandonné",
         "abandonné",
+        "ABANDONNE",
         "Annulé"
     ]
 }

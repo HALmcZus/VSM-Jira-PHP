@@ -83,37 +83,20 @@ $storageKey      = 'jira_project_feature';
                 </details>
 
                 <!-- Métriques du ticket Feature lui-même -->
-                <div class="card feature-self-metrics">
-                    <h3>📌 Métriques du ticket Feature</h3>
-                    <div class="meta-line meta-line-metrics">
-                        <div class="metric">
-                            <span class="metric-title">📅 <b>Dates du cycle de vie de la Feature</b></span>
-                            <span>✒️ Date de création de la Feature : <strong><?= $view->getSelfCreatedDate() ?></strong></span>
-                            <span>▶️ Date du démarrage de la Feature : <strong><?= $view->getSelfStartDate() ?></strong></span>
-                            <span>✅ Date du fin de la Feature : <strong><?= $view->getSelfEndDate() ?></strong></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires)</em></span>
-                            <span><?= $view->getSelfLeadTime() > 0 ? $view->getSelfLeadTime() . ' jours' : '—' ?></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés)</em></span>
-                            <span><?= $view->getSelfCycleTime() > 0 ? $view->getSelfCycleTime() . ' jours' : '—' ?></span>
-                        </div>
-                        <div class="metric">
-                            <span class="metric-title">🧮 <b>Temps par phase</b></span>
-                            <span>🧠 Affinage : <strong><?= $view->getSelfTimeSpentInRefinement() ?> jours</strong></span>
-                            <span>⚙️ Réal + Qualif : <strong><?= $view->getSelfTimeSpentInSprint() ?> jours</strong></span>
-                            <span>❓ Autre : <strong><?= $view->getSelfTimeSpentInOther() ?> jours</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Métriques agrégées des tickets enfants -->
-                <?php include __DIR__ . '/components/metrics/totals.phtml'; ?>
+                <?php include __DIR__ . '/components/metrics/featureSelfMetrics.phtml'; ?>
             </div>
         </div>
 
+        <!-- Timeline + VSM de la Feature -->
+        <div class="timeline-grid">
+            <?php include __DIR__ . '/components/metrics/featureSelfTimelineChart.phtml'; ?>
+        </div>
+
+
+        <!-- Métriques agrégées des tickets enfants -->
+        <?php include __DIR__ . '/components/metrics/totals.phtml'; ?>
+
+        <!-- Timeline + VSM des tickets enfants -->
         <div class="timeline-grid">
             <?php include __DIR__ . '/components/metrics/timelineChart.phtml'; ?>
         </div>

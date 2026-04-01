@@ -1,0 +1,33 @@
+<?php
+
+/** @var \App\View\FeatureView $view */
+?>
+<div class="feature-self-metrics-section">
+    <h3>📌 Métriques du ticket Feature</h3>
+
+    <div class="feature-self-metrics-grid">
+        <div class="metric">
+            <span class="metric-title">📅 <b>Cycle de vie</b></span>
+            <span>✒️ Création : <strong><?= $view->getSelfCreatedDate() ?></strong></span>
+            <span>▶️ Démarrage : <strong><?= $view->getSelfStartDate() ?: '—' ?></strong></span>
+            <span>✅ Fin : <strong><?= $view->getSelfEndDate() ?: '—' ?></strong></span>
+        </div>
+
+        <div class="metric">
+            <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
+            <span class="metric-value"><?= $view->getSelfLeadTime() > 0 ? $view->getSelfLeadTime() . ' jours' : '—' ?></span>
+        </div>
+
+        <div class="metric">
+            <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
+            <span class="metric-value"><?= $view->getSelfCycleTime() > 0 ? $view->getSelfCycleTime() . ' jours' : '—' ?></span>
+        </div>
+
+        <div class="metric">
+            <span class="metric-title">🧮 <b>Temps par phase</b></span>
+            <span>🧠 Affinage : <strong><?= $view->getSelfTimeSpentInRefinement() ?> j</strong></span>
+            <span>⚙️ Réal + Qualif : <strong><?= $view->getSelfTimeSpentInSprint() ?> j</strong></span>
+            <span>❓ Autre : <strong><?= $view->getSelfTimeSpentInOther() ?> j</strong></span>
+        </div>
+    </div>
+</div>

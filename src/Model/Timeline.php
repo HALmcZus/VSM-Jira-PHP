@@ -234,15 +234,16 @@ class Timeline
     }
 
     /**
-     * getSortedTimelineByStatus : ordonnance les status Jira suivant le workflow configuré
+     * getSortedTimelineByStatus : ordonnance les status Jira suivant le workflow configuré.
      *
-     * @param  array $timelineByStatus
-     * @param  bool $splitOtherStatuses
+     * @param  array  $timelineByStatus   Tableau brut [statusName => jours]
+     * @param  bool   $splitOtherStatuses Séparer workflowStatuses / otherStatuses
+     * @param  string $issueType          Type Jira (ex: 'Feature') pour sélectionner le bon workflow
      * @return array
      */
-    public function getSortedTimelineByStatus(array $timelineByStatus, $splitOtherStatuses = true): array
+    public function getSortedTimelineByStatus(array $timelineByStatus, bool $splitOtherStatuses = true, string $issueType = ''): array
     {
-        $workflow = $this->config->getJiraWorkflow();
+        $workflow = $this->config->getJiraWorkflow($issueType);
 
         //Sort as defined in config_files/jira_workflow.json
         $orderedStatuses = array_merge(

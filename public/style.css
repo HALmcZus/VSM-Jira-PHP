@@ -420,7 +420,7 @@ tr:hover {
 .jira-description th,
 .jira-description td      { padding: 6px 10px; border: 1px solid var(--border); }
 
-/* ===== Métriques du ticket Feature lui-même ===== */
+/* ===== Métriques du ticket Feature ===== */
 .feature-self-metrics {
     margin-top: 8px;
     background: #f8faff;
@@ -430,6 +430,39 @@ tr:hover {
 .feature-self-metrics h3 {
     font-size: 15px;
     margin-bottom: 12px;
+}
+
+.feature-self-metrics-section {
+    width: 100%;
+    padding: 16px;
+    background: #f0f4ff;
+    border-left: 4px solid var(--primary);
+    border-radius: var(--radius);
+}
+
+.feature-self-metrics-section h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    color: var(--text);
+}
+
+.feature-self-metrics-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: stretch;
+}
+
+.feature-self-metrics-grid .metric {
+    flex: 1 1 180px;       /* croît, rétrécit, min 180px */
+    min-width: 160px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .feature-self-metrics-grid {
+        flex-direction: column;
+    }
 }
 
 /*****************************
