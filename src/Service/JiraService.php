@@ -241,11 +241,21 @@ class JiraService
      *
      * @param int    $issueId Identifiant numérique de l'issue
      * @param array  $fields  Liste des champs à retourner (vide = tous)
+     * @param array  $expand  Liste des expansions Jira (ex: ['renderedFields', 'changelog'])
      * @return array
      */
-    public function getIssueById(int $issueId, array $fields = []): array
+    public function getIssueById(int $issueId, array $fields = [], array $expand = []): array
     {
-        $query = $fields ? '?fields=' . implode(',', $fields) : '';
+        $params = [];
+
+        if ($fields) {
+            $params['fields'] = implode(',', $fields);
+        }
+        if ($expand) {
+            $params['expand'] = implode(',', $expand);
+        }
+
+        $query = $params ? '?' . http_build_query($params) : '';
         $url   = $this->baseUrl . self::API_URL_ISSUE . '/' . $issueId . $query;
 
         return $this->request($url);

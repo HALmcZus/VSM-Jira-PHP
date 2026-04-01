@@ -100,7 +100,7 @@ class Timeline
 
         while ($current <= $endDate) {
             $dayOfWeek = (int) $current->format('N');
-            $currentDate = $current->format('Y-m-d');
+            $currentDate = $current->format('d/m/Y');
 
             $isWeekend = ($dayOfWeek >= 6);
             $isHoliday = in_array($currentDate, $nonWorkingDays, true);
@@ -130,8 +130,8 @@ class Timeline
      */
     private function calculateByTimeSlots(\DateTime $start, \DateTime $end): float
     {
-        $startDate = $start->format('Y-m-d');
-        $endDate = $end->format('Y-m-d');
+        $startDate = $start->format('d/m/Y');
+        $endDate = $end->format('d/m/Y');
         $nonWorkingDays = $this->config->getNonWorkingDays();
 
         $totalSlots = 0;
@@ -174,7 +174,7 @@ class Timeline
 
         while ($current < $lastDay) {
             $dayOfWeek = (int) $current->format('N');
-            $currentDate = $current->format('Y-m-d');
+            $currentDate = $current->format('d/m/Y');
 
             $isWeekend = ($dayOfWeek >= 6);
             $isHoliday = in_array($currentDate, $nonWorkingDays, true);
@@ -221,8 +221,8 @@ class Timeline
             return 0;
         }
 
-        $startDate = $start->format('Y-m-d');
-        $endDate = $end->format('Y-m-d');
+        $startDate = $start->format('d/m/Y');
+        $endDate = $end->format('d/m/Y');
 
         // Cas spécial : jours différents + même heure (tolérance ±30min)
         if ($startDate !== $endDate && $this->isSimilarTime($start, $end, 30)) {
@@ -294,7 +294,7 @@ class Timeline
         }
 
         // Get Jira workflow from jira_workflow.json
-        $workflow = $this->config->getJiraWorkflow();
+        $workflow = $this->config->getJiraWorkflow($issue->getIssueTypeName());
         $workflowTimeBreakdown = $issue->getWorkflowTimeBreakdown();
 
         // Current status data

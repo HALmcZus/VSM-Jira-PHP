@@ -80,7 +80,7 @@
                     name="<?= htmlspecialchars($inputName) ?>"
                     class="input"
                     required
-                    @change="$el.form.submit()">
+                    @change="$el.form.submit(); spinner()">
                     <option value="" disabled selected>-- Choisir --</option>
                     <template x-for="item in filteredItems" :key="item.id">
                         <option :value="item.id" x-text="item.label"></option>
@@ -94,7 +94,7 @@
             ⚠️ Aucun élément trouvé pour ce projet
         </div>
 
-        <div x-show="itemLoading">⏳ Chargement…</div>
+        <div x-show="itemLoading" aria-busy="true">⏳ Chargement…</div>
 
         <div x-show="error" class="inline-error">❌ <span x-text="error"></span></div>
         <div x-show="itemError" class="inline-error">❌ <span x-text="itemError"></span></div>
@@ -183,6 +183,7 @@
                         return;
                     }
                     this.loading = true;
+                    this.itemLoading = true;
                     fetch('/api/jira/projects/search?q=' + encodeURIComponent(this.query))
                         .then(r => {
                             if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -198,6 +199,7 @@
                         })
                         .finally(() => {
                             this.loading = false;
+                            this.itemLoading = false;
                         });
                 },
 
@@ -209,6 +211,7 @@
                 },
 
                 loadItems() {
+                    this.loading = true;
                     this.itemLoading = true;
                     this.itemError = null;
                     this.items = [];
@@ -229,8 +232,15 @@
                             console.error(err);
                         })
                         .finally(() => {
+                            this.loading = false;
                             this.itemLoading = false;
                         });
+                },
+
+                spinner() {
+                    //Display spinner when selecting an item from the dropdown
+                    this.loading = true;
+                    this.itemLoading = true;
                 },
             };
         };

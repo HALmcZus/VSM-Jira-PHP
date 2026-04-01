@@ -174,20 +174,28 @@ class Issue
         }
 
         return $format
-            ? $this->createdDate->format('Y-m-d')
+            ? $this->createdDate->format('d/m/Y')
             : $this->createdDate;
     }
 
     /**
      * Return the resolution date as a DateTime object.
      *
-     * @return \DateTime|null
+     * @return \DateTime|string
      */
-    public function getResolutionDateTime(): \DateTime|null
+    public function getResolutionDateTime($format = false): \DateTime|string
     {
-        return !empty($this->data['fields']['resolutiondate'])
-            ? new \DateTime($this->data['fields']['resolutiondate'])
-            : new \DateTime();
+        if ($this->doneDate) {
+            $result =  $this->doneDate;
+        } else {
+            $result = !empty($this->data['fields']['resolutiondate'])
+                ? new \DateTime($this->data['fields']['resolutiondate'])
+                : new \DateTime();
+        }
+
+        return $format
+            ? $result->format('d/m/Y')
+            : $result;
     }
 
     /**
@@ -225,7 +233,7 @@ class Issue
         }
 
         return $format
-            ? $this->firstInProgressDate->format('Y-m-d')
+            ? $this->firstInProgressDate->format('d/m/Y')
             : $this->firstInProgressDate;
     }
 
@@ -254,7 +262,7 @@ class Issue
         }
 
         return $format
-            ? $this->doneDate->format('Y-m-d')
+            ? $this->doneDate->format('d/m/Y')
             : $this->doneDate;
     }
 

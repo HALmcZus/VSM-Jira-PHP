@@ -42,7 +42,7 @@ abstract class AbstractCollectionView
             in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::REFINEMENT_ICON,
             in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::SPRINT_ICON,
             in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::DONE_ICON,
-            default                                                              => self::OTHER_ICON,
+            default                                                             => self::OTHER_ICON,
         };
     }
 

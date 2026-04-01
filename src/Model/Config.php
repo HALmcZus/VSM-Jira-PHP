@@ -11,6 +11,8 @@ class Config
 {
     const CONFIG_FILES_DIR = "config_files";
     const JIRA_WORKFLOW_FILE = "jira_workflow.json";
+    const JIRA_WORKFLOW_FILE_FEATURES = "jira_workflow_features.json";
+    const ISSUE_TYPE_FEATURE = "Feature";
 
     /**
      * getFileContent
@@ -66,12 +68,16 @@ class Config
     }
 
     /**
-     * getJiraWorkflow from config file
+     * get Issues or Features Jira Workflow from config files
      *
      * @return array
      */
-    public function getJiraWorkflow(): array
+    public function getJiraWorkflow(string $issueType = ''): array
     {
-        return $this->getFileContent(self::JIRA_WORKFLOW_FILE);
+        $fileName = ($issueType === self::ISSUE_TYPE_FEATURE)
+            ? self::JIRA_WORKFLOW_FILE_FEATURES
+            : self::JIRA_WORKFLOW_FILE;
+
+        return $this->getFileContent($fileName);
     }
 }

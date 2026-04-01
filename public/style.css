@@ -293,6 +293,7 @@ tr:hover {
     color: #333;
 }
 
+/** Recherche de projet Jira */
 .jira-project-search {
     position: relative;
     width: 100%;
@@ -315,6 +316,32 @@ tr:hover {
     max-height: 240px;
     overflow-y: auto;
 }
+
+/** Spinning loader */
+[aria-busy] {
+    --loading-size: 64px;
+    --loading-stroke: 6px;
+    --loading-duration: 1s;
+    position: relative;
+    opacity: .75
+}
+  [aria-busy]:before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--loading-size);
+    height: var(--loading-size);
+    margin-top: calc(var(--loading-size) / 2 * -1);
+    margin-left: calc(var(--loading-size) / 2 * -1);
+    border: var(--loading-stroke) solid rgba(0, 0, 0, 0.15);
+    border-radius: 50%;
+    border-top-color: rgba(0, 0, 0, 0.5);
+    animation: rotate calc(var(--loading-duration)) linear infinite;
+  }
+  @keyframes rotate {
+    100% { transform: rotate(360deg); }
+  }
 
 /* Error card styling */
 .error-card {
@@ -353,8 +380,61 @@ tr:hover {
     font-size: 0.9rem;
 }
 
-/* Bandeau navigation */
-/* ===== Demo banner ===== */
+/* ===== Description Jira (rendu HTML encapsulé) ===== */
+.feature-description-toggle {
+    margin-top: 8px;
+}
+
+.feature-description-toggle > summary {
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--primary);
+    user-select: none;
+}
+
+/* Encapsulation stricte : neutralise les styles globaux dans le bloc description */
+.jira-description {
+    margin-top: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #fafafa;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    overflow-wrap: break-word;
+}
+
+.jira-description p       { margin: 0 0 8px; }
+.jira-description ul,
+.jira-description ol      { margin: 0 0 8px; padding-left: 20px; }
+.jira-description li      { margin-bottom: 4px; }
+.jira-description h1,
+.jira-description h2,
+.jira-description h3      { margin: 10px 0 4px; font-size: 15px; }
+.jira-description code    { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-size: 13px; font-family: monospace; }
+.jira-description pre     { background: #f1f5f9; padding: 10px 14px; border-radius: 6px; overflow-x: auto; }
+.jira-description pre code { background: none; padding: 0; }
+.jira-description a       { color: var(--primary); }
+.jira-description table   { width: auto; }  /* neutralise le width:100% global */
+.jira-description th,
+.jira-description td      { padding: 6px 10px; border: 1px solid var(--border); }
+
+/* ===== Métriques du ticket Feature lui-même ===== */
+.feature-self-metrics {
+    margin-top: 8px;
+    background: #f8faff;
+    border-left: 4px solid var(--primary);
+}
+
+.feature-self-metrics h3 {
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+/*****************************
+ * Bandeau navigation
+ *****************************/
 .demo-banner {
     background: #fff3cd;
     color: #856404;
@@ -364,7 +444,6 @@ tr:hover {
     border-bottom: 1px solid #ffc107;
 }
 
-/* ===== App header ===== */
 .app-header {
     background: #1e293b;
     padding: 0;

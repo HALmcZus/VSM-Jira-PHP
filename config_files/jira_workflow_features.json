@@ -1,0 +1,30 @@
+{
+    "refinement_statuses": [
+        "To Do",
+        "À faire",
+        "Funnel",
+        "cotation à valider",
+        "analysing",
+        "prêt"
+    ],
+    "sprint_statuses": [
+        "planifié",
+        "en cours",
+        "in progress",
+        "implementing",
+        "validating on staging",
+        "validé",
+        "deploying n production",
+        "non atteignable",
+        "non atteint pendant le PI",
+        "releasing"
+    ],
+    "done_statuses": [
+        "Done",
+        "Terminé(e)",
+        "Atteint",
+        "Abandonné",
+        "abandonné",
+        "Annulé"
+    ]
+}

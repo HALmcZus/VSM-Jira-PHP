@@ -13,12 +13,18 @@ use Exception;
 class Feature extends AbstractIssueCollection
 {
     const PLANNING_INTERVAL_CUSTOM_FIELD = 'customfield_11400';
+
     private array $featureData = [];
+
+    /** Issue représentant le ticket Feature lui-même (pour ses propres métriques) */
+    private ?Issue $selfAsIssue = null;
 
     /**
      * {@inheritdoc}
      *
-     * Charge les métadonnées de la Feature Jira (key, summary, statut, PI).
+     * Charge les métadonnées de la Feature Jira, avec changelog et renderedFields
+     * pour permettre le calcul des métriques propres au ticket Feature
+     * et le rendu fidèle de la description.
      */
     protected function loadCollectionData(int $id): void
     {
@@ -26,14 +32,24 @@ class Feature extends AbstractIssueCollection
             'summary',
             'status',
             'issuetype',
-            self::PLANNING_INTERVAL_CUSTOM_FIELD
-        ]);
+            'priority',
+            'description',
+            'created',
+            'customfield_10075',                    // Jalon (Date)
+            'customfield_10011',                    // Epic name (text)
+            'customfield_10244',                    // Equipe (array)
+            self::PLANNING_INTERVAL_CUSTOM_FIELD,   // Planning Interval
+        ], ['renderedFields', 'changelog']);
 
         if (!isset($result['id'])) {
             throw new Exception("Feature Jira introuvable (ID: $id)");
         }
 
         $this->featureData = $result;
+
+        // Crée un objet Issue depuis le ticket Feature lui-même
+        // pour calculer ses métriques propres (Lead Time, Cycle Time, temps par statut)
+        $this->selfAsIssue = new Issue($result);
     }
 
     /**
@@ -116,5 +132,94 @@ class Feature extends AbstractIssueCollection
     {
         $key = $this->getKey();
         return $key ? $_ENV['JIRA_BASE_URL'] . '/browse/' . $key : '#';
+    }
+
+    /**
+     * Retourne le nom de la priorité du ticket Feature.
+     *
+     * @return string|null Ex: "High", "Medium"
+     */
+    public function getPriorityName(): ?string
+    {
+        return $this->featureData['fields']['priority']['name'] ?? null;
+    }
+
+    /**
+     * Retourne l'URL de l'icône de priorité.
+     *
+     * @return string|null
+     */
+    public function getPriorityIconUrl(): ?string
+    {
+        return $this->featureData['fields']['priority']['iconUrl'] ?? null;
+    }
+
+    /**
+     * Retourne la date du Jalon (customfield_10075), au format Y-m-d ou null.
+     *
+     * @return string|null Ex: "2025-12-31"
+     */
+    public function getJalon(): ?string
+    {
+        return $this->featureData['fields']['customfield_10075'] ?? null;
+    }
+
+    /**
+     * Retourne le nom de l'Epic lié (customfield_10011).
+     *
+     * @return string|null
+     */
+    public function getEpicName(): ?string
+    {
+        return $this->featureData['fields']['customfield_10011'] ?? null;
+    }
+
+    /**
+     * Retourne la liste des équipes (customfield_10244).
+     *
+     * Gestion défensive : supporte les scalaires (string), les tableaux de strings,
+     * et les tableaux d'objets Jira (avec clé 'name' ou 'value').
+     *
+     * @return string[]
+     */
+    public function getTeams(): array
+    {
+        $raw = $this->featureData['fields']['customfield_10244'] ?? [];
+
+        if (!is_array($raw) || empty($raw)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            static function (mixed $item): ?string {
+                if (is_array($item)) {
+                    return $item['name'] ?? $item['value'] ?? null;
+                }
+                return is_string($item) ? $item : null;
+            },
+            $raw
+        )));
+    }
+
+    /**
+     * Retourne la description de la Feature rendue en HTML par Jira (via renderedFields).
+     * Retourne null si non renseignée.
+     *
+     * @return string|null HTML échappé par Jira, prêt à l'affichage
+     */
+    public function getDescriptionHtml(): ?string
+    {
+        return $this->featureData['renderedFields']['description'] ?? null;
+    }
+
+    /**
+     * Retourne l'objet Issue représentant le ticket Feature lui-même.
+     * Permet d'accéder à ses métriques propres (Lead Time, Cycle Time, etc.)
+     *
+     * @return Issue|null
+     */
+    public function getSelfAsIssue(): ?Issue
+    {
+        return $this->selfAsIssue;
     }
 }

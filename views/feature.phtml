@@ -38,23 +38,78 @@ $storageKey      = 'jira_project_feature';
         <div class="card">
             <h2>
                 <a href="<?= $view->getFeatureUrl() ?>" target="_blank">
-                    <?= $view->getFeatureKey() ?> – <?= $view->getFeatureName() ?>
+                    <?= htmlspecialchars($view->getFeatureKey()) ?> – <?= htmlspecialchars($view->getFeatureName()) ?>
                 </a>
             </h2>
 
             <div class="meta">
                 <div class="meta-line meta-line-info">
-                    <span>🗓️ PI <?= htmlspecialchars($view->getPlanningIntervals()) ?></span>
+
+                    <!-- Priorité -->
+                    <span>
+                        <?php if ($view->getPriorityIconUrl()): ?>
+                            <img src="<?= htmlspecialchars($view->getPriorityIconUrl()) ?>" alt="" style="vertical-align:middle; width:16px; height:16px;">
+                        <?php endif; ?>
+                        <?= htmlspecialchars($view->getPriorityName()) ?>
+                    </span>
+
+                    <!-- Statut -->
                     <span class="badge orange">
                         Statut : <?= htmlspecialchars($view->getStatusName()) ?>
                     </span>
+
+                    <!-- PI -->
+                    <span>🗓️ PI <?= htmlspecialchars($view->getPlanningIntervals()) ?></span>
+
+                    <!-- Jalon -->
+                    <span>🏁 Jalon : <?= htmlspecialchars($view->getJalon()) ?></span>
+
+                    <!-- Epic -->
+                    <span>🔗 Epic : <?= htmlspecialchars($view->getEpicName()) ?></span>
+
+                    <!-- Equipe(s) -->
+                    <span>👥 Équipe(s) : <?= htmlspecialchars($view->getTeams()) ?></span>
+
+                    <!-- Nombre de tickets enfants -->
                     <span><?= $view->getIssuesCount() ?> ticket(s) associé(s)</span>
                 </div>
 
-                <div class="card">
-                    TODO : ici métriques de la Feature (cycle/lead times + temps par phases)
+                <!-- Description (masquée par défaut, toggle natif HTML) -->
+                <details class="feature-description-toggle">
+                    <summary>📄 Description</summary>
+                    <div class="jira-description">
+                        <?= $view->getDescriptionHtml() ?>
+                    </div>
+                </details>
+
+                <!-- Métriques du ticket Feature lui-même -->
+                <div class="card feature-self-metrics">
+                    <h3>📌 Métriques du ticket Feature</h3>
+                    <div class="meta-line meta-line-metrics">
+                        <div class="metric">
+                            <span class="metric-title">📅 <b>Dates du cycle de vie de la Feature</b></span>
+                            <span>✒️ Date de création de la Feature : <strong><?= $view->getSelfCreatedDate() ?></strong></span>
+                            <span>▶️ Date du démarrage de la Feature : <strong><?= $view->getSelfStartDate() ?></strong></span>
+                            <span>✅ Date du fin de la Feature : <strong><?= $view->getSelfEndDate() ?></strong></span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires)</em></span>
+                            <span><?= $view->getSelfLeadTime() > 0 ? $view->getSelfLeadTime() . ' jours' : '—' ?></span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés)</em></span>
+                            <span><?= $view->getSelfCycleTime() > 0 ? $view->getSelfCycleTime() . ' jours' : '—' ?></span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-title">🧮 <b>Temps par phase</b></span>
+                            <span>🧠 Affinage : <strong><?= $view->getSelfTimeSpentInRefinement() ?> jours</strong></span>
+                            <span>⚙️ Réal + Qualif : <strong><?= $view->getSelfTimeSpentInSprint() ?> jours</strong></span>
+                            <span>❓ Autre : <strong><?= $view->getSelfTimeSpentInOther() ?> jours</strong></span>
+                        </div>
+                    </div>
                 </div>
 
+                <!-- Métriques agrégées des tickets enfants -->
                 <?php include __DIR__ . '/components/metrics/totals.phtml'; ?>
             </div>
         </div>
