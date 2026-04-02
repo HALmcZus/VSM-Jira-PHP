@@ -5,6 +5,7 @@ namespace App\Model;
 use Exception;
 use App\Model\Config;
 use App\Model\Timeline;
+use DateTime;
 
 /**
  * Issue
@@ -37,6 +38,8 @@ class Issue
     protected ?\DateTime $createdDate = null;
     protected ?\DateTime $firstInProgressDate = null;
     protected ?\DateTime $doneDate = null;
+    protected DateTime|null $firstAddToSprintDate = null;
+    protected string $firstSprint;
     protected float $leadTime = 0.0;
     protected float $cycleTime = 0.0;
     protected array $timeByStatus = [];
@@ -420,5 +423,35 @@ class Issue
     public function getWaitingTimes(): array
     {
         return $this->waitingTimes;
+    }
+
+    /**
+     * Set la première date d'ajout à un Sprint
+     * @param DateTime $firstAddToSprintDate
+     */
+    public function setFirstAddToSprintDate(DateTime $firstAddToSprintDate)
+    {
+        $this->firstAddToSprintDate = $firstAddToSprintDate;
+    }
+
+    /**
+     * Get la première date d'ajout à un Sprint
+     * @return string|null
+     */
+    public function getFirstAddToSprintDate(): string|null
+    {
+        return ($this->firstAddToSprintDate instanceof DateTime)
+        ? $this->firstAddToSprintDate->format('d/m/Y')
+        : $this->firstAddToSprintDate;
+    }
+
+    public function setFirstSprint($sprint)
+    {
+        $this->firstSprint = $sprint;
+    }
+
+    public function getFirstSprint(): string
+    {
+        return $this->firstSprint;
     }
 }

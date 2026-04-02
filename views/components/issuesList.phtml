@@ -7,6 +7,7 @@
             <th>Titre</th>
             <th>Statut</th>
             <th>Date de création</th>
+            <th>Date de 1er ajout à un sprint</th>
             <th>1er passage à En cours</th>
             <th>Date de résolution (Terminé)</th>
             <th>Lead time</th>
@@ -23,6 +24,10 @@
                 <td><a href="<?= $issue->getIssueUrl(); ?>" target="_blank"><?= htmlspecialchars($issue->getSummary()); ?></a></td>
                 <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
                 <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
+                <td>
+                    <?= $issue->getFirstAddToSprintDate() ?? '—'; ?>
+                    <?//= $issue->getFirstSprint() ?? ''; ?>
+                </td>
                 <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
                 <td><?= $issue->getDoneDate() ?? '—'; ?></td>
                 <td><?= $issue->getLeadTime() > 0 ? $issue->getLeadTime() . ' jours' : '—'; ?></td>
