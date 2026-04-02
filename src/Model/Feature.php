@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use Exception;
+use App\Repository\ProjectFeaturesRepository;
 
 /**
  * Feature
@@ -15,9 +16,15 @@ class Feature extends AbstractIssueCollection
     const PLANNING_INTERVAL_CUSTOM_FIELD = 'customfield_11400';
 
     private array $featureData = [];
-
+    private ProjectFeaturesRepository $repository;
     /** Issue représentant le ticket Feature lui-même (pour ses propres métriques) */
     private ?Issue $selfAsIssue = null;
+
+    public function __construct(int $id)
+    {
+        $this->repository = new ProjectFeaturesRepository();
+        return parent::__construct($id);
+    }
 
     /**
      * {@inheritdoc}
@@ -90,7 +97,10 @@ class Feature extends AbstractIssueCollection
     {
         return $this->featureData['fields']['status']['name'] ?? null;
     }
-
+    public function getStatusLabel()
+    {
+        return $this->repository->getStatusLabel($this->getStatusName());
+    }
     /**
      * Retourne la valeur numérique du Planning Interval, ou null si non renseigné.
      *
@@ -182,7 +192,7 @@ class Feature extends AbstractIssueCollection
      *
      * @return string[]
      */
-    public function getTeams(): array
+    public function getContributingTeams(): array
     {
         $raw = $this->featureData['fields']['customfield_10244'] ?? [];
 
