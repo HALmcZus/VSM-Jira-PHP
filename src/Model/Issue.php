@@ -452,6 +452,6 @@ class Issue
 
     public function getFirstSprint(): string
     {
-        return $this->firstSprint;
+        return $this->firstSprint ?? 'N/A';
     }
 }

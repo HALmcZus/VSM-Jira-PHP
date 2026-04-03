@@ -305,8 +305,8 @@ class Timeline
         foreach ($history as $historyItem) {
             foreach ($historyItem['items'] as $status) {
 
-                //Ajoute la première date d'ajout à un sprint
-                if ($status['field'] !== 'Sprint' && (!$issue->getFirstAddToSprintDate() && $historyItem['created'])) {
+                //Set la première date d'ajout à un sprint
+                if ($status['field'] === 'Sprint' && (!$issue->getFirstAddToSprintDate() && $historyItem['created'])) {
                     $issue->setFirstAddToSprintDate(
                         new \DateTime($historyItem['created'])
                     );

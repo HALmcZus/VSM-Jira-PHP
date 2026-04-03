@@ -25,8 +25,8 @@
                 <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
                 <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
                 <td>
-                    <?= $issue->getFirstAddToSprintDate() ?? '—'; ?>
-                    <?//= $issue->getFirstSprint() ?? ''; ?>
+                    <?= $issue->getFirstAddToSprintDate() ?? '—'; ?><br/>
+                    (<?= $issue->getFirstSprint() ?? ''; ?>)
                 </td>
                 <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
                 <td><?= $issue->getDoneDate() ?? '—'; ?></td>
