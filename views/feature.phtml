@@ -55,7 +55,7 @@ $storageKey      = 'jira_project_feature';
 
                     <!-- Statut -->
                     <span class="badge <?= $view->getSelfStatusCategoryColor() ?>">
-                        Statut : <?= $view->getStatusName() ?>
+                        Statut : <?= $view->getStatusLabel() ?>
                     </span>
 
                     <!-- PI -->
@@ -68,7 +68,7 @@ $storageKey      = 'jira_project_feature';
                     <span>🔗 Epic : <?= htmlspecialchars($view->getEpicName()) ?></span>
 
                     <!-- Equipe(s) -->
-                    <span>👥 Équipe(s) : <?= htmlspecialchars($view->getTeams()) ?></span>
+                    <span>👥 Équipe(s) : <?= htmlspecialchars($view->getContributingTeams()) ?></span>
 
                     <!-- Nombre de tickets enfants -->
                     <span><?= $view->getIssuesCount() ?> ticket(s) associé(s)</span>

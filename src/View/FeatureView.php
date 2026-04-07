@@ -93,9 +93,9 @@ class FeatureView extends AbstractCollectionView
     /**
      * Retourne les équipes sous forme de chaîne lisible, ou '—' si aucune.
      */
-    public function getTeams(): string
+    public function getContributingTeams(): string
     {
-        $teams = $this->feature->getTeams();
+        $teams = $this->feature->getContributingTeams();
         return $teams ? implode(', ', $teams) : '—';
     }
 
@@ -259,5 +259,10 @@ class FeatureView extends AbstractCollectionView
             in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::DONE_ICON,
             default                                                             => self::OTHER_ICON,
         };
+    }
+
+    public function getStatusLabel()
+    {
+        return $this->feature->getStatusLabel();
     }
 }

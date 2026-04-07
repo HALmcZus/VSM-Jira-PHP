@@ -97,7 +97,7 @@ class ProjectFeaturesRepository
         return $mapped;
     }
 
-    protected function getStatusLabel(string $status): string
+    public function getStatusLabel(string $status): string
     {
         if (isset(self::STATUS_LABELS[$status])) {
             return self::STATUS_LABELS[$status];

@@ -108,6 +108,8 @@ class Version extends AbstractIssueCollection
     }
     public function isOverdue(): bool
     {
+        //Note: Jira ne stocke pas l'historique de changement de status d'une Version
+        //il n'est donc pas possible de savoir si la Version a été livré en retard, une fois celle-ci livrée
         return (bool) ($this->versionData['overdue'] ?? false);
     }
     public function getProjectId(): mixed
