@@ -41,6 +41,9 @@
                         <?php foreach ($issue->getWaitingTimes() as $label => $days): ?>
                             <span class="badge grey"><?= htmlspecialchars($label); ?> — <?= round($days, 1); ?> jours</span>
                         <?php endforeach; ?>
+                        <?php if (count($issue->getWaitingTimes()) > 1): ?>
+                            => Total : <strong><?= array_sum($issue->getWaitingTimes()); ?> jours d'attente</strong>
+                        <?php endif; ?>
                     <?php endif; ?>
 
                     <!-- Détails temps par statut -->

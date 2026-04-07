@@ -5,12 +5,22 @@
         <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
         <span>Total : <strong><?= $view->getTotalLeadTime(); ?> jours</strong></span>
         <span>Moyen : <strong><?= $view->getAverageLeadTime(); ?> jours /ticket</strong></span>
+        <span>Median : <strong><?= $view->getMedianLeadTime(); ?> jours</strong></span>
     </div>
 
     <div class="metric">
         <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
         <span>Total : <strong><?= $view->getTotalCycleTime(); ?> jours</strong></span>
         <span>Moyen : <strong><?= $view->getAverageCycleTime(); ?> jours /ticket</strong></span>
+        <span>Median : <strong><?= $view->getMedianCycleTime(); ?> jours</strong></span>
+    </div>
+
+    <div class="metric">
+        <span class="metric-title">⌛ <b>Waiting Time</b> <em>(Nombre de jours ouvrés de mise en attente ou de blocage)</em></span>
+        <span>Total : <strong><?= $view->getTotalTimeSpentInWaiting(); ?> jours</strong></span>
+        <= Résultat attendu : 98 jours !!??
+            <span>Moyen : <strong><?= $view->getAverageTimeSpentInWaiting(); ?> jours /ticket</strong></span>
+
     </div>
 
     <div class="metric">

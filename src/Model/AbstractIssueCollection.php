@@ -25,14 +25,18 @@ abstract class AbstractIssueCollection
 
     protected float $totalLeadTime = 0.0;
     protected float $averageLeadTime = 0.0;
+    protected float $medianLeadTime = 0.0;
     protected float $totalCycleTime = 0.0;
     protected float $averageCycleTime = 0.0;
+    protected float $medianCycleTime = 0.0;
     protected float $totalTimeSpentInRefinement = 0.0;
     protected float $averageTimeSpentInRefinement = 0.0;
     protected float $totalTimeSpentInSprint = 0.0;
     protected float $averageTimeSpentInSprint = 0.0;
     protected float $totalTimeSpentInOther = 0.0;
     protected float $averageTimeSpentInOther = 0.0;
+    protected float $totalTimeSpentInWaiting = 0.0;
+    protected float $averageTimeSpentInWaiting = 0.0;
 
     protected array $timelineByStatus = [];
     protected array $averageTimeByStatus = [];
@@ -87,6 +91,15 @@ abstract class AbstractIssueCollection
             $this->totalTimeSpentInRefinement  += $issue->getTimeSpentInRefinement() ?? 0.0;
             $this->totalTimeSpentInSprint      += $issue->getTimeSpentInSprint() ?? 0.0;
             $this->totalTimeSpentInOther       += $issue->getTimeSpentInOther() ?? 0.0;
+            $this->totalTimeSpentInWaiting     += $issue->getTimeSpentInWaiting() ?? 0.0;
+
+            //Stock le lead time et cycle time de chaque issue dans des tableaux pour calcul de la médiane
+            if ($issue->getLeadTime() !== 0.0) {
+                $leadTimes[]  = $issue->getLeadTime();
+            }
+            if ($issue->getCycleTime() !== 0.0) {
+                $cycleTimes[] = $issue->getCycleTime();
+            }
 
             foreach ($issue->getWaitingTimes() as $label => $days) {
                 $this->aggregatedWaitingTimes[$label] = ($this->aggregatedWaitingTimes[$label] ?? 0.0) + $days;
@@ -95,6 +108,10 @@ abstract class AbstractIssueCollection
 
         $this->averageLeadTime  = round($this->totalLeadTime / $this->issuesCount, 2);
         $this->averageCycleTime = round($this->totalCycleTime / $this->issuesCount, 2);
+        $this->averageTimeSpentInWaiting = round($this->totalTimeSpentInWaiting / $this->issuesCount, 2);
+
+        $this->medianLeadTime  = $this->calculateMedian($leadTimes);
+        $this->medianCycleTime = $this->calculateMedian($cycleTimes);
     }
 
     /**
@@ -125,6 +142,38 @@ abstract class AbstractIssueCollection
         $this->averageTimeSpentInRefinement = round($this->totalTimeSpentInRefinement / $this->issuesCount, 2);
         $this->averageTimeSpentInSprint     = round($this->totalTimeSpentInSprint / $this->issuesCount, 2);
         $this->averageTimeSpentInOther      = round($this->totalTimeSpentInOther / $this->issuesCount, 2);
+        $this->averageTimeSpentInWaiting    = round($this->totalTimeSpentInWaiting / $this->issuesCount, 2);
+    }
+
+
+    /**
+     * Calculate Median value from an array of numeric values.
+     *
+     * @param  mixed $values
+     * @return float
+     */
+    protected function calculateMedian(array $values): float
+    {
+        if ($values === []) {
+            return false;
+        }
+
+        $sorted = $values;
+        sort($sorted, SORT_NUMERIC);
+
+        $count = count($sorted);
+        $middleIndex = intdiv($count, 2);
+
+        // Si le nombre de valeurs est pair, on retourne la moyenne des deux valeurs centrales.
+        // Si impair, on retourne la valeur du milieu
+        return ($count % 2 === 0)
+            ? ($sorted[$middleIndex - 1] + $sorted[$middleIndex]) / 2
+            : $sorted[$middleIndex];
+    }
+
+    protected function calculateTotalTimeSpentInWaiting(): void
+    {
+        $this->totalTimeSpentInWaiting = array_sum($this->aggregatedWaitingTimes);
     }
 
     // ==================== Getters ====================
@@ -139,6 +188,7 @@ abstract class AbstractIssueCollection
         return $this->issuesCount;
     }
 
+    /** LEAD TIME **/
     public function getTotalLeadTime(): float
     {
         return $this->totalLeadTime;
@@ -147,6 +197,12 @@ abstract class AbstractIssueCollection
     {
         return $this->averageLeadTime;
     }
+    public function getMedianLeadTime(): float
+    {
+        return $this->medianLeadTime;
+    }
+
+    /** CYCLE TIME **/
     public function getTotalCycleTime(): float
     {
         return $this->totalCycleTime;
@@ -155,6 +211,22 @@ abstract class AbstractIssueCollection
     {
         return $this->averageCycleTime;
     }
+    public function getMedianCycleTime(): float
+    {
+        return $this->medianCycleTime;
+    }
+
+    /** WAITING TIME **/
+    public function getTotalWaitingTime(): float
+    {
+        return $this->totalTimeSpentInWaiting;
+    }
+    public function getAverageWaitingTime(): float
+    {
+        return $this->averageTimeSpentInWaiting;
+    }
+
+    /** TIME BREAKDOWN **/
     public function getTotalTimeSpentInRefinement(): float
     {
         return $this->totalTimeSpentInRefinement;
@@ -178,6 +250,14 @@ abstract class AbstractIssueCollection
     public function getAverageTimeSpentInOther(): float
     {
         return $this->averageTimeSpentInOther;
+    }
+    public function getTotalTimeSpentInWaiting(): float
+    {
+        return $this->totalTimeSpentInWaiting;
+    }
+    public function getAverageTimeSpentInWaiting(): float
+    {
+        return $this->averageTimeSpentInWaiting;
     }
 
     public function getTimelineByStatus(): array

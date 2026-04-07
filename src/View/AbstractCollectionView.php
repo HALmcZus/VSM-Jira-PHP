@@ -66,6 +66,7 @@ abstract class AbstractCollectionView
 
     // ==================== Métriques ====================
 
+    /** LEAD TIME **/
     public function getTotalLeadTime(): float
     {
         return $this->collection->getTotalLeadTime();
@@ -74,6 +75,12 @@ abstract class AbstractCollectionView
     {
         return $this->collection->getAverageLeadTime();
     }
+    public function getMedianLeadTime(): float
+    {
+        return $this->collection->getMedianLeadTime();
+    }
+
+    /** CYCLE TIME **/
     public function getTotalCycleTime(): float
     {
         return $this->collection->getTotalCycleTime();
@@ -82,6 +89,22 @@ abstract class AbstractCollectionView
     {
         return $this->collection->getAverageCycleTime();
     }
+    public function getMedianCycleTime(): float
+    {
+        return $this->collection->getMedianCycleTime();
+    }
+
+    /** WAITING TIME **/
+    public function getTotalWaitingTime(): float
+    {
+        return $this->collection->getTotalWaitingTime();
+    }
+    public function getAverageWaitingTime(): float
+    {
+        return $this->collection->getAverageWaitingTime();
+    }
+
+    /** TIME BREAKDOWN **/
     public function getTotalTimeSpentInRefinement(): float
     {
         return $this->collection->getTotalTimeSpentInRefinement();
@@ -105,6 +128,14 @@ abstract class AbstractCollectionView
     public function getAverageTimeSpentInOther(): float
     {
         return $this->collection->getAverageTimeSpentInOther();
+    }
+    public function getTotalTimeSpentInWaiting(): float
+    {
+        return $this->collection->getTotalTimeSpentInWaiting();
+    }
+    public function getAverageTimeSpentInWaiting(): float
+    {
+        return $this->collection->getAverageTimeSpentInWaiting();
     }
 
     // ==================== Timeline ====================

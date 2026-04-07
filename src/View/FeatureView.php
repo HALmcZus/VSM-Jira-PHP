@@ -149,6 +149,11 @@ class FeatureView extends AbstractCollectionView
         return $this->feature->getSelfAsIssue()?->getTimeSpentInOther() ?? 0.0;
     }
 
+    public function getSelfTimeSpentInWaiting(): float
+    {
+        return $this->feature->getSelfAsIssue()?->getTimeSpentInWaiting() ?? 0.0;
+    }
+
     public function getSelfFirstInProgressDate(): ?string
     {
         return $this->feature->getSelfAsIssue()?->getFirstInProgressDate() ?? null;
