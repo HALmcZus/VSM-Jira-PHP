@@ -8,6 +8,7 @@
         "en--rédaction",
         "EN -- RÉDACTION",
         "rédaction en cours",
+        "ECRITURE US",
 
         "A RELIRE EQUIPE",
         "A clarifier",
@@ -22,6 +23,7 @@
         "Tri - Analyse",
         "Affinée",
         "A chiffrer",
+        "US à Valider (DOR)",
 
         "Stratégie de Qualif",
         "Stratégie",
@@ -30,6 +32,7 @@
 
         "A planifier",
         "PRET A PLANIFIER",
+        "READY TO SPRINT",
         "Livraison prévue"
     ],
     "sprint_statuses": [
@@ -44,12 +47,16 @@
         "In Progress",
         "En cours",
         "En cours de dev",
+        "Bloqué",
+        "RUN - Bloqué",
         "En Attente Autre Equipe",
+        "EN ATTENTE",
 
         "Revue Dév",
         "Revue Dév / Pair",
         "Revue de Code",
         "Merge request",
+        "A déployer (mergé sur develop)",
         "REWORK",
 
         "A qualifier",
@@ -59,7 +66,7 @@
         "Pair-testing",
         "Test en cours",
         "En Test",
-        "RUN - Bloqué",
+        "Qualif Bloquée",
 
         "A valider PO",
         "Vainci 2",
@@ -70,6 +77,7 @@
         "Check DOD",
         "FSU validée",
 
+        "Packaging",
         "A DEPLOYER",
         "A déployer"
     ],
@@ -79,5 +87,15 @@
         "Abandonné",
         "abandonné",
         "Annulé"
+    ],
+    "waiting_statuses": [
+        "En Attente",
+        "En attente de Qualif",
+        "En Attente Autre Equipe",
+        "EN ATTENTE",
+        "ATTENTE INFO METIER",
+        "Bloqué",
+        "RUN - Bloqué",
+        "Qualif Bloquée"
     ]
 }

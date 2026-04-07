@@ -43,7 +43,8 @@ class Issue
     protected array $workflowTimeBreakdown = [
         'refinement' => 0.0,
         'sprint' => 0.0,
-        'other' => 0.0
+        'other' => 0.0,
+        'waiting' => 0.0
     ];
     protected array $waitingTimes = [];
 
@@ -392,6 +393,11 @@ class Issue
         return $this->workflowTimeBreakdown['other'];
     }
 
+    public function getTimeSpentInWaiting(): float
+    {
+        return $this->workflowTimeBreakdown['waiting'];
+    }
+
     public function getIssueUrl(): string
     {
         return str_replace(
@@ -410,6 +416,22 @@ class Issue
     public function setWaitingTimes(array $waitingTimes): void
     {
         $this->waitingTimes = $waitingTimes;
+    }
+
+    /**
+     * Ajoute un temps d'attente pour un label ou status donné de type "attente".
+     *
+     * @param  string $waitingStatus
+     * @param  float $daysInStatus
+     * @return void
+     */
+    public function addWaitingTime(string $waitingStatus, float $daysInStatus): void
+    {
+        if (isset($this->waitingTimes[$waitingStatus])) {
+            $this->waitingTimes[$waitingStatus] += $daysInStatus;
+        } else {
+            $this->waitingTimes[$waitingStatus] = $daysInStatus;
+        }
     }
 
     /**

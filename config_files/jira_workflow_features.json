@@ -28,5 +28,7 @@
         "abandonné",
         "ABANDONNE",
         "Annulé"
+    ],
+    "waiting_statuses": [
     ]
 }

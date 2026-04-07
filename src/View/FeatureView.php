@@ -223,6 +223,7 @@ class FeatureView extends AbstractCollectionView
         }
 
         return match (true) {
+            in_array($statusName, $workflow['waiting_statuses'] ?? [], true)    => self::STATUS_CATEGORY_WAITING,
             in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::STATUS_CATEGORY_REFINEMENT,
             in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::STATUS_CATEGORY_SPRINT,
             in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::STATUS_CATEGORY_DONE,
@@ -252,6 +253,7 @@ class FeatureView extends AbstractCollectionView
         $workflow = $this->config->getJiraWorkflow(Config::ISSUE_TYPE_FEATURE);
 
         return match (true) {
+            in_array($statusName, $workflow['waiting_statuses'] ?? [], true)    => self::WAITING_ICON,
             in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::REFINEMENT_ICON,
             in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::SPRINT_ICON,
             in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::DONE_ICON,

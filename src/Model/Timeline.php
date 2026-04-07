@@ -279,7 +279,7 @@ class Timeline
 
     /**
      * Reconstruit la timeline de l'issue à partir du changelog Jira
-     * et calcule le temps cumulé par status et par status category.
+     * et calcule le temps cumulé par status et par catégorie de status.
      *
      * Cette méthode est appelée une seule fois à l'initialisation
      * de l'objet Issue.
@@ -324,7 +324,14 @@ class Timeline
                 }
                 $timeByStatus[$currentStatus] += $daysInStatus;
 
+                // Mise à jour du temps par catégorie de status
                 $this->updateWorkflowTimeBreakdown($currentStatus, $daysInStatus, $workflow, $workflowTimeBreakdown);
+
+                //Si le status est catégorisé comme "waiting_statuses" dans le workflow, on l'ajoute _en plus_ à la catégorie "waiting" et dans ses waiting_times
+                if (in_array($currentStatus, $workflow['waiting_statuses'], true)) {
+                    $workflowTimeBreakdown['waiting'] += $daysInStatus;
+                    $issue->addWaitingTime($currentStatus, $daysInStatus);
+                }
 
                 /**
                  * Met à jour les firstInProgressDate et doneDate
@@ -419,7 +426,7 @@ class Timeline
         $activeWaitingLabels = [];
 
         /** @var array<string, float> $waitingTimes label => jours ouvrés cumulés */
-        $waitingTimes = [];
+        $waitingTimes = $issue->getWaitingTimes() ?? [];
 
         foreach ($history as $historyItem) {
             foreach ($historyItem['items'] as $item) {

@@ -16,10 +16,12 @@ abstract class AbstractCollectionView
     const REFINEMENT_ICON = '🧠';
     const SPRINT_ICON     = '⚙️';
     const DONE_ICON       = '✅';
+    const WAITING_ICON    = '⏳';
     const OTHER_ICON      = '❓';
     const STATUS_CATEGORY_REFINEMENT = 'refinement';
     const STATUS_CATEGORY_SPRINT     = 'sprint';
     const STATUS_CATEGORY_DONE       = 'done';
+    const STATUS_CATEGORY_WAITING    = 'waiting';
     const STATUS_CATEGORY_OTHER      = 'other';
 
     protected Config $config;
@@ -43,6 +45,7 @@ abstract class AbstractCollectionView
         $workflow = $this->config->getJiraWorkflow();
 
         return match (true) {
+            in_array($statusName, $workflow['waiting_statuses'] ?? [], true)    => self::WAITING_ICON,
             in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::REFINEMENT_ICON,
             in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::SPRINT_ICON,
             in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::DONE_ICON,
@@ -152,6 +155,7 @@ abstract class AbstractCollectionView
         $workflow = $this->config->getJiraWorkflow();
 
         return match (true) {
+            in_array($statusName, $workflow['waiting_statuses'] ?? [], true)    => self::STATUS_CATEGORY_WAITING,
             in_array($statusName, $workflow['refinement_statuses'] ?? [], true) => self::STATUS_CATEGORY_REFINEMENT,
             in_array($statusName, $workflow['sprint_statuses'] ?? [], true)     => self::STATUS_CATEGORY_SPRINT,
             in_array($statusName, $workflow['done_statuses'] ?? [], true)       => self::STATUS_CATEGORY_DONE,
