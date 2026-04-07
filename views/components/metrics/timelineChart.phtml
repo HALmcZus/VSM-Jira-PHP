@@ -95,7 +95,7 @@ $normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status)
         <?php $waitingTimes = $view->getAggregatedWaitingTimes(); ?>
         <?php if (!empty($waitingTimes)): ?>
             <div class="waiting-times-summary">
-                <h4>⏳ Temps de blocage cumulés (labels "attente" des tickets)</h4>
+                <h4>⏳ Temps de blocage cumulés (labels "attente" ou status des tickets)</h4>
                 <ul>
                     <?php foreach ($waitingTimes as $label => $days): ?>
                         <li>

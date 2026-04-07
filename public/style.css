@@ -225,7 +225,7 @@ tr:hover {
 }
 
 .vsm-text {
-    width: 350px;      /* largeur FIXE */
+    width: 450px;      /* largeur FIXE */
     flex-shrink: 0;    /* ne se compresse jamais */
 }
 
