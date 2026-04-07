@@ -50,6 +50,7 @@ class Issue
         'waiting' => 0.0
     ];
     protected array $waitingTimes = [];
+    protected array $revertCount = [];
 
     /**
      * Issue constructor
@@ -463,8 +464,8 @@ class Issue
     public function getFirstAddToSprintDate(): string|null
     {
         return ($this->firstAddToSprintDate instanceof DateTime)
-        ? $this->firstAddToSprintDate->format('d/m/Y')
-        : $this->firstAddToSprintDate;
+            ? $this->firstAddToSprintDate->format('d/m/Y')
+            : $this->firstAddToSprintDate;
     }
 
     public function setFirstSprint($sprint)
@@ -475,5 +476,22 @@ class Issue
     public function getFirstSprint(): string
     {
         return $this->firstSprint ?? 'N/A';
+    }
+
+    /**
+     * Si le status a déjà été rencontré, cela signifie qu'on y est retourné après être passé par un autre status (ex: To Do → In Progress → To Do).
+     * On considère que c'est un "revert" de status, et on l'incrémente dans le compteur de reverts pour ce status.
+     *
+     * @param  string $status
+     * @return void
+     */
+    public function addRevertCount(string $status): void
+    {
+        $this->revertCount[$status] = ($this->revertCount[$status] ?? 0) + 1;
+    }
+
+    public function getRevertCount(): array
+    {
+        return $this->revertCount;
     }
 }

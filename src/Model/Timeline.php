@@ -327,10 +327,14 @@ class Timeline
                 $daysInStatus = $this->calculateBusinessDays($currentStatusCreatedDate, $transitionDate);
 
                 /**
-                 * Agrégation du temps par status et catégorie de status
+                 *** Agrégation du temps par status et catégorie de status ***
                  */
                 if (!isset($timeByStatus[$currentStatus])) {
+                    //Si le status n'a jamais été rencontré, on l'ajoute au tableau
                     $timeByStatus[$currentStatus] = 0;
+                } else {
+                    //Sinon on incremente le nombre de retours à ce status
+                    $issue->addRevertCount($currentStatus);
                 }
                 $timeByStatus[$currentStatus] += $daysInStatus;
 

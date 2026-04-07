@@ -25,7 +25,7 @@
                 <td class="<?= $issue->getStatusCategoryColor() ?>"><?= $issue->getStatusName() ?? '—'; ?></td>
                 <td><?= $issue->getCreatedDate() ?? '—'; ?></td>
                 <td>
-                    <?= $issue->getFirstAddToSprintDate() ?? '—'; ?><br/>
+                    <?= $issue->getFirstAddToSprintDate() ?? '—'; ?><br />
                     (<?= $issue->getFirstSprint() ?? ''; ?>)
                 </td>
                 <td><?= $issue->getFirstInProgressDate() ?? '—'; ?></td>
@@ -59,6 +59,14 @@
                                 Autres statuts :
                                 <?php foreach ($issueTimelineData['otherStatuses'] as $status => $days): ?>
                                     <li><?= $view->normalizeStatusName($status); ?> : <strong><?= round($days, 2); ?> jours</strong></li>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+
+                            <?php if (count($issue->getRevertCount()) > 0): ?>
+                                <br />
+                                🔙 Nombre de retours arrières dans les status :
+                                <?php foreach ($issue->getRevertCount() as $status => $count): ?>
+                                    <li><?= $view->normalizeStatusName($status); ?> : <?= $count; ?> fois</li>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </ul>
