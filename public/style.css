@@ -309,11 +309,11 @@ tr:hover {
 }
 
 .input {
-
+    width: auto;
 }
 
 .input-large {
-    width: auto;
+    width: 500px;
 }
 
 .project-dropdown {

@@ -138,8 +138,9 @@ Responsabilités :
 * **Lead Time** (jours calendaires entre la date de création et la date de passage à Done/Terminé)
 * **Cycle Time** (jours ouvrés entre la date de passage à In progress et la date de passage à Done/Terminé)
 * **Durée moyenne par statut**
-* **Waiting times** basé sur les étiquettes (champ labels)
+* **Waiting times** basé sur les étiquettes (champ Labels) contenant "attente", et les statuts configurés comme tels dans le config_files\jira_workflow.json (bien que ce soit un anti-pattern, on pallie à toute éventualité)
 * Timelines consolidées (Version + Issues)
+* VSM (Value Stream Mapping Lean)
 
 Les métriques sont calculées **à partir des dates Jira réelles**.
 
@@ -158,7 +159,7 @@ Le frontend est volontairement **léger et sans framework lourd**.
 
 ## 🔐 Configuration
 
-1. Les accès Jira et paramètres sensibles sont stockés dans un fichier `.env`, remplis avec des valeurs par défaut inexploitables (placeholders).
+1. Les accès Jira et paramètres sensibles sont stockés dans un fichier `.env`, remplis avec des valeurs par défaut inexploitables (placeholders anonymes).
 
 .env.template :
 ```
@@ -207,6 +208,9 @@ Exemple :
         "Done",
         "Terminé(e)",
         "abandonné"
+    ],
+    "waiting_statuses": [
+        "En Attente"
     ]
 }
 ```
