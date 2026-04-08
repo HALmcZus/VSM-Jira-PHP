@@ -279,7 +279,7 @@ class Timeline
 
     /**
      * Reconstruit la timeline de l'issue à partir du changelog Jira
-     * et calcule le temps cumulé par status et par catégorie de status.
+     * et calcule le temps cumulé par statut et par catégorie de statut.
      *
      * Cette méthode est appelée une seule fois à l'initialisation
      * de l'objet Issue.
@@ -327,21 +327,21 @@ class Timeline
                 $daysInStatus = $this->calculateBusinessDays($currentStatusCreatedDate, $transitionDate);
 
                 /**
-                 *** Agrégation du temps par status et catégorie de status ***
+                 *** Agrégation du temps par statut et catégorie de statut ***
                  */
                 if (!isset($timeByStatus[$currentStatus])) {
-                    //Si le status n'a jamais été rencontré, on l'ajoute au tableau
+                    //Si le statut n'a jamais été rencontré, on l'ajoute au tableau
                     $timeByStatus[$currentStatus] = 0;
                 } else {
-                    //Sinon on incremente le nombre de retours à ce status
+                    //Sinon on incremente le nombre de retours à ce statut
                     $issue->addRevertCount($currentStatus);
                 }
                 $timeByStatus[$currentStatus] += $daysInStatus;
 
-                // Mise à jour du temps par catégorie de status
+                // Mise à jour du temps par catégorie de statut
                 $this->updateWorkflowTimeBreakdown($currentStatus, $daysInStatus, $workflow, $workflowTimeBreakdown);
 
-                //Si le status est catégorisé comme "waiting_statuses" dans le workflow, on l'ajoute _en plus_ à la catégorie "waiting" et dans ses waiting_times
+                //Si le statut est catégorisé comme "waiting_statuses" dans le workflow, on l'ajoute _en plus_ à la catégorie "waiting" et dans ses waiting_times
                 if (in_array($currentStatus, $workflow['waiting_statuses'], true)) {
                     $workflowTimeBreakdown['waiting'] += $daysInStatus;
                     $issue->addWaitingTime($currentStatus, $daysInStatus);
@@ -354,12 +354,12 @@ class Timeline
                 if ($status['toString'] === self::STATUS_IN_PROGRESS && $issue->getFirstInProgressDate(false) === null) {
                     $issue->setFirstInProgressDate($transitionDate);
                 }
-                // S'il s'agit du dernier passage à Done (pour prendre en compte les éventuels allers-retours de status)
+                // S'il s'agit du dernier passage à Done (pour prendre en compte les éventuels allers-retours de statut)
                 if (in_array($status['toString'], $workflow['done_statuses'], true)) {
                     $issue->setDoneDate($transitionDate);
                 }
 
-                // Mise à jour du status courant pour la prochaine boucle
+                // Mise à jour du statut courant pour la prochaine boucle
                 $currentStatus = $status['toString'];
                 $currentStatusCreatedDate = $transitionDate;
             }

@@ -479,8 +479,8 @@ class Issue
     }
 
     /**
-     * Si le status a déjà été rencontré, cela signifie qu'on y est retourné après être passé par un autre status (ex: To Do → In Progress → To Do).
-     * On considère que c'est un "revert" de status, et on l'incrémente dans le compteur de reverts pour ce status.
+     * Si le statut a déjà été rencontré, cela signifie qu'on y est retourné après être passé par un autre statut (ex: To Do → In Progress → To Do).
+     * On considère que c'est un "revert" de statut, et on l'incrémente dans le compteur de reverts pour ce statut.
      *
      * @param  string $status
      * @return void

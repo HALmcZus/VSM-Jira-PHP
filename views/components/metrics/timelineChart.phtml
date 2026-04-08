@@ -44,7 +44,8 @@ $normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status)
                 const chartColors = chartLabels.map(label => {
                     if (label.startsWith('🧠')) return '#36a2ebb3';
                     if (label.startsWith('⚙️')) return '#ffce56b3';
-                    if (label.startsWith('❓')) return '#ff6384b3';
+                    if (label.startsWith('⏳')) return '#ff0000b3';
+                    if (label.startsWith('❓')) return '#9800fdb3';
                     return '#c9cbcfb3';
                 });
 
@@ -95,7 +96,7 @@ $normalizedLabels = array_map(fn($status) => $view->normalizeStatusName($status)
         <?php $waitingTimes = $view->getAggregatedWaitingTimes(); ?>
         <?php if (!empty($waitingTimes)): ?>
             <div class="waiting-times-summary">
-                <h4>⏳ Temps de blocage cumulés (labels "attente" ou status des tickets)</h4>
+                <h4>⏳ Temps de blocage cumulés (labels "attente" ou statuts des tickets)</h4>
                 <ul>
                     <?php foreach ($waitingTimes as $label => $days): ?>
                         <li>

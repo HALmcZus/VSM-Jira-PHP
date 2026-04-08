@@ -14,12 +14,18 @@
         </div>
 
         <div class="metric">
-            <span class="metric-title">📦 <b>Lead Time</b> <em>(jours calendaires Création -> Terminé)</em></span>
+            <span class="metric-title">
+                📦 <b>Lead Time</b><br />
+                <em>(jours calendaires Création -> Terminé)</em>
+            </span>
             <span class="metric-value"><?= $view->getSelfLeadTime() > 0 ? $view->getSelfLeadTime() . ' jours' : '—' ?></span>
         </div>
 
         <div class="metric">
-            <span class="metric-title">🛠️ <b>Cycle Time</b> <em>(jours ouvrés En cours -> Terminé)</em></span>
+            <span class="metric-title">
+                🛠️ <b>Cycle Time</b><br />
+                <em>(jours ouvrés En cours -> Terminé)</em>
+            </span>
             <span class="metric-value"><?= $view->getSelfCycleTime() > 0 ? $view->getSelfCycleTime() . ' jours' : '—' ?></span>
         </div>
 

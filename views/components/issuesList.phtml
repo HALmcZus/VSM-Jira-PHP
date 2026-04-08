@@ -67,13 +67,14 @@
 
                             <?php if (count($issue->getRevertCount()) > 0): ?>
                                 <br />
-                                🔙 Nombre de retours arrières dans les status :
+                                🔙 Nombre de retours arrières dans les statuts :
                                 <?php foreach ($issue->getRevertCount() as $status => $count): ?>
                                     <li><?= $view->normalizeStatusName($status); ?> : <?= $count; ?> fois</li>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </ul>
                     </details>
+
                     <!-- Détails temps par catégorie de statut -->
                     <details>
                         <summary>Totaux temps passé par étapes du cycle de vie du ticket</summary>

@@ -66,7 +66,7 @@ Il est développé en PHP ^8.5, framework Slim ^4.15 pour le Backend, et en HTML
 
 ```
 ├── config_files/
-│   ├── jira_workflow.json          # Configuration du workflow Jira de votre projet (status correspondants aux phases d'affinage, de sprint et Done)
+│   ├── jira_workflow.json          # Configuration du workflow Jira de votre projet (statuts correspondants aux phases d'affinage, de sprint et Done)
 │   └── non_working_days.json.css   # Liste des jours non travaillés (fériés FR) --Sera remplacée par un appel API officielle des jours fériés français.
 │
 ├── php/                   # Pour la version Standalone : moteur PHP portable (version 8.5)
