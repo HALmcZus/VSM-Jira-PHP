@@ -31,8 +31,9 @@
             <em>(Nombre de jours ouvrés de mise en attente ou de blocage)</em>
         </span>
         <span>Total : <strong><?= $view->getTotalTimeSpentInWaiting(); ?> jours</strong></span>
-        <= Résultat attendu : 98 jours !!??
-            <span>Moyen : <strong><?= $view->getAverageTimeSpentInWaiting(); ?> jours /ticket</strong></span>
+        => REP-263 – MCO REPAIRES PI7 : comptage manuel = 98 j !!!
+        => dont 51.9 de labels et 46 de status
+        <span>Moyen : <strong><?= $view->getAverageTimeSpentInWaiting(); ?> jours /ticket</strong></span>
     </div>
 
     <div class="metric">

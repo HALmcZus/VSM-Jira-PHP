@@ -423,7 +423,8 @@ class Issue
     }
 
     /**
-     * Ajoute un temps d'attente pour un label ou status donné de type "attente".
+     * Ajoute un temps d'attente pour un status donné de catégorie "waiting_statuses".
+     * @see \config_files\jira_workflow.json
      *
      * @param  string $waitingStatus
      * @param  float $daysInStatus

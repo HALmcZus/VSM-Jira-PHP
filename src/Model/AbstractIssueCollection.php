@@ -85,13 +85,16 @@ abstract class AbstractIssueCollection
             return;
         }
 
+        $leadTimes = [];
+        $cycleTimes = [];
         foreach ($this->issues as $issue) {
             $this->totalLeadTime               += $issue->getLeadTime() ?? 0;
             $this->totalCycleTime              += $issue->getCycleTime() ?? 0;
             $this->totalTimeSpentInRefinement  += $issue->getTimeSpentInRefinement() ?? 0.0;
             $this->totalTimeSpentInSprint      += $issue->getTimeSpentInSprint() ?? 0.0;
             $this->totalTimeSpentInOther       += $issue->getTimeSpentInOther() ?? 0.0;
-            $this->totalTimeSpentInWaiting     += $issue->getTimeSpentInWaiting() ?? 0.0;
+
+            $this->calcAndaggregateWaitingTimes($issue);
 
             //Stock le lead time et cycle time de chaque issue dans des tableaux pour calcul de la médiane
             if ($issue->getLeadTime() !== 0.0) {
@@ -99,10 +102,6 @@ abstract class AbstractIssueCollection
             }
             if ($issue->getCycleTime() !== 0.0) {
                 $cycleTimes[] = $issue->getCycleTime();
-            }
-
-            foreach ($issue->getWaitingTimes() as $label => $days) {
-                $this->aggregatedWaitingTimes[$label] = ($this->aggregatedWaitingTimes[$label] ?? 0.0) + $days;
             }
         }
 
@@ -112,6 +111,15 @@ abstract class AbstractIssueCollection
 
         $this->medianLeadTime  = $this->calculateMedian($leadTimes);
         $this->medianCycleTime = $this->calculateMedian($cycleTimes);
+    }
+
+    private function calcAndaggregateWaitingTimes(Issue $issue)
+    {
+        $this->totalTimeSpentInWaiting += $issue->getTimeSpentInWaiting() ?? 0.0;
+        foreach ($issue->getWaitingTimes() as $label => $days) {
+            $this->aggregatedWaitingTimes[$label] = ($this->aggregatedWaitingTimes[$label] ?? 0.0) + $days;
+            $this->totalTimeSpentInWaiting += $days;
+        }
     }
 
     /**
@@ -149,12 +157,12 @@ abstract class AbstractIssueCollection
     /**
      * Calculate Median value from an array of numeric values.
      *
-     * @param  mixed $values
+     * @param  array $values
      * @return float
      */
     protected function calculateMedian(array $values): float
     {
-        if ($values === []) {
+        if (!is_array($values) || $values === []) {
             return false;
         }
 
@@ -173,6 +181,9 @@ abstract class AbstractIssueCollection
 
     protected function calculateTotalTimeSpentInWaiting(): void
     {
+        //TODO commentaires de debug, à suppr
+        //à faire avant / mutualiser ?
+        //=> en fait, jamais appelé ! => valeur semble OK, il faudrait l'utiliser
         $this->totalTimeSpentInWaiting = array_sum($this->aggregatedWaitingTimes);
     }
 

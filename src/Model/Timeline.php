@@ -479,6 +479,11 @@ class Timeline
             $waitingTimes[$label] = ($waitingTimes[$label] ?? 0.0) + $days;
         }
 
+        if ($waitingTimes) {
+            //TODO debug à suppr
+            echo '';
+        }
+
         $issue->setWaitingTimes($waitingTimes);
     }
 
