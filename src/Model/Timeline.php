@@ -224,6 +224,11 @@ class Timeline
         $startDate = $start->format('d/m/Y');
         $endDate = $end->format('d/m/Y');
 
+        // Cas où le status est changé moins d'une heure après (fausse manip ou temps anecdotique) : on considère que le ticket n'est pas resté dans ce statut
+        if ($startDate === $endDate && $this->isSimilarTime($start, $end, 60)) {
+            return 0;
+        }
+
         // Cas spécial : jours différents + même heure (tolérance ±30min)
         if ($startDate !== $endDate && $this->isSimilarTime($start, $end, 30)) {
             return $this->countBusinessDaysBetween($start, $end);

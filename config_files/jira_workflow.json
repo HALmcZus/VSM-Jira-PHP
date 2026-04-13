@@ -11,6 +11,7 @@
         "rédaction en cours",
         "ECRITURE US",
 
+        "VALIDATION FONCTIONNELLE",
         "A RELIRE EQUIPE",
         "A clarifier",
         "BESOIN DE CLARIFICATION",
@@ -18,6 +19,7 @@
         "Ready for Refinement",
         "PRET-POUR-REFINEMENT",
         "A analyser MO",
+        "SOLAU - Phase Analyse",
         "ATTENTE INFO METIER",
         "Attente métier",
         "En attente métier",
@@ -26,6 +28,7 @@
         "Tri - Analyse",
         "Etudes",
         "ANALYSE TERMINEE",
+        "Affinage",
         "Affinée",
         "A chiffrer",
         "US à Valider (DOR)",
@@ -76,13 +79,14 @@
         "Qualif Bloquée",
 
         "A valider PO",
-        "Prêt Vainci 2",
-        "Vainci 2",
         "A PRENDRE EN CHARGE (PO)",
         "Validation PO / Vainci",
         "Validation PO/PM",
         "Validation PO",
         "Check DOD",
+
+        "Prêt Vainci 2",
+        "Vainci 2",
         "FSU validée",
 
         "Packaging",

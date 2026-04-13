@@ -432,6 +432,10 @@ class Issue
      */
     public function addWaitingTime(string $waitingStatus, float $daysInStatus): void
     {
+        if ($daysInStatus <= 0) {
+            return;
+        }
+
         if (isset($this->waitingTimes[$waitingStatus])) {
             $this->waitingTimes[$waitingStatus] += $daysInStatus;
         } else {
