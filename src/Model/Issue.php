@@ -53,14 +53,14 @@ class Issue
     protected array $revertCount = [];
 
     /**
-     * Issue constructor
-     *
-     * @param array $data Données brutes issues de l’API Jira
+     * @param array         $data     Données brutes issues de l'API Jira
+     * @param Config|null   $config   Optionnel, injecté pour les tests (défaut : new Config())
+     * @param Timeline|null $timeline Optionnel, injecté pour les tests (défaut : new Timeline())
      */
-    public function __construct(array $data)
+    public function __construct(array $data, ?Config $config = null, ?Timeline $timeline = null)
     {
-        $this->config = new Config();
-        $this->timeline = new Timeline();
+        $this->config   = $config   ?? new Config();
+        $this->timeline = $timeline ?? new Timeline($this->config);
 
         $this->initializeData($data);
         $this->timeline->buildStatusTimeline($this);
@@ -397,9 +397,15 @@ class Issue
         return $this->workflowTimeBreakdown['other'];
     }
 
+    /**
+     * Retourne le total des jours d'attente de l'issue (labels + statuts d'attente cumulés).
+     * $this->waitingTimes est alimenté par buildStatusTimeline() et buildWaitingTimes().
+     *
+     * @return float
+     */
     public function getTimeSpentInWaiting(): float
     {
-        return $this->workflowTimeBreakdown['waiting'];
+        return array_sum($this->waitingTimes);
     }
 
     public function getIssueUrl(): string

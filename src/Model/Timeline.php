@@ -18,10 +18,13 @@ class Timeline
 
     /**
      * __construct
+     *
+     * @param  mixed $config
+     * @return void
      */
-    public function __construct()
+    public function __construct(?Config $config = null)
     {
-        $this->config = new Config();
+        $this->config = $config ?? new Config();
     }
 
     /**
@@ -224,7 +227,7 @@ class Timeline
         $startDate = $start->format('d/m/Y');
         $endDate = $end->format('d/m/Y');
 
-        // Cas où le status est changé moins d'une heure après (fausse manip ou temps anecdotique) : on considère que le ticket n'est pas resté dans ce statut
+        // Cas où le statut/label est changé moins d'une heure après (fausse manip ou temps anecdotique) : on considère que le ticket n'est pas resté dans ce statut
         if ($startDate === $endDate && $this->isSimilarTime($start, $end, 60)) {
             return 0;
         }
@@ -444,8 +447,8 @@ class Timeline
         /** @var array<string, \DateTime> $activeWaitingLabels label => date d'ajout */
         $activeWaitingLabels = [];
 
-        /** @var array<string, float> $waitingTimes label => jours ouvrés cumulés */
-        $waitingTimes = $issue->getWaitingTimes() ?? [];
+        /** @var array<string, float> $labelWaitingTimes */
+        $labelWaitingTimes = [];
 
         foreach ($history as $historyItem) {
             foreach ($historyItem['items'] as $item) {
@@ -455,7 +458,6 @@ class Timeline
                 }
 
                 $transitionDate = new \DateTime($historyItem['created']);
-
                 $previousLabels = $this->splitLabels($item['fromString'] ?? '');
                 $newLabels      = $this->splitLabels($item['toString'] ?? '');
 
@@ -470,7 +472,7 @@ class Timeline
                 foreach (array_diff($previousLabels, $newLabels) as $label) {
                     if ($this->isWaitingLabel($label) && isset($activeWaitingLabels[$label])) {
                         $days = $this->calculateBusinessDays($activeWaitingLabels[$label], $transitionDate);
-                        $waitingTimes[$label] = ($waitingTimes[$label] ?? 0.0) + $days;
+                        $labelWaitingTimes[$label] = ($labelWaitingTimes[$label] ?? 0.0) + $days;
                         unset($activeWaitingLabels[$label]);
                     }
                 }
@@ -481,15 +483,17 @@ class Timeline
         $endDate = $issue->getResolutionDateTime();
         foreach ($activeWaitingLabels as $label => $addedDate) {
             $days = $this->calculateBusinessDays($addedDate, $endDate);
-            $waitingTimes[$label] = ($waitingTimes[$label] ?? 0.0) + $days;
+            $labelWaitingTimes[$label] = ($labelWaitingTimes[$label] ?? 0.0) + $days;
         }
 
-        if ($waitingTimes) {
-            //TODO debug à suppr
-            echo '';
+        // Fusion des statuts (déjà calculés par buildStatusTimeline) + labels calculés ici.
+        // Incrémente uniquement si une clé existe des deux côtés.
+        $merged = $issue->getWaitingTimes();
+        foreach ($labelWaitingTimes as $label => $days) {
+            $merged[$label] = ($merged[$label] ?? 0.0) + $days;
         }
 
-        $issue->setWaitingTimes($waitingTimes);
+        $issue->setWaitingTimes($merged);
     }
 
     /**

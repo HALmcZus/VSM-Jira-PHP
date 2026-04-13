@@ -1,7 +1,7 @@
 <?php
 
-use App\Controller\FeatureController;
 use Slim\App;
+use App\Controller\FeatureController;
 use App\Controller\VersionController;
 use App\Controller\JiraProjectController;
 use App\Controller\ProjectVersionsController;

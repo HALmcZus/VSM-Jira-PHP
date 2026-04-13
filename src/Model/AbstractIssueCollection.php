@@ -113,9 +113,17 @@ abstract class AbstractIssueCollection
         $this->medianCycleTime = $this->calculateMedian($cycleTimes);
     }
 
-    private function calcAndaggregateWaitingTimes(Issue $issue)
+    /**
+     * Agrège les temps d'attente d'une issue dans les totaux de la collection.
+     *
+     * Source unique : $issue->getWaitingTimes() contient déjà statuts + labels
+     * (alimenté par Timeline::buildStatusTimeline + buildWaitingTimes).
+     *
+     * @param Issue $issue
+     * @return void
+     */
+    private function calcAndaggregateWaitingTimes(Issue $issue): void
     {
-        $this->totalTimeSpentInWaiting += $issue->getTimeSpentInWaiting() ?? 0.0;
         foreach ($issue->getWaitingTimes() as $label => $days) {
             $this->aggregatedWaitingTimes[$label] = ($this->aggregatedWaitingTimes[$label] ?? 0.0) + $days;
             $this->totalTimeSpentInWaiting += $days;
@@ -184,6 +192,7 @@ abstract class AbstractIssueCollection
         //TODO commentaires de debug, à suppr
         //à faire avant / mutualiser ?
         //=> en fait, jamais appelé ! => valeur semble OK, il faudrait l'utiliser
+        die('calculateTotalTimeSpentInWaiting');
         $this->totalTimeSpentInWaiting = array_sum($this->aggregatedWaitingTimes);
     }
 
