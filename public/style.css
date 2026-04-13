@@ -6,7 +6,7 @@
  * Ajouter dans chaque vue <head> :
  * <link rel="preconnect" href="https://fonts.googleapis.com">
  * <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
- * <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ * <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
  * ============================================================ */
 
 /* ============================================================
@@ -80,6 +80,7 @@ html {
 
 body {
     font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;          /* force 400, évite le rendu thin sur certains OS */
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
@@ -232,11 +233,12 @@ form {
 .badge.red    { background: var(--danger-bg);   color: var(--danger-text);   border-color: var(--danger-border); }
 .badge.blue   { background: var(--info-bg);     color: var(--info-text);     border-color: var(--info-border); }
 .badge.grey   { background: var(--neutral-bg);  color: var(--neutral-text);  border-color: var(--neutral-border); }
+.badge.wait   { background: #fecaca; /* red-200 */ color: #7f1d1d; /* red-900 */ border: 1px solid #f87171; /* red-400 */ }
 
-/* Couleurs de statut sur les cellules de tableau */
-.blue-gray  { background: var(--info-bg);    color: var(--info-text);    }
-.green      { background: var(--success-bg); color: var(--success-text); }
-.yellow     { background: var(--warning-bg); color: var(--warning-text); }
+/* Couleurs de statut sur les cellules de tableau — saturées pour lisibilité */
+.blue-gray  { background: #dbeafe; color: #1e3a8a; } /* blue-100 / blue-900 */
+.green      { background: #bbf7d0; color: #14532d; } /* green-200 / green-900 */
+.yellow     { background: #fef08a; color: #713f12; } /* yellow-200 / yellow-900 */
 
 /* ============================================================
  * 7. META & MÉTRIQUES
@@ -260,9 +262,26 @@ form {
 
 .meta-line-metrics {
     display: flex;
+    flex-wrap: wrap;             /* les .metric se mettent côte à côte */
     align-items: stretch;
-    flex-wrap: wrap;
     gap: 14px;
+    /* Même container que .feature-self-metrics-section */
+    width: 100%;
+    padding: 18px 20px;
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* Le h3 prend toute la largeur → force un saut de ligne avant les .metric */
+.meta-line-metrics > h3 {
+    flex: 0 0 100%;
+    width: 100%;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 2px;          /* gap: 14px gère l'espace vertical */
+    color: var(--text);
 }
 
 /* Metric card */
@@ -417,11 +436,11 @@ tbody tr td[colspan] {
 .vsm-timeline-label  { font-size: 0.78rem; font-weight: 500; color: #0f172a; }
 .vsm-timeline-metric { font-size: 0.72rem; font-style: italic; color: #475569; margin-top: 2px; }
 
-.vsm-timeline-refinement { background: #eff6ff; border-color: #bfdbfe; }
-.vsm-timeline-sprint      { background: #fffbeb; border-color: #fde68a; }
-.vsm-timeline-done        { background: #f0fdf4; border-color: #bbf7d0; }
-.vsm-timeline-other       { background: #fdf2f8; border-color: #f5d0fe; }
-.vsm-timeline-waiting     { background: #fef2f2; border-color: #fecaca; }
+.vsm-timeline-refinement { background: #bfdbfe; border-color: #93c5fd; } /* blue-200/300 */
+.vsm-timeline-sprint      { background: #fde68a; border-color: #fbbf24; } /* amber-200/400 */
+.vsm-timeline-done        { background: #bbf7d0; border-color: #4ade80; } /* green-200/400 */
+.vsm-timeline-other       { background: #e9d5ff; border-color: #c084fc; } /* purple-200/400 */
+.vsm-timeline-waiting     { background: #fecaca; border-color: #f87171; } /* red-200/400 */
 
 .vsm-arrow { font-size: 1rem; color: var(--text-light); flex-shrink: 0; }
 
@@ -445,12 +464,12 @@ tbody tr td[colspan] {
     display: flex;
     align-items: center;
     gap: 6px;
-    background: var(--danger-bg);
-    border: 1px solid var(--danger-border);
+    background: #fecaca;         /* red-200 — plus visible */
+    border: 1px solid #f87171;   /* red-400 */
     border-radius: var(--radius-pill);
     padding: 4px 12px;
     font-size: 0.78rem;
-    color: var(--danger-text);
+    color: #7f1d1d;              /* red-900 */
 }
 .waiting-label { font-weight: 500; }
 
@@ -465,7 +484,7 @@ details[open] {}
 
 summary {
     cursor: pointer;
-    padding: 12px 16px;
+    padding: 12px 16px 12px 38px; /* espace à gauche pour le chevron */
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--text);
@@ -475,18 +494,23 @@ summary {
     display: flex;
     align-items: center;
     gap: 8px;
+    position: relative;
     transition: background var(--transition);
     user-select: none;
 }
 summary::-webkit-details-marker { display: none; }
-summary::after {
+
+/* Chevron à gauche */
+summary::before {
     content: '›';
-    margin-left: auto;
-    font-size: 1rem;
+    position: absolute;
+    left: 14px;
+    font-size: 1.1rem;
+    line-height: 1;
     color: var(--text-light);
     transition: transform var(--transition);
 }
-details[open] > summary::after { transform: rotate(90deg); }
+details[open] > summary::before { transform: rotate(90deg); }
 summary:hover { background: var(--border); }
 
 details > *:not(summary) {
