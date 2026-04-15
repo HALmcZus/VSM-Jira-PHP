@@ -505,7 +505,7 @@ summary::before {
     content: '›';
     position: absolute;
     left: 14px;
-    font-size: 1.1rem;
+    font-size: 2rem;
     line-height: 1;
     color: var(--text-light);
     transition: transform var(--transition);
