@@ -15,7 +15,7 @@
 
         <div class="metric">
             <span class="metric-title">
-                📦 <b>Lead Time</b><br />
+                📦 <b>Lead Time (Métier)</b><br />
                 <em>(jours calendaires Création -> Terminé)</em>
             </span>
             <span class="metric-value"><?= $view->getSelfLeadTime() > 0 ? $view->getSelfLeadTime() . ' jours' : '—' ?></span>
@@ -23,7 +23,7 @@
 
         <div class="metric">
             <span class="metric-title">
-                🛠️ <b>Cycle Time</b><br />
+                🛠️ <b>Cycle Time (effectif)</b><br />
                 <em>(jours ouvrés En cours -> Terminé)</em>
             </span>
             <span class="metric-value"><?= $view->getSelfCycleTime() > 0 ? $view->getSelfCycleTime() . ' jours' : '—' ?></span>
