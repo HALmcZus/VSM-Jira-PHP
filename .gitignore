@@ -5,3 +5,4 @@ cache/*
 php/*
 vendor/*
 start.bat
+README.md

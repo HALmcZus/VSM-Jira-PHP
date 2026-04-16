@@ -28,7 +28,7 @@ $storageKey      = 'jira_project_version';
         <?php include __DIR__ . '/components/form/selectJiraProject.phtml'; ?>
 
         <form method="POST" action="/version">
-            <label><em>Ou directement par FixVersion ID :</em></label>
+            <label><em>Ou ddddddddirectement par FixVersion ID :</em></label>
             <input type="text" name="fixVersionId" required placeholder="ID de la Version">
             <button type="submit">OK</button>
         </form>
@@ -78,9 +78,8 @@ $storageKey      = 'jira_project_version';
             <h2><?= $view->getIssuesCount(); ?> tickets rattachés à cette version :</h2>
             <?php include __DIR__ . '/components/issuesList.phtml'; ?>
         </div>
-
     <?php endif; ?>
 
+    <?php include __DIR__ . '/components/footer.phtml'; ?>
 </body>
-
 </html>
