@@ -175,12 +175,10 @@ class GovApiService
 
         if (curl_errno($ch)) {
             $error = curl_error($ch);
-            curl_close($ch);
             throw new \RuntimeException("GovApiService::get() — cURL error: $error (URL: $url)");
         }
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         if ($httpCode !== 200) {
             throw new \RuntimeException("GovApiService::get() — HTTP $httpCode (URL: $url)");

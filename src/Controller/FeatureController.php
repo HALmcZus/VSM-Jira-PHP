@@ -39,7 +39,6 @@ class FeatureController
         return $_ENV['IS_DEMO'] ?? false;
     }
 
-
     /**
      * process
      *
@@ -60,7 +59,7 @@ class FeatureController
                 throw new \Exception('Le paramètre featureId est requis.');
             }
 
-            $feature = new \App\Model\Feature((int) $featureId);
+            $feature = new \App\Model\Feature($featureId);
             $view    = new \App\View\FeatureView($feature);
         } catch (\Throwable $e) {
             $error = $e->getMessage();

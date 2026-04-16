@@ -22,7 +22,7 @@ class Version extends AbstractIssueCollection
      *
      * Charge les métadonnées de la Version Jira (nom, dates, statut...).
      */
-    protected function loadCollectionData(int $id): void
+    protected function loadCollectionData(string $id): void
     {
         $result = $this->jiraService->getVersionById($id);
 
@@ -44,7 +44,7 @@ class Version extends AbstractIssueCollection
      *
      * Charge les issues via deux appels : récupération des IDs, puis des détails+changelog.
      */
-    protected function loadIssues(int $id): void
+    protected function loadIssues(string $id): void
     {
         try {
             $this->loadIssueIds($id);
@@ -64,9 +64,9 @@ class Version extends AbstractIssueCollection
     /**
      * Charge les IDs des issues de la version via JQL fixVersion.
      *
-     * @param int $versionId
+     * @param string $versionId
      */
-    private function loadIssueIds(int $versionId): void
+    private function loadIssueIds(string $versionId): void
     {
         $issues = $this->jiraService->getIssuesIdsByVersion($versionId);
 

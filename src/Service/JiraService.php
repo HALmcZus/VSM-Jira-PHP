@@ -70,12 +70,12 @@ class JiraService
     /**
      * getVersionById
      *
-     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-version/#api-rest-api-2-version-id-get
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-project-versions/#api-rest-api-2-version-id-get
      *
-     * @param  mixed $versionId
+     * @param  string $versionId
      * @return array
      */
-    public function getVersionById(int $versionId): array
+    public function getVersionById(string $versionId): array
     {
         $url = $this->baseUrl . self::API_URL_VERSION . '/' . $versionId;
 
@@ -106,10 +106,10 @@ class JiraService
     /**
      * getIssuesIdsByVersion
      *
-     * @param  mixed $versionId
+     * @param  string $versionId
      * @return array
      */
-    public function getIssuesIdsByVersion(int $versionId): array
+    public function getIssuesIdsByVersion(string $versionId): array
     {
         $jql = "fixVersion = $versionId";
 
@@ -239,12 +239,12 @@ class JiraService
      *
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/#api-rest-api-3-issue-issueidorkey-get
      *
-     * @param int    $issueId Identifiant numérique de l'issue
+     * @param string $issueId Identifiant numérique de l'issue
      * @param array  $fields  Liste des champs à retourner (vide = tous)
      * @param array  $expand  Liste des expansions Jira (ex: ['renderedFields', 'changelog'])
      * @return array
      */
-    public function getIssueById(int $issueId, array $fields = [], array $expand = []): array
+    public function getIssueById(string $issueId, array $fields = [], array $expand = []): array
     {
         $params = [];
 
@@ -265,10 +265,10 @@ class JiraService
      * Récupère les issues enfants d'une Feature via JQL parent = {parentId}.
      * Embarque le changelog pour le calcul des timelines.
      *
-     * @param int $parentId ID numérique de la Feature parente
+     * @param string $parentId ID numérique de la Feature parente
      * @return array        Tableau d'issues brutes (format API Jira)
      */
-    public function getIssuesByParent(int $parentId): array
+    public function getIssuesByParent(string $parentId): array
     {
         $payload = [
             'jql'        => "parent = $parentId",

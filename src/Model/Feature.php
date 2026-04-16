@@ -20,7 +20,7 @@ class Feature extends AbstractIssueCollection
     /** Issue représentant le ticket Feature lui-même (pour ses propres métriques) */
     private ?Issue $selfAsIssue = null;
 
-    public function __construct(int $id)
+    public function __construct(string $id)
     {
         $this->repository = new ProjectFeaturesRepository();
         return parent::__construct($id);
@@ -33,7 +33,7 @@ class Feature extends AbstractIssueCollection
      * pour permettre le calcul des métriques propres au ticket Feature
      * et le rendu fidèle de la description.
      */
-    protected function loadCollectionData(int $id): void
+    protected function loadCollectionData(string $id): void
     {
         $result = $this->jiraService->getIssueById($id, [
             'summary',
@@ -64,7 +64,7 @@ class Feature extends AbstractIssueCollection
      *
      * Charge les issues enfants via JQL parent = {featureId}, avec changelog embarqué.
      */
-    protected function loadIssues(int $id): void
+    protected function loadIssues(string $id): void
     {
         try {
             $rawIssues = $this->jiraService->getIssuesByParent($id);
