@@ -22,9 +22,13 @@ class Version extends AbstractIssueCollection
      *
      * Charge les métadonnées de la Version Jira (nom, dates, statut...).
      */
-    protected function loadCollectionData(string $id): void
+    protected function loadCollectionData(mixed $id): void
     {
-        $result = $this->jiraService->getVersionById($id);
+        if (is_numeric($id)) {
+            $result = $this->jiraService->getVersionById($id);
+        } else {
+            $result = $this->jiraService->getVersionByName($id);
+        }
 
         if (!isset($result['id']) || isset($result['error'])) {
             throw new Exception("Erreur lors de la récupération de la Version Jira : " . print_r($result, true));

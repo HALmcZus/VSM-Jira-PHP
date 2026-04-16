@@ -45,9 +45,9 @@ abstract class AbstractIssueCollection
     /**
      * Constructeur — orchestre le cycle de vie via Template Method.
      *
-     * @param string $id Identifiant numérique Jira (Version ID ou Issue ID)
+     * @param mixed $id Identifiant numérique Jira (Version ID ou Issue ID)
      */
-    public function __construct(string $id)
+    public function __construct(mixed $id)
     {
         $this->jiraService = new JiraService();
         $this->config      = new Config();
@@ -64,9 +64,9 @@ abstract class AbstractIssueCollection
      * Charge les données propres à la collection (Version ou Feature).
      * Ne doit PAS charger les issues — c'est le rôle de loadIssues().
      *
-     * @param string $id
+     * @param mixed $id
      */
-    abstract protected function loadCollectionData(string $id): void;
+    abstract protected function loadCollectionData(mixed $id): void;
 
     /**
      * Charge les issues associées et peuple $this->issues + $this->issuesCount.

@@ -33,7 +33,7 @@ class Feature extends AbstractIssueCollection
      * pour permettre le calcul des métriques propres au ticket Feature
      * et le rendu fidèle de la description.
      */
-    protected function loadCollectionData(string $id): void
+    protected function loadCollectionData(mixed $id): void
     {
         $result = $this->jiraService->getIssueById($id, [
             'summary',

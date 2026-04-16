@@ -72,14 +72,40 @@ class JiraService
      *
      * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-project-versions/#api-rest-api-2-version-id-get
      *
-     * @param  string $versionId
+     * @param  int $versionId
      * @return array
      */
-    public function getVersionById(string $versionId): array
+    public function getVersionById(int $versionId): array
     {
         $url = $this->baseUrl . self::API_URL_VERSION . '/' . $versionId;
 
         return $this->request($url);
+    }
+
+    /**
+     * getVersionByName
+     *
+     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-project-versions/#api-rest-api-2-version-id-get
+     *
+     * @param  string $versionName
+     * @return array
+     */
+    public function getVersionByName(string $versionName): array
+    {
+        $jql = "fixVersion = '$versionName'";
+
+        $fields = [
+            'fixVersions',
+            'project'
+        ];
+
+        $result = $this->callSearchApiGet($jql, $fields);
+
+        //TODO pourquoi on ne récupére pas le version ID ??
+        //=> essayer ça (GET /rest/api/3/version?query=<name>) :
+        //https://chatgpt.com/share/69e10f1a-aeb4-832f-a51d-0d7cd838b03a
+
+        return $this->getVersionById();
     }
 
     /**
