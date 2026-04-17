@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Service\JiraService;
+use App\Service\JiraVersionService;
 
 /**
  * JiraProjectRepository
@@ -13,11 +13,17 @@ class ProjectVersionsRepository
     const VERSION_STATUS_RELEASED = '🚀Livré';
     const VERSION_STATUS_ARCHIVED = '📦Archivé';
 
-    private JiraService $jira;
+    private JiraVersionService $jiraService;
 
-    public function __construct()
+    /**
+     * __construct
+     *
+     * @param  mixed $jira
+     * @return void
+     */
+    public function __construct(JiraVersionService $jiraService)
     {
-        $this->jira = new JiraService();
+        $this->jiraService = $jiraService;
     }
 
     /**
@@ -28,7 +34,7 @@ class ProjectVersionsRepository
      */
     public function getProjectVersionsList(string $projectKey): array
     {
-        $versions = $this->jira->getVersionsByProject($projectKey);
+        $versions = $this->jiraService->getVersionsByProject($projectKey);
 
         return $this->sortVersionsList($versions);
     }

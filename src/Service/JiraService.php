@@ -12,14 +12,15 @@ class JiraService
 {
     //API /rest/api/3/search déprécié ! Utiliser /rest/api/3/search/jql à la place
     const API_URL_SEARCH = '/rest/api/3/search/jql';
-    const API_URL_VERSION = '/rest/api/2/version';
+    const API_URL_VERSION_V2 = '/rest/api/2/version';
+    const API_URL_VERSION_V3 = '/rest/api/3/version';
     const API_URL_PROJECT_VERSIONS = '/rest/api/2/project/{project_id}/versions';
     const API_URL_FETCH_ISSUES = '/rest/api/3/issue/bulkfetch';
     const API_URL_PROJECT_SEARCH = '/rest/api/3/project/search';
     const API_URL_ISSUE = '/rest/api/3/issue';
     const PLANNING_INTERVAL_CUSTOM_FIELD = 'customfield_11400';
 
-    private string $baseUrl;
+    protected string $baseUrl;
     private string $email;
     private string $token;
     private bool $isDemo = false;
@@ -77,35 +78,9 @@ class JiraService
      */
     public function getVersionById(int $versionId): array
     {
-        $url = $this->baseUrl . self::API_URL_VERSION . '/' . $versionId;
+        $url = $this->baseUrl . self::API_URL_VERSION_V2 . '/' . $versionId;
 
         return $this->request($url);
-    }
-
-    /**
-     * getVersionByName
-     *
-     * @see https://developer.atlassian.com/cloud/jira/platform/rest/v2/api-group-project-versions/#api-rest-api-2-version-id-get
-     *
-     * @param  string $versionName
-     * @return array
-     */
-    public function getVersionByName(string $versionName): array
-    {
-        $jql = "fixVersion = '$versionName'";
-
-        $fields = [
-            'fixVersions',
-            'project'
-        ];
-
-        $result = $this->callSearchApiGet($jql, $fields);
-
-        //TODO pourquoi on ne récupére pas le version ID ??
-        //=> essayer ça (GET /rest/api/3/version?query=<name>) :
-        //https://chatgpt.com/share/69e10f1a-aeb4-832f-a51d-0d7cd838b03a
-
-        return $this->getVersionById();
     }
 
     /**
@@ -332,7 +307,7 @@ class JiraService
      * @param  mixed $isPost
      * @return array
      */
-    private function request(string $url, $payload = null, bool $isPost = false): array
+    protected function request(string $url, $payload = null, bool $isPost = false): array
     {
         if (!$this->areCredentialsVerified) {
             $this->checkCredentials();

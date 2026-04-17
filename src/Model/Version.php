@@ -25,9 +25,9 @@ class Version extends AbstractIssueCollection
     protected function loadCollectionData(mixed $id): void
     {
         if (is_numeric($id)) {
-            $result = $this->jiraService->getVersionById($id);
+            $result = $this->jiraVersionService->getVersionById($id);
         } else {
-            $result = $this->jiraService->getVersionByName($id);
+            $result = $this->jiraVersionService->findByName($id);
         }
 
         if (!isset($result['id']) || isset($result['error'])) {

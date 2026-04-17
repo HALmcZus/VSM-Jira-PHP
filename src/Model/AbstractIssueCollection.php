@@ -3,6 +3,7 @@
 namespace App\Model;
 
 use App\Service\JiraService;
+use App\Service\JiraVersionService;
 
 /**
  * AbstractIssueCollection
@@ -16,6 +17,7 @@ use App\Service\JiraService;
 abstract class AbstractIssueCollection
 {
     protected JiraService $jiraService;
+    protected JiraVersionService $jiraVersionService;
     protected Config $config;
     protected Timeline $timeline;
 
@@ -50,6 +52,7 @@ abstract class AbstractIssueCollection
     public function __construct(mixed $id)
     {
         $this->jiraService = new JiraService();
+        $this->jiraVersionService = new JiraVersionService();
         $this->config      = new Config();
         $this->timeline    = new Timeline();
 
