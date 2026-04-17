@@ -29,8 +29,12 @@ $storageKey      = 'jira_project_version';
 
         <form method="POST" action="/version">
             <label><em>Ou directement par FixVersion ID :</em></label>
-            <input type="text" name="fixVersionId" required placeholder="ID de la Version" value="CQFD4.6.0 TID">
+            <input type="text" name="fixVersionId" required placeholder="ID de la Version">
             <button type=" submit">OK</button>
+            <button type="submit" name="refresh" value="1"
+                title="Recharger le cache des Versions Jira"
+                style="margin-left: 8px;">🔄 Rafraîchir le cache
+            </button>
         </form>
     </div>
 

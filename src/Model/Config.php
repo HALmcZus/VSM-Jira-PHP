@@ -12,6 +12,7 @@ class Config
     const CONFIG_FILES_DIR = "config_files";
     const JIRA_WORKFLOW_FILE = "jira_workflow.json";
     const JIRA_WORKFLOW_FILE_FEATURES = "jira_workflow_features.json";
+    const JIRA_WATCHED_PROJECTS_FILE = "watched_projects.json";
     const ISSUE_TYPE_FEATURE = "Feature";
 
     /**
@@ -79,5 +80,15 @@ class Config
             : self::JIRA_WORKFLOW_FILE;
 
         return $this->getFileContent($fileName);
+    }
+
+    /**
+     * getWatchedProjects
+     *
+     * @return array
+     */
+    public function getWatchedProjects(): array
+    {
+        return $this->getFileContent(self::JIRA_WATCHED_PROJECTS_FILE);
     }
 }

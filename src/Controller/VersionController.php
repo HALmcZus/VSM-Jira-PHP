@@ -49,26 +49,28 @@ class VersionController
      */
     public function process(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $data = $request->getParsedBody();
-        $versionId = $data['fixVersionId'] ?? null;
+        $data      = $request->getParsedBody();
+        $versionId = trim($data['fixVersionId'] ?? '');
 
-        $view = null;
-        $error = null;
+        $view   = null;
+        $error  = null;
+        $notice = null; // Notice informative (ambiguïté, introuvable)
 
         try {
             if (!$versionId) {
                 throw new \Exception('Le paramètre fixVersionId est requis.');
             }
 
-            // Load data
             $version = new Version($versionId);
-            $view = new VersionView($version);
+            $view    = new VersionView($version);
+        } catch (\RuntimeException $e) {
+            // RuntimeException = cas métier gérés (introuvable, ambigu)
+            // → Notice, pas erreur bloquante
+            $notice = $e->getMessage();
         } catch (\Throwable $e) {
-            // Capturer l'erreur pour l'afficher dans la vue
             $error = $e->getMessage();
         }
 
-        // Rendu de la vue
         ob_start();
         require __DIR__ . '/../../views/version.phtml';
         $html = ob_get_clean();
