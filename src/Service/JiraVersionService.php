@@ -43,22 +43,22 @@ class JiraVersionService extends JiraService
         }
 
         // 2️⃣ Cherche via l'API d'autocomplete (plus rapide que de récupérer toutes les versions d'un projet)
-        // $this->fetchFromAutocomplete($name);
-
-        // if (isset($this->cache['versions'][$name])) {
-        //     $this->saveCache();
-        //     return $this->cache['versions'][$name];
-        // }
-
-        // 3️⃣ fallback global si pas trouvé et cache trop vieux
-        // if ($this->isCacheExpired()) {
-        $this->fetchAllVersions();
+        $this->fetchFromAutocomplete($name);
 
         if (isset($this->cache['versions'][$name])) {
             $this->saveCache();
             return $this->cache['versions'][$name];
         }
-        // }
+
+        // 3️⃣ fallback global si pas trouvé et cache trop vieux
+        if ($this->isCacheExpired()) {
+            $this->fetchAllVersions();
+
+            if (isset($this->cache['versions'][$name])) {
+                $this->saveCache();
+                return $this->cache['versions'][$name];
+            }
+        }
 
         return null;
     }
@@ -90,21 +90,19 @@ class JiraVersionService extends JiraService
         }
 
 
-        // private function fetchFromAutocomplete(string $query): void
-        // {
-        //     // On cherche des issues avec cette fixVersion
-        //     $jql = sprintf('fixVersion = "%s"', addslashes($query));
+        // alternative ? :
 
-        //     $response = $this->callSearchApiGet($jql, ['fixVersions', 'project']);
+        // $jql = sprintf('fixVersion = "%s"', addslashes($query));
 
-        //     foreach ($response['issues'] ?? [] as $issue) {
-        //         foreach ($issue['fields']['fixVersions'] ?? [] as $version) {
-        //             $this->store([
-        //                 'id' => $version['id'],
-        //                 'name' => $version['name'],
-        //                 'projectId' => $issue['fields']['project']['id'] ?? null
-        //             ]);
-        //         }
+        // $response = $this->callSearchApiGet($jql, ['fixVersions', 'project']);
+
+        // foreach ($response['issues'] ?? [] as $issue) {
+        //     foreach ($issue['fields']['fixVersions'] ?? [] as $version) {
+        //         $this->store([
+        //             'id' => $version['id'],
+        //             'name' => $version['name'],
+        //             'projectId' => $issue['fields']['project']['id'] ?? null
+        //         ]);
         //     }
         // }
     }
